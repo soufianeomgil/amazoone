@@ -1,4 +1,4 @@
-import { Schema, model, Document, Model } from 'mongoose';
+import { Schema, model, Document, Model, models } from 'mongoose';
 
 // --- Interfaces for Type Safety ---
 // product status and 
@@ -24,12 +24,17 @@ export interface IVariantAttribute {
 /**
  * Interface for a product variant (e.g., a specific size and color combination).
  */
+export interface ImageState {
+  url?: string;
+  public_id?: string;
+  preview?: string;
+}
 export interface IVariant {
   sku: string; // Stock Keeping Unit for this specific variant
   priceModifier: number; // Amount to add/subtract from the base price
   stock: number;
   attributes: IVariantAttribute[];
-  images?: string[]; // Specific images for this variant
+  images?: ImageState[]; // Specific images for this variant
 }
 
 /**
@@ -39,11 +44,11 @@ export interface IProduct extends Document {
   name: string;
   description: string;
   brand: string;
-  category: Schema.Types.ObjectId; // Reference to a Category model
+  category: string; // Reference to a Category model
   basePrice: number;
   status: "ACTIVE" | "DRAFT" | "INACTIVE" | "OUT OF STOCK",
-  thumbnail: string; // Main display image
-  images: string[]; // Additional gallery images
+  thumbnail: ImageState // Main display image
+  images: ImageState[]; // Additional gallery images
   rating: number; // Average rating, calculated from reviews
   reviewCount: number;
   reviews: IReview[];
@@ -95,7 +100,7 @@ const ProductSchema = new Schema<IProduct>({
   brand: { type: String, required: true },
   status: {type: String, enum: ["ACTIVE", "DRAFT", "INACTIVE", "OUT OF STOCK"], default: "DRAFT"},
   // Assuming a Category model exists for better organization
-  category: { type: Schema.Types.ObjectId, required: true, ref: 'Category' },
+  category: { type: String, required: true},
   basePrice: { type: Number, required: true, min: 0 },
   thumbnail: { type: String, required: true },
   images: [{ type: String }],
@@ -135,4 +140,4 @@ ProductSchema.index({ isFeatured: -1 });
 /**
  * The Mongoose model for the Product.
  */
-export const Product: Model<IProduct> = model<IProduct>('Product', ProductSchema);
+export const Product: Model<IProduct> = models.Product ||  model<IProduct>('Product', ProductSchema);

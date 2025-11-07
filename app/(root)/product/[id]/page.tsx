@@ -173,10 +173,10 @@ const ProductDetails: React.FC = () => {
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <div className="flex items-center flex-wrap space-x-2 text-sm text-gray-600">
             <span className="hover:text-orange-600 cursor-pointer">Electronics</span>
             <span>›</span>
-            <span className="hover:text-orange-600 cursor-pointer">Computers & Accessories</span>
+            <span className="hover:text-orange-600 whitespace-nowrap cursor-pointer">Computers & Accessories</span>
             <span>›</span>
             <span className="hover:text-orange-600 cursor-pointer">Laptops</span>
             <span>›</span>

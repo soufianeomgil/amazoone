@@ -3,10 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { MenuIcon, LocationIcon, SearchIcon, CartIcon, FlagIcon, CaretDownIcon, UserIcon, CloseIcon } from './icons';
 import Link from 'next/link';
 import Image from 'next/image';
+import { signOut, useSession } from 'next-auth/react';
+import { Button } from '../ui/button';
+
 
 const Header: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
+   const session = useSession()
 
     const handleMenuToggle = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -38,9 +42,7 @@ const Header: React.FC = () => {
                 <div className="flex items-center justify-between px-2 py-1">
                     {/* Left Side */}
                     <div className="flex items-center space-x-2">
-                        {/* <button onClick={handleMenuToggle} className="p-2 border border-transparent hover:border-white rounded-sm md:hidden">
-                            <MenuIcon />
-                        </button> */}
+                       
                         <Link href="/" className="p-1 border border-transparent hover:border-white rounded-sm">
                             <Image 
                              src="https://pngimg.com/uploads/amazon/amazon_PNG11.png"
@@ -84,7 +86,9 @@ const Header: React.FC = () => {
                             onMouseLeave={() => setIsAccountDropdownOpen(false)}
                         >
                             <div className="p-2 border border-transparent hover:border-white rounded-sm cursor-pointer">
-                                <p className="text-xs">Hello, sign in</p>
+                                <p className="text-xs">
+                                    Hello, {session.status === "unauthenticated" ?  "sign in" : session?.data?.user.name } 
+                                </p>
                                 <div className="flex items-center">
                                     <p className="text-sm font-bold">Account & Lists</p>
                                     <CaretDownIcon />
@@ -96,10 +100,19 @@ const Header: React.FC = () => {
                                 <div className="absolute -top-2 right-10 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-white"></div>
                                 <div className="p-4 border-b">
                                     <div className="flex flex-col items-center">
-                                        <button className="w-48 bg-yellow-400 hover:bg-yellow-500 text-sm font-bold py-1.5 rounded-md shadow-sm">
+                                        {session.status === "unauthenticated" ? (
+                                          <div>
+                                              <Button className="w-48 bg-yellow-400 hover:bg-yellow-500 text-sm font-bold py-1.5 rounded-md shadow-sm">
                                              <Link href="/login">Sign in</Link> 
-                                        </button>
+                                        </Button>
                                         <p className="text-xs mt-1">New customer? <Link href="/sign-up" className="text-blue-600 hover:underline">Start here.</Link></p>
+                                          </div>
+                                        ): (
+
+ <Button className='lassName="w-48 cursor-pointer  bg-yellow-400 hover:bg-yellow-500 text-sm font-bold py-1.5 rounded-md shadow-sm"' onClick={()=> signOut({redirect: false})}>Sign out</Button>
+
+                                        )}
+                                        
                                     </div>
                                 </div>
                                 <div className="flex p-4">
@@ -114,11 +127,11 @@ const Header: React.FC = () => {
                                     <div className="w-1/2 pl-4">
                                         <h3 className="font-bold text-base mb-2">Your Account</h3>
                                         <ul className="text-sm space-y-2">
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Account</a></li>
+                                            <li><Link href="/profile/5545" className="text-gray-700 hover:text-orange-600 hover:underline">Account</Link></li>
                                             <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Orders</a></li>
                                             <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Recommendations</a></li>
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Browsing History</a></li>
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Watchlist</a></li>
+                                            <li><Link href="/browsing-history" className="text-gray-700 hover:text-orange-600 hover:underline">Browsing History</Link></li>
+                                            <li><Link href="/account/wishlist" className="text-gray-700 hover:text-orange-600 hover:underline">Wishlist</Link></li>
                                             <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Video Purchases & Rentals</a></li>
                                             <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Kindle Unlimited</a></li>
                                         </ul>
@@ -126,10 +139,10 @@ const Header: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="hidden md:block p-2 border border-transparent hover:border-white rounded-sm">
+                        <Link href="/account/order-history" className="hidden md:block p-2 border border-transparent hover:border-white rounded-sm">
                             <p className="text-xs">Returns</p>
                             <p className="text-sm font-bold">& Orders</p>
-                        </div>
+                        </Link>
                         <Link href="/cart" className="flex items-end p-2 border border-transparent hover:border-white rounded-sm relative">
                             <CartIcon />
                             <span className="absolute top-1 right-5 md:right-7 bg-[#FEBD69] text-black text-xs font-bold rounded-full h-4 w-4 text-center">0</span>

@@ -1,0 +1,54 @@
+import { NextResponse } from "next/server";
+
+
+import { ForbiddenError } from "@/lib/http-errors";
+
+import handleError from "@/lib/handlers/error";
+import { AccountSchema } from "@/lib/zod";
+import connectDB from "@/database/db";
+import Account from "@/models/account.model";
+
+
+
+export async function GET() {
+  try {
+    await connectDB()
+
+    const accounts = await Account.find();
+
+    return NextResponse.json(
+      { success: true, data: accounts },
+      { status: 200 }
+    );
+  } catch (error) {
+    return handleError(error, "api") as APIErrorResponse;
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    await connectDB()
+    const body = await request.json();
+
+    const validatedData = AccountSchema.parse(body);
+
+    const existingAccount = await Account.findOne({
+      provider: validatedData.provider,
+      providerAccountId: validatedData.providerAccountId,
+    });
+
+    if (existingAccount)
+      throw new ForbiddenError(
+        "An account with the same provider already exists"
+      );
+
+    const newAccount = await Account.create(validatedData);
+
+    return NextResponse.json(
+      { success: true, data: newAccount },
+      { status: 201 }
+    );
+  } catch (error) {
+    return handleError(error, "api") as APIErrorResponse;
+  }
+}

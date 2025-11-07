@@ -8,7 +8,8 @@
     @apply  text-black;
   } */
   body {
-    @apply bg-[#E3E6E6]    ;
+    @apply bg-[#E3E6E6]  overflow-scroll!  ;
+
   }
 }
 

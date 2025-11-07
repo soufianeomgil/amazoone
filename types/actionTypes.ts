@@ -46,16 +46,18 @@ export interface Review {
   isVerifiedPurchase: boolean;
   createdAt: Date;
 }
-
-export interface ProductVariant {
-  variantId: string;
-  sku: string;
-  attributes: ProductAttribute[];
-  priceInCents: number;
-  salePriceInCents?: number;
-  quantity: number;
-  imageIds: string[];
-}
+// export interface ImageState {
+//           url?: string | undefined,
+//           public_id?: string | undefined,
+//           preview?: string | undefined,
+// }
+// export interface ProductVariant {
+//     sku: string; // Stock Keeping Unit for this specific variant
+//     priceModifier: number | string | undefined; // Amount to add/subtract from the base price
+//     stock: number;
+//     attributes: ProductAttribute[];
+//     images?: ImageState[]; 
+// }
 
 export interface IProduct {
   title: string;
@@ -79,6 +81,59 @@ export interface IProduct {
   reviewCount: number;
   recentReviews: Review[];
   technicalSpecifications: ProductAttribute[];
+}
+ 
+
+
+// export interface CreateProductParams {
+//   name: string;
+//   description: string;
+//   brand: string;
+//   category: string;
+//   status: "ACTIVE" | "DRAFT" | "INACTIVE" | "OUT OF STOCK";
+//   basePrice: number | string;
+//   stock?: number | string | undefined;
+//   imageUrl: ImageState; // Main display image
+//   images: ImageState[]; 
+//   tags: string[];
+//   isFeatured: boolean;
+//   variants: ProductVariant[];
+//   attributes: ProductAttribute[]
+
+// }
+export interface ImageState {
+  url?: string;
+  public_id?: string;
+  preview?: string;
+}
+
+export interface ProductAttribute {
+  name: string;
+  value: string;
+}
+
+export interface ProductVariant {
+  sku: string;
+  priceModifier?: number | string;
+  stock: number | string;
+  attributes: ProductAttribute[];
+  images?: ImageState[];
+}
+
+export interface CreateProductParams {
+  name: string;
+  description: string;
+  brand: string;
+  category: string;
+  status: "ACTIVE" | "DRAFT" | "INACTIVE" | "OUT OF STOCK";
+  basePrice: number | string;
+  stock?: number | string;
+  imageUrl?: ImageState;
+  images?: ImageState[];
+  tags?: string[];
+  isFeatured?: boolean;
+  variants?: ProductVariant[];
+  attributes?: ProductAttribute[];
 }
 interface CreditCardInfo {
   cardholderName: string;
@@ -126,4 +181,22 @@ export interface IUser {
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
+}
+export interface AuthCredentials {
+  email: string;
+  gender: "male" | "female";
+  fullName: string;
+ 
+  password: string;
+ 
+}
+export interface SignInWithOAuthParams {
+  provider: "google" | "github";
+  providerAccountId: string;
+  user: {
+    email: string;
+    lastName: string;
+    name: string;
+    image: string;
+  };
 }

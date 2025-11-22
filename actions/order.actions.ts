@@ -259,7 +259,7 @@ type CreateOrderItem = {
   productId: string | { _id?: string; id?: string } | any;
   quantity: number;
   variantId?: string | null;
-  variant?: any | null;
+  variant?: IVariant | null;
   meta?: Record<string, any>;
 };
 
@@ -358,7 +358,7 @@ export async function createOrderAction(
         // --- Determine candidateVariantId and locate server-side variant ---
         const candidateVariantId =
           raw.variantId ??
-          (raw.variant && (raw.variant._id ?? raw.variant.id ?? raw.variant.sku)) ??
+          (raw.variant && (raw.variant.sku ?? raw.variant.sku ?? raw.variant.sku)) ??
           null;
 
         let variant: any = null;
@@ -371,7 +371,7 @@ export async function createOrderAction(
         // If still not found, try matching by variant.sku from client
         if (!variant && raw.variant && Array.isArray(prod.variants)) {
           if (raw.variant.sku) {
-            variant = prod.variants.find((v: any) => String(v.sku) === String(raw.variant.sku));
+            variant = prod.variants.find((v: any) => String(v.sku) === String(raw?.variant?.sku));
           } else {
             // optional: implement attribute matching if needed
           }
@@ -418,20 +418,19 @@ export async function createOrderAction(
         // create a compact variant snapshot (prefer server variant)
         const variantSnapshot = variant
           ? {
-              _id: variant._id ? String(variant._id) : undefined,
+             
               sku: variant.sku ?? null,
               priceModifier: variant.priceModifier ?? null,
-              price: variant.price ?? null,
+              
               stock: variant.stock ?? null,
               attributes: variant.attributes ?? [],
               images: variant.images ?? [],
             }
           : raw.variant
           ? {
-              _id: raw.variant._id ?? raw.variant.id ?? null,
               sku: raw.variant.sku ?? null,
-              priceModifier: raw.variant.priceModifier ?? raw.variant.price ?? null,
-              price: raw.variant.price ?? null,
+              priceModifier: raw.variant.priceModifier,
+               stock: variant.stock,
               attributes: raw.variant.attributes ?? [],
               images: raw.variant.images ?? [],
             }
@@ -440,7 +439,7 @@ export async function createOrderAction(
         orderItems.push({
           productId: prod._id,
           name: prod.name ?? "Product",
-          variantId: candidateVariantId ?? (variantSnapshot?._id ?? null),
+          variantId: candidateVariantId ?? (variantSnapshot?.sku ?? null),
           variant: variantSnapshot,
           quantity: qty,
           unitPrice,

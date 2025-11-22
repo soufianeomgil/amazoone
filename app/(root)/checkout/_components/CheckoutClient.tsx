@@ -111,7 +111,7 @@ const CheckoutClient: React.FC<Props> = ({ cartItems, onQuantityChange, onDelete
     dispatch(setPaymentMethod(method));
   };
    const selectedAddress = useSelector((state: any) => state?.address?.selectedAddress);
-   console.log(selectedAddress, "here here here")
+   console.log(cartItems.items.map((i) => i.variant), "here for variant")
    const router = useRouter()
   const placeOrder = async() => {
     setPending(true)
@@ -133,7 +133,7 @@ const payload = {
       productId: pid,
       quantity: i.quantity,
       variantId: i.variantId ?? null,
-      variant: i.variant ?? null,
+      variant: i.variant,
       meta: {},
     };
   }),

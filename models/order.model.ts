@@ -123,7 +123,7 @@ export interface IOrderModel extends Model<IOrderDoc> {
    SCHEMAS
    -----------------------------*/
  const VariantSchema = new Schema<IVariant>({
-  sku: { type: String, required: true },
+  sku: { type: String },
   priceModifier: { type: Number, required: true, default: 0 },
   stock: { type: Number, required: true, min: 0, default: 0 },
   attributes: [{

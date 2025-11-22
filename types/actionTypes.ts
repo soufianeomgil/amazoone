@@ -1,4 +1,7 @@
-import { Schema } from "mongoose";
+import { IAddress } from "@/models/address.model";
+import { OrderStatus } from "@/models/order.model";
+import { IReview } from "@/models/product.model";
+import { ObjectId, Schema } from "mongoose";
 
 export enum ProductStatus {
   ACTIVE = 'ACTIVE',
@@ -36,16 +39,16 @@ export interface ShippingDetails {
   };
   isEligibleForPrime: boolean;
 }
-
-export interface Review {
-  userId: string;
-  rating: 1 | 2 | 3 | 4 | 5;
-  title: string;
-  commentBody: string;
-  images?: string[];
-  isVerifiedPurchase: boolean;
-  createdAt: Date;
-}
+// USE THIS FOR ADDING A REVIEW AS A TYPE INTERFACE;
+// export interface Review {
+//   userId: string;
+//   rating: 1 | 2 | 3 | 4 | 5;
+//   title: string;
+//   commentBody: string;
+//   images?: string[];
+//   isVerifiedPurchase: boolean;
+//   createdAt: Date;
+// }
 // export interface ImageState {
 //           url?: string | undefined,
 //           public_id?: string | undefined,
@@ -79,7 +82,7 @@ export interface IProduct {
   sellerId: string;
   averageRating: number;
   reviewCount: number;
-  recentReviews: Review[];
+  recentReviews: IReview[];
   technicalSpecifications: ProductAttribute[];
 }
  
@@ -101,6 +104,12 @@ export interface IProduct {
 //   attributes: ProductAttribute[]
 
 // }
+export interface GetSingleProductParams  {
+  productId: string;
+}
+export interface ToggleWishlistParams {
+  productId: string;
+}
 export interface ImageState {
   url?: string;
   public_id?: string;
@@ -190,6 +199,9 @@ export interface AuthCredentials {
   password: string;
  
 }
+export interface GetAddressDetailsParams {
+  id:string;
+}
 export interface SignInWithOAuthParams {
   provider: "google" | "github";
   providerAccountId: string;
@@ -199,4 +211,20 @@ export interface SignInWithOAuthParams {
     name: string;
     image: string;
   };
+}
+export interface  AddAddressParams  { 
+     name: string;
+     addressLine1: string;
+     addressLine2?: string;
+     city: string;
+     postalCode: string;
+     state: string;
+     country: string;
+     phone: number | string;
+
+     isDefault: boolean;
+     DeliveryInstructions?:string;
+}
+export interface EditAddressParams extends AddAddressParams {
+  id: string;
 }

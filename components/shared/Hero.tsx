@@ -4,7 +4,6 @@ import { ChevronLeftIcon, ChevronRightIcon } from './icons';
 
 const slides = [
     { url: 'https://m.media-amazon.com/images/I/71U-Q+N7PXL._SX3000_.jpg' },
-    // { url: 'https://m.media-amazon.com/images/I/61GnA2cvAgL._SX3000_.jpg' },
     { url: 'https://m.media-amazon.com/images/I/61zAjw4bqPL._SX3000_.jpg' },
     { url: 'https://m.media-amazon.com/images/I/71cp9PVuTfL._SX3000_.jpg' },
 ];
@@ -44,7 +43,7 @@ const Hero: React.FC = () => {
                     {slides.map((slide, slideIndex) => (
                          <img
                             key={slideIndex}
-                            src={slide.url}
+                            src={slide.url as string}
                             alt={`Promotional banner ${slideIndex + 1}`}
                             className="w-full h-full object-cover shrink-0"
                         />

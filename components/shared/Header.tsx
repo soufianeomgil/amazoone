@@ -5,13 +5,22 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
 import { Button } from '../ui/button';
+import { ROUTES } from '@/constants/routes';
+import { useSelector } from 'react-redux';
+import { getTotalItems } from '@/lib/store/cartSlice';
 
-
-const Header: React.FC = () => {
+// TODO: CREATE A SUB HEADER FOR FREE SHIPPING [TOWN]
+// RENDER CART ITEMS
+// CART SIDEBAR
+// CHECKOUT PAGE
+const Header = ({qty,data}: {
+    qty: number | undefined;
+    data: any
+}) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
    const session = useSession()
-
+ const totalItems = useSelector(getTotalItems)
     const handleMenuToggle = () => {
         setIsMenuOpen(!isMenuOpen);
     };
@@ -118,22 +127,22 @@ const Header: React.FC = () => {
                                 <div className="flex p-4">
                                     <div className="w-1/2 pr-4 border-r">
                                         <h3 className="font-bold text-base mb-2">Your Lists</h3>
-                                        <ul className="text-sm space-y-2">
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Create a List</a></li>
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Find a List or Registry</a></li>
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">AmazonSmile Charity Lists</a></li>
+                                        <ul className="text-sm space-y-2 list-none!">
+                                            <li className="list-none!"><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Create a List</a></li>
+                                            <li className="list-none!"><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Find a List or Registry</a></li>
+                                            <li className="list-none!"><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">AmazonSmile Charity Lists</a></li>
                                         </ul>
                                     </div>
                                     <div className="w-1/2 pl-4">
                                         <h3 className="font-bold text-base mb-2">Your Account</h3>
-                                        <ul className="text-sm space-y-2">
-                                            <li><Link href="/profile/5545" className="text-gray-700 hover:text-orange-600 hover:underline">Account</Link></li>
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Orders</a></li>
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Recommendations</a></li>
-                                            <li><Link href="/browsing-history" className="text-gray-700 hover:text-orange-600 hover:underline">Browsing History</Link></li>
-                                            <li><Link href="/account/wishlist" className="text-gray-700 hover:text-orange-600 hover:underline">Wishlist</Link></li>
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Video Purchases & Rentals</a></li>
-                                            <li><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Kindle Unlimited</a></li>
+                                        <ul className="text-sm list-none! space-y-2">
+                                            <li className="list-none!"><Link href={`/profile/${session.data?.user.id}`} className="text-gray-700 hover:text-orange-600 hover:underline">Account</Link></li>
+                                            <li className="list-none!"><Link href={ROUTES.myorders} className="text-gray-700 hover:text-orange-600 hover:underline">Orders</Link></li>
+                                            <li className="list-none!"><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Recommendations</a></li>
+                                            <li className="list-none!"><Link href="/browsing-history" className="text-gray-700 hover:text-orange-600 hover:underline">Browsing History</Link></li>
+                                            <li className="list-none!"><Link href="/account/wishlist" className="text-gray-700 hover:text-orange-600 hover:underline">Wishlist</Link></li>
+                                            <li className="list-none!"><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Video Purchases & Rentals</a></li>
+                                            <li className="list-none!"><a href="#" className="text-gray-700 hover:text-orange-600 hover:underline">Kindle Unlimited</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -145,7 +154,9 @@ const Header: React.FC = () => {
                         </Link>
                         <Link href="/cart" className="flex items-end p-2 border border-transparent hover:border-white rounded-sm relative">
                             <CartIcon />
-                            <span className="absolute top-1 right-5 md:right-7 bg-[#FEBD69] text-black text-xs font-bold rounded-full h-4 w-4 text-center">0</span>
+                            <span className="absolute top-1 right-5 md:right-7 bg-[#FEBD69] text-black text-xs font-bold rounded-full h-4 w-4 text-center">
+                                 {qty ? qty : totalItems}
+                            </span>
                             <span className="hidden md:inline text-sm font-bold">Cart</span>
                         </Link>
                     </div>

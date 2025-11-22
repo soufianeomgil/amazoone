@@ -1,6 +1,7 @@
 "use client"
 import { CaretDownIcon } from '@/components/shared/icons';
 import ProductCard from '@/components/shared/ProductCard';
+import Link from 'next/link';
 import React, { useState } from 'react';
 
 
@@ -123,20 +124,20 @@ const BrowsingHistory: React.FC = () => {
             {products.length > 0 && (
                 <div className="flex justify-center items-center mt-8">
                     <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                        <a href="#" className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <Link href="#" className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                             <span className="sr-only">Previous</span>
                             &lt; Previous
-                        </a>
-                        <a href="#" aria-current="page" className="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                        </Link>
+                        <Link href="#" aria-current="page" className="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                             1
-                        </a>
-                        <a href="#" className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                        </Link>
+                        <Link href="#" className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                             2
-                        </a>
-                        <a href="#" className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        </Link>
+                        <Link href="#" className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                              Next &gt;
                             <span className="sr-only">Next</span>
-                        </a>
+                        </Link>
                     </nav>
                 </div>
             )}

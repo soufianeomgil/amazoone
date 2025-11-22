@@ -1,14 +1,17 @@
 import { Schema, model, Document, Model, models } from 'mongoose';
 
-// --- Interfaces for Type Safety ---
-// product status and 
+
 /**
  * Interface for a customer review.
  */
-export interface IReview extends Document {
+export interface IReview  {
   user: Schema.Types.ObjectId; // Reference to the user who wrote the review
+   isVerifiedPurchase: boolean;
   name: string; // User's name to display
   rating: number; // Rating from 1 to 5
+  headline: string;
+  isRecommendedByBuyer: boolean;
+  images?: ImageState[]
   comment: string;
   createdAt: Date;
 }
@@ -70,7 +73,16 @@ const ReviewSchema = new Schema<IReview>({
   // Assuming a User model exists for linking reviews to users
   user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
   name: { type: String, required: true },
+  isVerifiedPurchase: {type: Boolean , default: false, required: true},
   rating: { type: Number, required: true, min: 1, max: 5 },
+  headline: { type: String, required: true},
+   images: [{ type: {
+    url: { type: String },
+    preview: { type: String },
+    public_id: { type: String },
+  },
+  default: {},}],
+  isRecommendedByBuyer: {type: Boolean, default: false},
   comment: { type: String, required: true },
 }, {
   timestamps: { createdAt: true, updatedAt: false }, // Only track creation time for reviews
@@ -79,7 +91,7 @@ const ReviewSchema = new Schema<IReview>({
 /**
  * Schema for product variants. This is also embedded in the Product schema.
  */
-const VariantSchema = new Schema<IVariant>({
+ const VariantSchema = new Schema<IVariant>({
   sku: { type: String, required: true, unique: true },
   priceModifier: { type: Number, required: true, default: 0 },
   stock: { type: Number, required: true, min: 0, default: 0 },
@@ -116,6 +128,7 @@ const ProductSchema = new Schema<IProduct>({
   // Assuming a Category model exists for better organization
   category: { type: String, required: true},
   basePrice: { type: Number, required: true, min: 0 },
+  // 
  thumbnail: {
   type: {
     url: { type: String },

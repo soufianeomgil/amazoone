@@ -2,6 +2,8 @@
 import connectDB from "@/database/db"
 import User from "@/models/user.model"
 import bcrypt from "bcryptjs"
+// TODO: cart functionality;
+// TODO: allocate money + 600 that you already have for fasi (2000 + 600 = 2600dh) that half your debt;
 import handleError from "@/lib/handlers/error"
 import mongoose from "mongoose"
 import { ForbiddenError } from "@/lib/http-errors"

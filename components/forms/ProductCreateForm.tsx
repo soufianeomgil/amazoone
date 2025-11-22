@@ -48,6 +48,8 @@ import { cn } from "@/lib/utils";
 import { CreateProductAction } from "@/actions/product.actions";
 import { ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
+import Editor from "../editor/Editor";
+import { MDXEditorMethods } from "@mdxeditor/editor";
 
 // --- Types ---
 // interface ImageState {
@@ -117,13 +119,14 @@ const CreateProduct: React.FC = () => {
     tags: "",
     isFeatured: false,
     status: "DRAFT",
-    variants: [{
-      sku: "",
+   variants: [{
+  sku: "",
   priceModifier: 0,
   stock:0,
   attributes: [],
   images: [{ url: "", public_id: "", preview: "" }],
     }],
+
     attributes: [{name: "", value: ""}],
   });
 
@@ -252,10 +255,45 @@ const handleVariantAttributeChange = (vIndex: number, aIndex: number, field: key
     });
   };
 
-  const addVariantImage = (vIndex: number) =>
+  // const addVariantImage = (vIndex: number) =>
+  // setProduct((prev) => {
+  //   const newVariants = [...prev.variants];
+  //   newVariants[vIndex].images = [...(newVariants[vIndex].images || []), { public_id: "", url: "", preview: "" }];
+  //   // sync to RHF
+  //   setValue(
+  //     "variants",
+  //     newVariants.map((v) => ({
+  //       ...v,
+  //       images: (v.images || []).map((img) => ({ url: img.url ?? "", public_id: img.public_id ?? "" })),
+  //     })),
+  //     { shouldValidate: true }
+  //   );
+  //   return { ...prev, variants: newVariants };
+  // });
+const addVariantImage = (vIndex: number) =>
   setProduct((prev) => {
     const newVariants = [...prev.variants];
-    newVariants[vIndex].images = [...(newVariants[vIndex].images || []), { public_id: "", url: "", preview: "" }];
+    const images = [...(newVariants[vIndex]?.images || [])];
+
+    const now = Date.now();
+    const last = images[images.length - 1];
+
+    // If last item is an empty placeholder created very recently, ignore the click
+    if (
+      last &&
+      !last.url &&
+      !last.preview &&
+      !last.public_id &&
+      (last as any)._createdAt &&
+      now - (last as any)._createdAt < 500
+    ) {
+      return { ...prev, variants: newVariants };
+    }
+
+    // push a new placeholder (with a timestamp to help avoid immediate duplicates)
+    images.push({ public_id: "", url: "", preview: "", _createdAt: now } as any);
+    newVariants[vIndex] = { ...newVariants[vIndex], images };
+
     // sync to RHF
     setValue(
       "variants",
@@ -265,8 +303,10 @@ const handleVariantAttributeChange = (vIndex: number, aIndex: number, field: key
       })),
       { shouldValidate: true }
     );
+
     return { ...prev, variants: newVariants };
   });
+
 
 const removeVariantImage = (vIndex: number, imgIndex: number) =>
   setProduct((prev) => {
@@ -478,7 +518,7 @@ const handleVariantImageUpload = (vIndex: number, imgIndex: number, result: any)
   // console.log(watch(), "form watch");
 const isSubmitting = form.formState.isSubmitting === true;
 console.log(form.formState.errors, "errors")
- 
+   const editorRef = useRef<MDXEditorMethods>(null);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -565,7 +605,7 @@ console.log(form.formState.errors, "errors")
 
                   <div className="space-y-2 md:col-span-2">
                   
-                       <FormField
+                       {/* <FormField
                       control={form.control}
                       name="description"
                       render={({ field }) => (
@@ -583,7 +623,26 @@ console.log(form.formState.errors, "errors")
                           <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
-                    />
+                    /> */}
+                    {/* Product Description */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Product Description</FormLabel>
+              <FormControl>
+              <Editor
+                  value={field.value}
+                  disabled={isSubmitting}
+                  editorRef={editorRef}
+                  fieldChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage className="text-red-500" />
+            </FormItem>
+          )}
+        />
                   </div>
 
                   <div className="space-y-2">
@@ -773,12 +832,17 @@ console.log(form.formState.errors, "errors")
          
          
         >
-          {({ open }) => (
-            <div
-              onClick={() => {
-               
-                open?.()
-              }}
+          {( widget ) => {
+            const open = widget?.open
+            return (
+  <div
+             onClick={() => {
+      if (typeof open === "function") {
+        open();
+      } else {
+        console.warn("Cloudinary widget not ready yet");
+      }
+    }}
               className="w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50"
             >
               {field.value?.preview ? (
@@ -790,7 +854,9 @@ console.log(form.formState.errors, "errors")
                 </>
               )}
             </div>
-          )}
+            )
+           
+          }}
         </CldUploadWidget>
       </FormControl>
       <FormMessage />
@@ -825,9 +891,18 @@ console.log(form.formState.errors, "errors")
     options={widgetOptions}
     onSuccess={(results) => handleGalleryImageUpload(index, results)}
   >
-    {({ open }) => (
-      <div
-        onClick={() => open?.()}
+    {( widget ) => {
+      const open = widget?.open;
+      return (
+        <div className="relative">
+   <div 
+       onClick={() => {
+      if (typeof open === "function") {
+        open();
+      } else {
+        console.warn("Cloudinary widget not ready yet");
+      }
+    }}
         className="w-full h-32 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50"
       >
         {image.preview ? (
@@ -839,7 +914,21 @@ console.log(form.formState.errors, "errors")
           </div>
         )}
       </div>
-    )}
+      <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation(); // don't open widget
+            removeGalleryImage(index)
+          }}
+          className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow border border-gray-200 hover:bg-red-50"
+          aria-label="Remove image"
+        >
+          <X className="w-3 h-3 text-red-600" />
+        </button>
+        </div>
+       
+      )
+    }}
   </CldUploadWidget>
 ))}
 
@@ -983,9 +1072,18 @@ console.log(form.formState.errors, "errors")
     onSuccess={(results) => handleVariantImageUpload(vIndex, imgIndex, results)}
    
   >
-    {({ open }) => (
-      <div
-        onClick={() => open?.()}
+    {( widget ) => {
+      const open = widget?.open;
+      return (
+        <div className="relative">
+  <div
+       onClick={() => {
+      if (typeof open === "function") {
+        open();
+      } else {
+        console.warn("Cloudinary widget not ready yet");
+      }
+    }}
         className="w-full h-24 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/50"
       >
         {img.preview ? (
@@ -1002,7 +1100,21 @@ console.log(form.formState.errors, "errors")
           </div>
         )}
       </div>
-    )}
+       <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation(); // don't open widget
+            removeVariantImage(vIndex, imgIndex);
+          }}
+          className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow border border-gray-200 hover:bg-red-50"
+          aria-label="Remove image"
+        >
+          <X className="w-3 h-3 text-red-600" />
+        </button>
+        </div>
+        
+      )
+    }}
   </CldUploadWidget>
 ))}
 

@@ -195,6 +195,9 @@ export const productSchema = z.object({
 
   attributes: z.array(z.object({ name: z.string(), value: z.string() })).optional().default([]),
 });
+export const GetAddressDetailsSchema = z.object({
+  id: z.string().min(1, {message: "Address Id is required"})
+})
 export const SignInWithOAuthSchema = z.object({
   provider: z.enum(["google", "github"], { message: "Invalid provider type" }),
   providerAccountId: z.string().min(1, { message: "provider account ID is required" }),
@@ -234,3 +237,75 @@ export const UsersSchema = z.object({
   // --- Related Data Collections (Relationships) ---
   
 });
+export const GetSingleProductSchema = z.object({
+  productId: z.string().min(1, {message: "product Id is required"})
+})
+
+
+export const ToggleWishlistSchema  = z.object({
+  productId: z.string().min(1, {message: "Product Id is required"})
+})
+
+
+/**
+ * Zod schema for adding/editing an address.
+ * - Defaults country to "Morocco"
+ * - Validates Moroccan phone numbers: accepts +212... or 0... with leading 5/6/7
+ * - Validates Moroccan postal codes (5 digits)
+ */
+export const AddAddressSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: "Name is required" })
+    .max(100, { message: "Name is too long" })
+    .transform((s) => s.trim()),
+
+  addressLine1: z
+    .string()
+    .min(1, { message: "Address is required" })
+    .max(200, { message: "Address is too long" })
+    .transform((s) => s.trim()),
+
+  // optional second line (nullable allowed)
+  addressLine2: z
+    .string()
+    .max(200, { message: "Address line is too long" })
+    .optional()
+    .transform((v) => (typeof v === "string" ? v.trim() : v)),
+
+  city: z
+    .string()
+    .min(1, { message: "City is required" })
+    .max(100, { message: "City name is too long" })
+    .transform((s) => s.trim()),
+
+  // Morocco postal codes are 5 digits
+  postalCode: z
+    .string()
+    .regex(/^\d{5}$/, { message: "Postal code must be 5 digits" }),
+
+  // Default the country to Morocco; keep as literal if you never want it changed
+  country: z.string().default("Morocco"),
+  state: z.string().min(1, {message: "state feild is required"}),
+  // Phone: accept +2125XXXXXXXX or 0[5|6|7]XXXXXXXX (10 digits total after leading 0)
+  phone: z
+    .string()
+    .min(1, { message: "Phone number is required" })
+    .regex(/^(\+212|0)(5|6|7)\d{8}$/, {
+      message:
+        "Invalid phone. Use +212XXXXXXXXX or 0XXXXXXXXX (Moroccan numbers start with 5/6/7).",
+    }),
+
+  isDefault: z.boolean().optional().default(false),
+
+  deliveryInstructions: z
+    .string()
+    .max(500, { message: "Delivery instructions are too long" })
+    .optional()
+    .transform((v) => (typeof v === "string" ? v.trim() : v)),
+});
+export const EditAddressSchema = AddAddressSchema.extend({
+  id: z.string().min(1, { message: "Address Id is required" }),
+});
+
+export type AddAddressInput = z.infer<typeof AddAddressSchema>;

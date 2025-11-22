@@ -1,5 +1,6 @@
 
 
+import { getAllProducts } from '@/actions/product.actions';
 import Hero from '@/components/shared/Hero';
 import ProductCard from '@/components/shared/ProductCard';
 import ProductGrid from '@/components/shared/ProductGrid';
@@ -135,7 +136,9 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products }) =>
 };
 
 
-const Home: React.FC = () => {
+const Home = async () => {
+    const result = await getAllProducts()
+    console.log(result.data?.products)
     return (
       <main>
           <Hero />
@@ -158,7 +161,7 @@ const Home: React.FC = () => {
                     <ProductCarousel {...carouselData} />
                 </div>
                 
-                <ProductGrid />
+                <ProductGrid products={result.data?.products || []} />
                   <div className="mt-6">
                     <ProductCarousel {...itemsUnder50} />
                 </div>

@@ -492,6 +492,7 @@ export async function createOrderAction(
         payment: paymentSnapshot,
         notes: p.notes ?? null,
       };
+      console.log(orderItems, "orderItems")
 
       // Create order (inside the same transaction)
       createdOrder = await (Order as any).createForUser(session.user.id, orderPayload);

@@ -419,23 +419,23 @@ export async function createOrderAction(
         const variantSnapshot = variant
           ? {
              
-              sku: variant.sku ?? null,
-              priceModifier: variant.priceModifier ?? null,
+              sku: variant.sku,
+              priceModifier: variant.priceModifier,
               
-              stock: variant.stock ?? null,
+              stock: variant.stock,
               attributes: variant.attributes ?? [],
               images: variant.images ?? [],
             }
           : raw.variant
           ? {
-              sku: raw.variant.sku ?? null,
+              sku: raw.variant.sku,
               priceModifier: raw.variant.priceModifier,
                stock: variant.stock,
               attributes: raw.variant.attributes ?? [],
               images: raw.variant.images ?? [],
             }
           : null;
-
+        console.log(variantSnapshot, "variant from server")
         orderItems.push({
           productId: prod._id,
           name: prod.name ?? "Product",
@@ -453,7 +453,7 @@ export async function createOrderAction(
       const subtotal = orderItems.reduce((s, it) => s + Number(it.linePrice || 0), 0);
       const discount = 0;
       const total = Math.round((subtotal + shippingCost + tax - discount + Number.EPSILON) * 100) / 100;
-
+  
       // payment snapshot
       const paymentSnapshot: any = p.payment
         ? {

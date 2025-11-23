@@ -144,7 +144,21 @@ const OrderItemSchema = new Schema<IOrderItem>(
     productId: { type: Schema.Types.ObjectId, ref: "Product", required: true, index: true },
     name: { type: String, required: true },
     variantId: { type: String, default: null },
-    variant: {VariantSchema},
+    variant: {
+       sku: { type: String },
+  priceModifier: { type: Number, required: true, default: 0 },
+  stock: { type: Number, required: true, min: 0, default: 0 },
+  attributes: [{
+    _id: false, // Don't create a separate _id for each attribute
+    name: { type: String, required: true },
+    value: { type: String, required: true },
+  }],
+  images: [{ type: {
+    url: { type: String },
+    preview: { type: String },
+    public_id: { type: String },
+  }}],
+    },
     quantity: { type: Number, required: true, min: 1, default: 1 },
     unitPrice: { type: Number, required: true, min: 0 },
     linePrice: { type: Number, required: true, min: 0 }, // unitPrice * quantity (snapshotted)

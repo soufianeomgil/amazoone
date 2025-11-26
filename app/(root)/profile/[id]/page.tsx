@@ -4,6 +4,7 @@ import { ROUTES } from '@/constants/routes';
 import { FilterIcon, Heart, UserCircleIcon, XIcon } from 'lucide-react';
 import Link from 'next/link';
 import FilterSidebar from '@/components/shared/FilterSidebar';
+import { MainCard } from "@/components/cards/MainCard";
 
 interface AccountCardProps {
     icon: React.ReactNode;
@@ -54,8 +55,12 @@ const accountSections: AccountCardProps[] = [
 interface BrowsingHistoryItem {
     id: number;
     name: string;
-    imageUrl: string;
-    price: number;
+     thumbnail: {
+        url: string;
+        preview?:string;
+        public_id?:string
+    };
+    basePrice: number;
     rating: number;
     reviewCount: number;
 }
@@ -64,48 +69,54 @@ const browsingHistoryItems: BrowsingHistoryItem[] = [
     {
         id: 1,
         name: 'Echo Dot (5th Gen, 2022 release) | Smart speaker with Alexa',
-        imageUrl: 'https://m.media-amazon.com/images/I/81O6ark9UvL._AC_UL320_.jpg',
-        price: 49.99,
+        thumbnail: {
+          url: "https://m.media-amazon.com/images/I/81O6ark9UvL._AC_UL320_.jpg"
+        } ,
+        basePrice: 49.99,
         rating: 4.5,
         reviewCount: 13876,
     },
     {
         id: 2,
         name: 'Keurig K-Mini Coffee Maker, Single Serve K-Cup Pod Coffee Brewer',
-        imageUrl: 'https://m.media-amazon.com/images/I/51SmxbR4QWL._AC_UL320_.jpg',
-        price: 79.99,
+        thumbnail: {
+            url: "https://m.media-amazon.com/images/I/51SmxbR4QWL._AC_UL320_.jpg"
+        },
+        basePrice: 79.99,
         rating: 4,
         reviewCount: 89341,
     },
     {
         id: 3,
         name: 'Amazon Basics Lightweight Super Soft Easy Care Microfiber Bed Sheet Set',
-        imageUrl: 'https://m.media-amazon.com/images/I/71Lp7UpChCL._AC_UL320_.jpg',
-        price: 19.99,
+        thumbnail: {
+            url: 'https://m.media-amazon.com/images/I/71Lp7UpChCL._AC_UL320_.jpg'
+        },
+        basePrice: 19.99,
         rating: 5,
         reviewCount: 412531,
     },
     {
         id: 4,
         name: 'Anker Portable Charger, 313 Power Bank (PowerCore Slim 10K)',
-        imageUrl: 'https://m.media-amazon.com/images/I/71QjmBAjE7L._AC_UL320_.jpg',
-        price: 21.99,
+        thumbnail: {url: 'https://m.media-amazon.com/images/I/71QjmBAjE7L._AC_UL320_.jpg'},
+        basePrice: 21.99,
         rating: 4.5,
         reviewCount: 65432,
     },
     {
         id: 5,
         name: 'Logitech MX Master 3S - Wireless Performance Mouse with Ultra-Fast Scrolling',
-        imageUrl: 'https://m.media-amazon.com/images/I/71oiOtOHqDL._AC_UL320_.jpg',
-        price: 99.99,
+        thumbnail: {url: "https://m.media-amazon.com/images/I/71oiOtOHqDL._AC_UL320_.jpg"} ,
+        basePrice: 99.99,
         rating: 5,
         reviewCount: 9876,
     },
      {
         id: 6,
         name: 'SAMSUNG 32" Odyssey G32A FHD 1ms 165Hz Gaming Monitor',
-        imageUrl: 'https://m.media-amazon.com/images/I/41NX3N+JpxL._AC_UL320_.jpg',
-        price: 249.99,
+        thumbnail: {url: 'https://m.media-amazon.com/images/I/41NX3N+JpxL._AC_UL320_.jpg'} ,
+        basePrice: 249.99,
         rating: 4,
         reviewCount: 1245,
     },
@@ -124,38 +135,10 @@ const AccountCard: React.FC<AccountCardProps> = ({ icon, title, description, hre
     </a>
 );
 
-const renderStars = (rating: number) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-        if (i <= Math.floor(rating)) {
-            stars.push(<StarIcon key={i} className="text-yellow-500 h-4 w-4" />);
-        } else if (i === Math.ceil(rating) && !Number.isInteger(rating)) {
-            // This logic can be expanded for half-stars if needed
-            stars.push(<StarIcon key={i} className="text-yellow-500 h-4 w-4" />);
-        } else {
-            stars.push(<StarIcon key={i} className="text-gray-300 h-4 w-4" />);
-        }
-    }
-    return stars;
-};
 
 
-const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, price, rating, reviewCount }) => (
-    <div className="flex-shrink-0 w-48 text-left">
-        <Link href="#">
-            <img src={imageUrl} alt={name} className="w-full h-40 object-contain mb-2" />
-        </Link>
-        <Link href="#" className="text-sm text-blue-600 hover:text-orange-700 hover:underline line-clamp-4">{name}</Link>
-        <div className="flex items-center mt-1">
-            {renderStars(rating)}
-            <span className="text-sm text-blue-600 ml-1">{reviewCount.toLocaleString()}</span>
-        </div>
-        <p className="text-base font-bold text-red-700 mt-1">${price.toFixed(2)}</p>
-        <button className="w-full bg-yellow-300 hover:bg-yellow-400 text-black text-xs rounded-md py-1 mt-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
-            Add to Cart
-        </button>
-    </div>
-);
+
+
 
 
 const Profile: React.FC = () => {
@@ -182,7 +165,7 @@ const Profile: React.FC = () => {
                     {/* <FilterSidebar /> */}
                          <div className="flex  overflow-x-auto space-x-6 pb-4">
                          {browsingHistoryItems.map(item => (
-                            <BrowsingHistoryCard key={item.id} {...item} />
+                            <MainCard key={item.id} {...item} />
                         ))}
                     </div>
                   

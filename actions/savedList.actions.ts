@@ -3,6 +3,7 @@ import connectDB from "@/database/db";
 import { action } from "@/lib/handlers/action";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors";
+import { CreateListSchema } from "@/lib/zod";
 import SavedList, { ISavedList } from "@/models/savedList.model";
 // server/actions/createSavedListAction.ts
 import mongoose from "mongoose";
@@ -10,11 +11,7 @@ import { z } from "zod";
 
 
 
-const CreateListSchema = z.object({
-  name: z.string().min(1).max(120).optional().default("Wishlist"),
-  isPrivate: z.boolean().optional().default(true),
-  isDefault: z.boolean().optional().default(false),
-});
+
 
 type CreateListParams = z.infer<typeof CreateListSchema>;
 

@@ -33,7 +33,6 @@ export enum PaymentMethod {
 export interface IOrderItem {
   productId: ObjectId;
   name: string;
-  variantId?: string | null;
   quantity: number;
   variant?: IVariant | null
   unitPrice: number; // price per unit at the time of purchase
@@ -149,8 +148,7 @@ const OrderItemSchema = new Schema<IOrderItem>(
   {
     productId: { type: Schema.Types.ObjectId, ref: "Product", required: true, index: true },
     name: { type: String, required: true },
-    variantId: { type: String, default: null },
-  variant: { type: VariantSchema, default: null },
+    variant: { type: VariantSchema, default: null },
     quantity: { type: Number, required: true, min: 1, default: 1 },
     unitPrice: { type: Number, required: true, min: 0 },
     linePrice: { type: Number, required: true, min: 0 }, // unitPrice * quantity (snapshotted)
@@ -278,7 +276,6 @@ OrderSchema.methods.addItem = function (this: IOrderDoc, item: Partial<IOrderIte
   const newItem: IOrderItem = {
     productId: new mongoose.Types.ObjectId(String(item.productId)),
     name: String(item.name || "Product"),
-    variantId: item.variantId ?? null,
     quantity: Number(item.quantity),
     variant: item.variant,
     unitPrice: Number(item.unitPrice),
@@ -295,7 +292,7 @@ OrderSchema.methods.addItem = function (this: IOrderDoc, item: Partial<IOrderIte
 OrderSchema.methods.removeItem = function (this: IOrderDoc, productId: ObjectId | string, variantId?: string | null) {
   const pid = String(productId);
   this.items = (this.items || []).filter(
-    (it) => !(String(it.productId) === pid && (variantId == null || it.variantId === variantId))
+    (it) => !(String(it.productId) === pid && (variantId == null || it.variant?._id === variantId))
   );
   this.recalcTotals();
 };

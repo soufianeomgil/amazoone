@@ -32,7 +32,7 @@ export interface ImageState {
   public_id?: string;
   preview?: string;
 }
-export interface IVariant {
+export interface IVariant extends Document {
   sku: string; // Stock Keeping Unit for this specific variant
   priceModifier: number; // Amount to add/subtract from the base price
   stock: number;
@@ -92,7 +92,7 @@ const ReviewSchema = new Schema<IReview>({
  * Schema for product variants. This is also embedded in the Product schema.
  */
  const VariantSchema = new Schema<IVariant>({
-  sku: { type: String, required: true, unique: true },
+  sku: { type: String, required: true },
   priceModifier: { type: Number, required: true, default: 0 },
   stock: { type: Number, required: true, min: 0, default: 0 },
   attributes: [{
@@ -106,7 +106,7 @@ const ReviewSchema = new Schema<IReview>({
     public_id: { type: String },
   },
   default: {},}],
-}, { _id: false }); // Don't create a separate _id for each variant object in the array
+}); // Don't create a separate _id for each variant object in the array
 const attributeSchema = new Schema<IVariantAttribute>({
   name: {
     type: String,

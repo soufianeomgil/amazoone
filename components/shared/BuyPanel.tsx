@@ -12,6 +12,7 @@ import { RootState } from '@/lib/store'
 import { useRouter } from 'next/navigation'
 import { addItemAsync } from '@/lib/store/cartSlice'
 import { Spinner } from '../ui/spinner'
+import FixedQTY from './FixedQTY'
 
 const BuyPanel = ({product,user}: {product: IProduct, user: IUser | null}) => {
   const items = [
@@ -74,7 +75,8 @@ const BuyPanel = ({product,user}: {product: IProduct, user: IUser | null}) => {
       }
     };
   return (
-    <div className='bg-white lg:grid hidden shadow-2xl h-fit rounded-lg py-3 lg:col-span-3 '> 
+    <>
+ <div className='bg-white lg:grid hidden shadow-2xl h-fit rounded-lg py-3 lg:col-span-3 '> 
        <div className="flex flex-col items-center justify-center gap-3">
             <h4 className='font-bold text-xl  text-[hsl(178,100%,34%)] '>
                 £ {product.basePrice}
@@ -110,7 +112,8 @@ const BuyPanel = ({product,user}: {product: IProduct, user: IUser | null}) => {
                   </p>
             </div>
             </div>
-                <div className='flex  px-2 mx-auto pb-3 text-center  justify-center flex-col w-full border-gray-300 items-center gap-3'>
+                <div className='flex  px-2 mx-auto pb-3 text-center
+                  justify-center flex-col w-full border-gray-300 items-center gap-3'>
     
                     <div className="flex items-center space-x-2">
                       <button
@@ -123,7 +126,7 @@ const BuyPanel = ({product,user}: {product: IProduct, user: IUser | null}) => {
                       </button>
                 
                       <span
-                        className="px-3 py-1 border border-gray-300 rounded min-w-[48px] text-center text-sm"
+                        className="px-3 py-1 border border-gray-300 rounded min-w-12 text-center text-sm"
                         aria-live="polite"
                         aria-atomic="true"
                       >
@@ -158,8 +161,13 @@ const BuyPanel = ({product,user}: {product: IProduct, user: IUser | null}) => {
                     </div>
                  ))}
              </div>
+             
        </div>
+       
     </div>
+     <FixedQTY pending={loading} handleAddToCart={handleAddToCart} product={product} />
+    </>
+   
   )
 }
 

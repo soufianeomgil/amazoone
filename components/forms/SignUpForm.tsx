@@ -17,14 +17,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, Radio } from "@/components/ui/radio"; // if you have radio; otherwise we'll use native inputs
+ // if you have radio; otherwise we'll use native inputs
 
 import { SignUpValidationSchema } from "@/lib/zod";
 import { signUpWithCredentials } from "@/actions/auth.actions";
 
 type SignUpValues = z.infer<typeof SignUpValidationSchema>;
 
-export default function SignUpForm(): JSX.Element {
+export default function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isShipping = searchParams?.get?.("shipping");

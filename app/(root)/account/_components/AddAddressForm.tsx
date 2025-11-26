@@ -99,7 +99,7 @@ const AddAddressForm = () => {
   };
   return (
     <div className="bg-white">
-      <div className="container mx-auto px-4 py-8 max-w-[560px] ">
+      <div className="container mx-auto  max-w-[560px] ">
        
         <h1 className="text-2xl flex items-center gap-1 md:text-3xl font-bold text-gray-800 mb-6">
            <img src="/location.png" alt="location icon" className="w-[22px] object-contain " />  <span>Add a new address</span>

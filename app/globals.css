@@ -1,18 +1,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
 
-@layer base {
-  /* * {
-    @apply  text-black;
-  } */
-  body {
-    @apply bg-[#E3E6E6]  overflow-scroll!  ;
 
-  }
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+
+
+
+body  {
+  height: 100% ;
+  background: #E3E6E6;
+  width: 100%;
+  overflow-y: auto!important;
 }
-
 .hash-span {
   margin-top: -140px;
   padding-bottom: 140px;

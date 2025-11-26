@@ -158,7 +158,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
             </div>
            </div>
 <BuyPanel product={product} user={data?.user as IUser || {}} />
-       <FixedQTY product={product} />
+      
         </div>
 
        

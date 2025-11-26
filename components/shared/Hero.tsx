@@ -3,9 +3,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons';
 
 const slides = [
-    { url: 'https://m.media-amazon.com/images/I/71U-Q+N7PXL._SX3000_.jpg' },
-    { url: 'https://m.media-amazon.com/images/I/61zAjw4bqPL._SX3000_.jpg' },
-    { url: 'https://m.media-amazon.com/images/I/71cp9PVuTfL._SX3000_.jpg' },
+    //{url: "https://www.louisvuitton.com/images/is/image/lv/MEN_BC_MNG_SHADOW_OCT25_04_DI3.jpg"},
+    { url: 'https://images.ctfassets.net/brzb6u29244a/1r0xTJ5E4aYyYYlHkXFk01/3ea85491d43aa09216ad889fea64c1f1/HeroCategory-Desktop_Gucci-GIFT-GIVING-NOV25-Set-2-25-1268_001_Default.png?w=1440&fm=avif&q=50' },
+  // { url: '' },
+    { url: 'https://media.gucci.com/style/DarkGray_Center_0_0_1200x1200/1747327503/853971_FAFFQ_8864_001_100_0000_Light-gucci-giglio-large-tote-bag.jpg' },
 ];
 
 const Hero: React.FC = () => {
@@ -28,29 +29,31 @@ const Hero: React.FC = () => {
     };
 
     useEffect(() => {
-        const slideInterval = setInterval(nextSlide, 5000);
+        const slideInterval = setInterval(nextSlide, 10000);
         return () => clearInterval(slideInterval);
     }, [nextSlide]);
 
 
     return (
-        <section className="relative h-56 md:h-[600px] w-full -mt-1 group z-0">
+        <section className="relative h-90 md:h-[700px] w-full  group z-0">
             <div className="w-full h-full overflow-hidden">
                  <div
                     className="w-full h-full flex transition-transform ease-in-out duration-700"
                     style={{ transform: `translateX(-${currentIndex * 100}%)` }}
                 >
                     {slides.map((slide, slideIndex) => (
+                       
                          <img
                             key={slideIndex}
                             src={slide.url as string}
                             alt={`Promotional banner ${slideIndex + 1}`}
-                            className="w-full h-full object-cover shrink-0"
+                            className="w-full h-full sm:object-contain object-cover shrink-0"
                         />
                     ))}
                 </div>
             </div>
-             <div className="absolute inset-0 bg-linear-to-t from-gray-200 via-transparent to-transparent"></div>
+             <div className="absolute max-sm:hidden
+             inset-0 bg-linear-to-t from-gray-200 via-transparent to-transparent" />
 
             {/* Left Arrow */}
             <div className="hidden group-hover:block absolute top-[35%] -translate-y-1/2 left-5 text-2xl rounded-md p-2 bg-white/60 text-gray-800 cursor-pointer shadow-md hover:bg-white">

@@ -1,8 +1,13 @@
 "use client"
 import { CaretDownIcon } from '@/components/shared/icons';
-import ProductCard from '@/components/shared/ProductCard';
+import ProductCard from '@/components/cards/ProductCard';
 import Link from 'next/link';
 import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/constants/routes';
+import { formatDate, formatPrice } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { DollarSign, ShoppingBag } from 'lucide-react';
 
 
 export interface Product {
@@ -14,7 +19,7 @@ export interface Product {
     reviewCount: number;
 }
 
-const mockProducts: Product[] = [
+ const mockProducts: Product[] = [
     {
         id: 1,
         name: 'Echo Dot (5th Gen) | Smart speaker with Alexa | Charcoal',
@@ -84,9 +89,7 @@ const mockProducts: Product[] = [
 const BrowsingHistory: React.FC = () => {
     const [products, setProducts] = useState<Product[]>(mockProducts);
 
-    const handleRemove = (productId: number) => {
-        setProducts(products.filter(p => p.id !== productId));
-    };
+   
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -142,6 +145,7 @@ const BrowsingHistory: React.FC = () => {
                 </div>
             )}
         </div>
+       
     );
 };
 

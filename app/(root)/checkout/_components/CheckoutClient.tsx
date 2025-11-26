@@ -30,7 +30,7 @@ const currency = (n: number) =>
 
 const CheckoutClient: React.FC<Props> = ({ cartItems, onQuantityChange, onDelete, onToggleGift, onPlaceOrder }) => {
   const dispatch = useDispatch();
-
+   const [open,setOpen] = useState(false)
   // read payment method from redux store (defensive)
   const paymentMethodFromStore = useSelector((state: any) => state?.cart?.paymentMethod ?? null);
 

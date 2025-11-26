@@ -6,7 +6,7 @@ import AddAddressForm from '../../_components/AddAddressForm'
 
 const page = () => {
   return (
-    <div>
+    <div className="bg-white w-full px-4 py-8">
         <Link
           href="/account/addresses"
           className="text-sm text-blue-600 flex items-center gap-1 hover:text-orange-600 hover:underline mb-7 "

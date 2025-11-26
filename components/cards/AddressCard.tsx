@@ -5,6 +5,7 @@ import Link from "next/link";
 import EditAddressBtn from "@/components/shared/clientBtns/EditAddressBtn";
 import { LocationIcon } from "@/components/shared/icons";
 import { IAddress } from "@/models/address.model";
+import { AddAddressModal } from "../shared/modals/AddAddressMdel";
 
 
 
@@ -16,6 +17,7 @@ type ApiResponse = {
 
 export default function AddressCard() {
   const [address, setAddress] = useState<IAddress | null>(null);
+   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allAddresses, setAllAddresses] = useState<IAddress[] | []>([]);
@@ -87,22 +89,22 @@ export default function AddressCard() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="border border-red-200 bg-white rounded-lg p-4">
-        <p className="text-red-600 font-medium">Error loading address</p>
-        <p className="text-sm text-gray-600 mt-1">{error}</p>
-        <div className="mt-3">
-          <Link href="/account/addresses" className="text-sm text-blue-600 hover:underline">
-            Manage addresses
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="border border-red-200 bg-white rounded-lg p-4">
+  //       <p className="text-red-600 font-medium">Error loading address</p>
+  //       <p className="text-sm text-gray-600 mt-1">{error}</p>
+  //       <div className="mt-3">
+  //         <Link href="/account/addresses" className="text-sm text-blue-600 hover:underline">
+  //           Manage addresses
+  //         </Link>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // If no saved addresses -> show empty, actionable state
-  if (!address) {
+  if (!address || error) {
     return (
       <div
         style={{ borderStyle: "dashed" }}
@@ -110,11 +112,12 @@ export default function AddressCard() {
       >
         <LocationIcon />
         <div>
-          <p className="font-medium text-sm">Add a new address</p>
+          <p onClick={()=> setOpen(true)} className="font-medium text-sm">Add a new address</p>
           <Link href="/account/addresses" className="text-xs text-blue-600 hover:underline">
             Manage your addresses
           </Link>
         </div>
+        <AddAddressModal open={open} setOpen={setOpen} />
       </div>
     );
   }

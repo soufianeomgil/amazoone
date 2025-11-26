@@ -307,5 +307,10 @@ export const AddAddressSchema = z.object({
 export const EditAddressSchema = AddAddressSchema.extend({
   id: z.string().min(1, { message: "Address Id is required" }),
 });
+export const CreateListSchema = z.object({
+  name: z.string().min(1, {message: "list name is required"}).max(120).optional().default("Wishlist"),
+  isPrivate: z.boolean().optional().default(true),
+  isDefault: z.boolean().optional().default(false),
+});
 
 export type AddAddressInput = z.infer<typeof AddAddressSchema>;

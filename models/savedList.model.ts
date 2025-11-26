@@ -1,12 +1,13 @@
 // models/SavedList.ts
 import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { IVariant } from "./product.model";
 
 export type ObjectId = Types.ObjectId;
 
 // Schema for each saved item in a list (product ref + optional variant info)
 export interface ISavedItem {
   productId: ObjectId;
-  variantId?: string | null;
+  variant?: IVariant | null;
   addedAt: Date;
   // optional extra metadata (snapshot price, thumbnail, note)
   priceSnapshot?: number;
@@ -53,7 +54,22 @@ export interface ISavedListModel extends Model<ISavedListDoc> {
 
 const SavedItemSchema = new Schema<ISavedItem>({
   productId: { type: Schema.Types.ObjectId, ref: "Product", required: true, index: true },
-  variantId: { type: String, default: null },
+  variant: { 
+  sku: { type: String, required: true},
+  priceModifier: { type: Number, required: true, default: 0 },
+  stock: { type: Number, required: true, min: 0, default: 0 },
+  attributes: [{
+    _id: false, // Don't create a separate _id for each attribute
+    name: { type: String, required: true },
+    value: { type: String, required: true },
+  }],
+  images: [{ type: {
+    url: { type: String },
+    preview: { type: String },
+    public_id: { type: String },
+  },
+  default: {},}],
+},
   addedAt: { type: Date, default: () => new Date() },
   priceSnapshot: { type: Number, default: undefined },
   thumbnail: { type: String, default: undefined },
@@ -101,12 +117,12 @@ SavedListSchema.pre("save", function (next) {
 // Instance methods
 SavedListSchema.methods.hasItem = function (productId: ObjectId | string, variantId?: string | null) {
   const pid = String(productId);
-  return this.items.some((it: ISavedItem) => String(it.productId) === pid && (variantId == null || it.variantId === variantId));
+  return this.items.some((it: ISavedItem) => String(it.productId) === pid && (variantId == null || it.variant?._id === variantId));
 };
 
 SavedListSchema.methods.addItem = async function (this: ISavedListDoc, item: { productId: ObjectId | string; variantId?: string | null; priceSnapshot?: number; thumbnail?: string; note?: string }) {
   const pid = String(item.productId);
-  const existsIndex = this.items.findIndex((it: ISavedItem) => String(it.productId) === pid && (item.variantId == null || it.variantId === item.variantId));
+  const existsIndex = this.items.findIndex((it: ISavedItem) => String(it.productId) === pid && (item.variantId == null || it.variant?._id === item.variantId));
   if (existsIndex !== -1) {
     // update metadata if present
     const existing = this.items[existsIndex];
@@ -135,7 +151,7 @@ SavedListSchema.methods.addItem = async function (this: ISavedListDoc, item: { p
 SavedListSchema.methods.removeItem = async function (this: ISavedListDoc, productId: ObjectId | string, variantId?: string | null) {
   const pid = String(productId);
   const before = this.items.length;
-  this.items = this.items.filter((it: ISavedItem) => !(String(it.productId) === pid && (variantId == null || it.variantId === variantId)));
+  this.items = this.items.filter((it: ISavedItem) => !(String(it.productId) === pid && (variantId == null || it?.variant?._id === variantId)));
   this.meta = this.meta || { count: 0 };
   this.meta.count = this.items.length;
   this.meta.lastRemovedAt = new Date();

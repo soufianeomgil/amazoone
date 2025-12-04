@@ -141,8 +141,34 @@ export const removeItemAsync = createAsyncThunk(
   }
 );
 
+// export const updateQuantityAsync = createAsyncThunk(
+//   'cart/updateQuantity',
+//   async (
+//     {
+//       productId,
+//       variantId,
+//       quantity,
+//     }: { productId: string; variantId?: string | null; quantity: number },
+//     { getState }
+//   ) => {
+//     const state = getState() as { cart: CartState };
+//     const guestId = state.cart.guestId || getOrCreateGuestId();
+//     const id = makeCartItemId(productId, variantId);
+
+//     await updateCartItemQuantity({
+//       guestId,
+//       productId,
+//       quantity,
+//       variantId,
+//     } as any);
+
+//     return { id, quantity };
+//   }
+// );
+
+// Replace or update your createAsyncThunk to pass variantId consistently (null for no variant)
 export const updateQuantityAsync = createAsyncThunk(
-  'cart/updateQuantity',
+  "cart/updateQuantity",
   async (
     {
       productId,
@@ -153,13 +179,15 @@ export const updateQuantityAsync = createAsyncThunk(
   ) => {
     const state = getState() as { cart: CartState };
     const guestId = state.cart.guestId || getOrCreateGuestId();
-    const id = makeCartItemId(productId, variantId);
+    // normalize variantId here as well: empty string -> null
+    const normalizedVariantId = variantId && String(variantId).trim() !== "" ? String(variantId) : null;
+    const id = makeCartItemId(productId, normalizedVariantId);
 
     await updateCartItemQuantity({
       guestId,
       productId,
       quantity,
-      variantId,
+      variantId: normalizedVariantId,
     } as any);
 
     return { id, quantity };

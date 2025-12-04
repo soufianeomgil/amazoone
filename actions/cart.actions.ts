@@ -127,6 +127,55 @@ export async function removeFromCart({
   }
 }
 
+// export async function updateCartItemQuantity({
+//   guestId,
+//   productId,
+//   variantId,
+//   quantity,
+// }: {
+//   guestId?: string | null;
+//   productId: string;
+//   variantId?: string | null;
+//   quantity: number;
+// }): Promise<ActionResponse<{ cart: ICart }>> {
+//   try {
+//     const session = await auth();
+//     const userId = session?.user?.id ?? null;
+//     await connectDB();
+
+//     let cart;
+
+//     if (userId) {
+//       cart = await Cart.findOne({ userId });
+//     } else if (guestId) {
+//       cart = await Cart.findOne({ guestId });
+//     }
+
+//     if (!cart) throw new Error('Cart not found');
+
+//     const normalizedVariantId = variantId ?? null;
+
+//     const item = cart.items.find(
+//       (i: any) =>
+//         i.productId.toString() === productId &&
+//         (i.variantId ?? null) === normalizedVariantId
+//     );
+
+//     if (!item) throw new Error('cart item not found');
+
+//     item.quantity = quantity;
+
+//     await cart.save();
+
+//     return {
+//       success: true,
+//       data: { cart: JSON.parse(JSON.stringify(cart)) },
+//     };
+//   } catch (error) {
+//     return handleError(error) as ErrorResponse;
+//   }
+// }
+// Replace the existing `updateCartItemQuantity` with this improved version
 export async function updateCartItemQuantity({
   guestId,
   productId,
@@ -143,7 +192,7 @@ export async function updateCartItemQuantity({
     const userId = session?.user?.id ?? null;
     await connectDB();
 
-    let cart;
+    let cart: any;
 
     if (userId) {
       cart = await Cart.findOne({ userId });
@@ -151,17 +200,23 @@ export async function updateCartItemQuantity({
       cart = await Cart.findOne({ guestId });
     }
 
-    if (!cart) throw new Error('Cart not found');
+    if (!cart) throw new Error("Cart not found");
 
-    const normalizedVariantId = variantId ?? null;
+    // Normalize variantId: treat '', undefined, null the same way (no variant)
+    const normalizedVariantId = variantId && String(variantId).trim() !== "" ? String(variantId) : null;
 
-    const item = cart.items.find(
-      (i: any) =>
-        i.productId.toString() === productId &&
-        (i.variantId ?? null) === normalizedVariantId
-    );
+    // find item robustly — productId / variantId may be stored as ObjectId or string
+    const item = cart.items.find((i: any) => {
+      const storedProductId = String(i.productId);
+      // stored variant may be undefined/null/ObjectId/string
+      const storedVariant = i.variantId === undefined || i.variantId === null ? null : String(i.variantId);
+      return storedProductId === String(productId) && storedVariant === normalizedVariantId;
+    });
 
-    if (!item) throw new Error('cart item not found');
+    if (!item) throw new Error("cart item not found");
+
+    // clamp quantity (optional) — keep as you had, but prevent negative
+    if (quantity < 0) throw new Error("Quantity must be >= 0");
 
     item.quantity = quantity;
 
@@ -175,6 +230,7 @@ export async function updateCartItemQuantity({
     return handleError(error) as ErrorResponse;
   }
 }
+
 
 export const syncCarts = async (guestId: string | null): Promise<ActionResponse<{ mergedCart: any }>> => {
   const session = await auth();

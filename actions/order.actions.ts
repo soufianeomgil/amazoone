@@ -532,7 +532,7 @@ type GetOrdersParams = {
   pageSize?: number;
 };
 // TODO: FINISH FETCHING USER ORDERS WITH PAGINATION
-// TODO: that page design [Ai] ;
+
 export async function getUserOrdersAction(
   params: GetOrdersParams
 ): Promise<ActionResponse<{ orders: IOrderDoc[]; isNext: boolean; ordersLength: number }>> {

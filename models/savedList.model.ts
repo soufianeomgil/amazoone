@@ -19,7 +19,8 @@ export interface ISavedItem {
 
 
 // Main SavedList shape
-export interface ISavedList {
+export interface ISavedList extends Document {
+  
   userId: ObjectId;            // owner
   name: string;                // e.g., "Wishlist", "For Mom"
   items: ISavedItem[];         // saved products
@@ -41,6 +42,7 @@ export interface ISavedListDoc extends ISavedList, Document {
     productId: ObjectId | string;
     variantId?: string | null;
     priceSnapshot?: number;
+    variant?:IVariant;
     thumbnail?: string;
     note?: string;
   }) => Promise<ISavedListDoc>;
@@ -57,7 +59,7 @@ export interface ISavedListModel extends Model<ISavedListDoc> {
 
 const SavedItemSchema = new Schema<ISavedItem>(
   {
-    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true, index: true },
+    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
 
     // store the variant id (string) for matching; do NOT create unique/indexed sku here
     variantId: { type: String, default: null },
@@ -76,12 +78,12 @@ const SavedItemSchema = new Schema<ISavedItem>(
 
 const SavedListSchema = new Schema<ISavedListDoc, ISavedListModel>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, required: true, trim: true, maxlength: 120, default: "Wishlist" },
     items: { type: [SavedItemSchema], default: [] },
     isPrivate: { type: Boolean, default: true },
     isDefault: { type: Boolean, default: false },
-    archived: { type: Boolean, default: false, index: true },
+    archived: { type: Boolean, default: false },
     meta: {
       count: { type: Number, default: 0 },
       lastAddedAt: Date,
@@ -129,7 +131,7 @@ SavedListSchema.methods.hasItem = function (productId: ObjectId | string, varian
   });
 };
 
-SavedListSchema.methods.addItem = async function (this: ISavedListDoc, item: { productId: ObjectId | string; variantId?: string | null; priceSnapshot?: number; thumbnail?: string; note?: string; variant?: any }) {
+SavedListSchema.methods.addItem = async function (this: ISavedListDoc, item: { productId: ObjectId | string; variantId?: string | null; priceSnapshot?: number; thumbnail?: string; note?: string; variant?: IVariant }) {
   const pid = String(item.productId);
   const existsIndex = this.items.findIndex((it: ISavedItem) => {
     const sameProduct = String(it.productId) === pid;

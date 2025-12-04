@@ -136,7 +136,7 @@ const Rating: React.FC<RatingProps> = ({
 
       <div className="flex flex-col leading-tight">
         {showNumeric && (
-          <span className={`font-medium ${s.text} text-gray-800`}>{rating.toFixed(1)}</span>
+          <span className={`font-medium ${s.text} text-blue-600 hover:underline text-xs `}>{rating.toFixed(1)}</span>
         )}
         {typeof reviews === "number" && (
           <a href={`#${id ?? ""}`} className="text-xs text-gray-600 hover:underline">

@@ -8,6 +8,7 @@ import EmptyCart from '@/components/shared/Empty';
 
 import AddressCard from '@/components/cards/AddressCard';
 import { getCurrentUser } from '@/actions/user.actions';
+import { Button } from '@/components/ui/button';
 // TODO: ADD BELOW USER SAVED LIST
 
 
@@ -44,8 +45,57 @@ const page = async() => {
               
                 <hr/>
                 {  result.data?.userCart.items.map((item:any, key: number) => (
-                    <CartItemComponent key={key} item={item} />
+                    <CartItemComponent key={key} userId={res.data?.user?._id as string | null} item={item} />
                 ))}
+                
+            </div>
+           </div>
+             <div className=" ">
+              <div className=" bg-white p-4 rounded-md shadow-sm">
+               
+                 <div className=" pb-2 ">
+                    <h1 className="sm:text-xl text-lg font-bold">
+                        Your Items
+                    </h1>
+                    {/* <span className="text-sm text-gray-500">Price</span> */}
+                </div>
+              
+               <div className='flex flex-col mt-3 gap-2.5 '>
+                   <h3 className="text-blue-700 font-bold  sm:text-lg text-base  ">Saved for later (5 items)</h3>
+                   <div className='border border-gray-500 p-3 '>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                                 {/* {products.map((product) => (
+                                   <ProductCard onQuickViewClick={()=> handleQuickView(product)} key={product.id} product={product} />
+                                 ))} */}
+                                 {[0,1,2,3,4].map((_,index) => (
+                                   <div className='flex flex-col border border-gray-300 p-2.5 gap-2.5' key={index}>
+                                        <div className='w-full flex items-center justify-center '>
+                                             <img src="https://m.media-amazon.com/images/I/71oiOtOHqDL._AC_AA220_.jpg" alt="product name" />
+                                        </div>
+                                        <article>
+                                             <p className='line-clamp-2 text-gray-800 text-sm font-medium '>Studded Hobo Bags for Women Soft Vegan Leather Studded Shoulder Handbag Slouchy Tote Purses</p>
+                                             <span className="text-xs font-normal text-gray-800">100+ bought in past month</span>
+                                             <p className="text-xs font-normal text-green-800">InStock</p>
+                                             <p className='text-gray-900 font-bold text-xs mt-1.5 '>Color: <span className='text-gray-700 font-normal '>Black</span></p>
+                                             <Button type='button' className="border mt-2.5 cursor-pointer bg-transparent hover:bg-gray-100 text-gray-700 font-medium text-sm border-gray-500 rounded-full w-full">
+                                                 Move to cart
+                                             </Button>
+                                             <div className='flex flex-col mt-3 gap-1.5'>
+                                                     <button type='button' className="  cursor-pointer  w-fit bg-transparent hover:underline text-blue-600 font-medium text-xs ">
+                                                 Delete
+                                             </button>
+                                              <button type='button' className="  cursor-pointer w-fit bg-transparent hover:underline text-blue-600 font-medium text-xs ">
+                                                 Add to list
+                                             </button>
+                                              
+                                             </div>
+                                        </article>
+                                   </div>
+                                 ))}
+                               </div>
+                   </div>
+               </div>
+               
                 
             </div>
            </div>

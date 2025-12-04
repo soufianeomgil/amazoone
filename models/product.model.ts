@@ -44,6 +44,8 @@ export interface IVariant extends Document {
  * Interface for the main Product document.
  */
 export interface IProduct extends Document {
+  createdAt: any;
+  updatedAt: any;
   name: string;
   description: string;
   brand: string;

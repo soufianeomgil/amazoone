@@ -1,4 +1,3 @@
-
 "use client"
 import { IProduct } from '@/models/product.model'
 import { IUser } from '@/types/actionTypes'
@@ -13,8 +12,10 @@ import { useRouter } from 'next/navigation'
 import { addItemAsync } from '@/lib/store/cartSlice'
 import { Spinner } from '../ui/spinner'
 import FixedQTY from './FixedQTY'
+import AddToListButton from './clientBtns/ListBtn'
+import { ISavedList } from '@/models/savedList.model'
 
-const BuyPanel = ({product,user}: {product: IProduct, user: IUser | null}) => {
+const BuyPanel = ({product,data}: {product: IProduct, data:ISavedList[]}) => {
   const items = [
      {
        img: "https://www.marjanemall.ma/images/auth-white.png",
@@ -145,6 +146,7 @@ const BuyPanel = ({product,user}: {product: IProduct, user: IUser | null}) => {
                   <Button onClick={handleAddToCart} className='bg-[hsl(178,100%,34%)] w-full text-white font-medium hover:opacity-80 cursor-pointer '>
                      {loading ? <Spinner /> : <><ShoppingCart /> Add to cart</>}  
                   </Button>
+                  <AddToListButton product={product} data={data} />
             </div>
             <div className="
              ">

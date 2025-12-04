@@ -184,7 +184,7 @@ const Wishlist: React.FC = () => {
             className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row gap-4 hover:shadow-sm transition-shadow"
           >
             {/* preview grid */}
-            <div className="w-full md:w-56 flex-shrink-0">
+            <div className="w-full md:w-56 shrink-0">
               {list.items.length > 0 ? (
                 <div className="grid grid-cols-2 grid-rows-2 gap-1 rounded overflow-hidden bg-gray-50 p-1">
                   {list.items.slice(0, 4).map((it) => (

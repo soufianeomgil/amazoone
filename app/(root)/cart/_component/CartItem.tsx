@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { IProduct, IVariant } from "@/models/product.model";
+import { IProduct, IVariant, IVariantAttribute } from "@/models/product.model";
 import { useDispatch } from "react-redux";
 import { removeItemAsync, updateQuantityAsync } from "@/lib/store/cartSlice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DeleteIcon } from "lucide-react";
 import QuantitySelector from "@/components/shared/QTY";
+import { addToSaveForLater } from "@/actions/saveForLater.actions";
 
 
 interface Props {
@@ -17,10 +18,9 @@ interface Props {
   variant?: IVariant | null;
   onQuantityChange?: (newQty: number) => void;
   onDelete?: () => void;
-  onSaveForLater?: () => void;
 }
 
-export const CartItemComponent: React.FC<{ item: Props }> = ({ item }) => {
+export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }> = ({ item , userId}) => {
   const product = item.productId;
   const variant = item.variant ?? null;
   const dispatch = useDispatch();
@@ -59,7 +59,7 @@ export const CartItemComponent: React.FC<{ item: Props }> = ({ item }) => {
       setPending(false);
     }
   };
-   const handleRemoveItem = async(productId:string, variantId?:string)=> {
+   const handleRemoveItem = async(productId:string, variantId:string | null)=> {
       try {
          setPending(true)
          await new Promise(resolve => setTimeout(resolve, 500) )
@@ -78,7 +78,7 @@ export const CartItemComponent: React.FC<{ item: Props }> = ({ item }) => {
     if (Array.isArray((variant as any).attributes)) {
       return (
         <div className="mt-1 text-xs text-gray-700 flex flex-wrap gap-1">
-          {(variant as any).attributes.map((a: any, idx: number) => (
+          {(variant as any).attributes.map((a:IVariantAttribute, idx: number) => (
             <span
               key={idx}
               className="bg-gray-100 px-2 py-1 rounded-md text-[11px]"
@@ -92,6 +92,44 @@ export const CartItemComponent: React.FC<{ item: Props }> = ({ item }) => {
     }
     return null;
   };
+ const handleAddToSaveForLater = async () => {
+  try {
+    const normalizedVariantId =  variant?.sku ?? variant?._id;
+
+    const { error, success } = await addToSaveForLater({
+      payload: {
+        productId: String(product._id),
+        variant,
+        variantId: normalizedVariantId,
+        quantity: item.quantity,
+        snapshot: {
+          price: item.productId.basePrice,
+          thumbnail: item.productId.thumbnail,
+          title: item.productId.name,
+        },
+      },
+      userId: userId as string,
+    });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    if (success) {
+      // Wait for the removal to finish
+      await dispatch(
+        removeItemAsync({
+          productId: String(product._id),
+          variantId: normalizedVariantId,
+        }) as any
+      );
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 
   return (
     <article className="w-full  border-b border-gray-200 py-4">
@@ -186,13 +224,13 @@ export const CartItemComponent: React.FC<{ item: Props }> = ({ item }) => {
 
       {/* ===================== ACTIONS (SHARED) ===================== */}
       <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-2">
-        <button className="text-sm hover:underline" onClick={()=> handleRemoveItem(product._id as string, variant?.sku)}>
+        <button className="text-sm hover:underline" onClick={()=> handleRemoveItem(product._id as string,variant?.sku ?? variant?.id)}>
           <DeleteIcon className="w-4 h-4 cursor-pointer" />
         </button>
 
         <button
           className="text-xs px-2 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-95 transition-all"
-          onClick={item.onSaveForLater}
+          onClick={handleAddToSaveForLater}
         >
           Save for later
         </button>

@@ -40,7 +40,7 @@ export type CreateListModalProps = {
 /* -----------------------
    Component
    ----------------------- */
-const CreateListModal: React.FC<CreateListModalProps> = ({ open, setOpen, onCreate, defaultName = "" }) => {
+const CreateListModal: React.FC<CreateListModalProps> = ({ open, setOpen, defaultName = "" }) => {
 
 
   const modalRef = useRef<HTMLDivElement | null>(null);
@@ -64,9 +64,9 @@ const CreateListModal: React.FC<CreateListModalProps> = ({ open, setOpen, onCrea
         if(error) {
           toast.error(error.message)
           return
-        }else if(success) {
+        }else{
            setOpen(false)
-           toast.success(`${values.name} List has been created`)
+           toast.success(`List has been created`)
            return
         }
       } catch (error) {

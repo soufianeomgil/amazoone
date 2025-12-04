@@ -46,7 +46,7 @@ const Header = ({qty,data}: {
 
     return (
         <>
-            <header className="bg-[#131921] text-white">
+            <header className="bg-[#131921] w-full text-white">
                 {/* Top Navigation */}
                 <div className="flex items-center justify-between px-2 py-1">
                     {/* Left Side */}

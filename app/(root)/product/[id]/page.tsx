@@ -28,6 +28,7 @@ import { IUser } from '@/types/actionTypes';
 import { getCurrentUser } from '@/actions/user.actions';
 import BuyPanel from '@/components/shared/BuyPanel';
 import FixedQTY from '@/components/shared/FixedQTY';
+import { getSavedListsAction } from '@/actions/savedList.actions';
 
 
 
@@ -56,8 +57,8 @@ const renderStars = (rating: number = 0, size: 'sm' | 'md' = 'md') => {
 const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
   const productId = (await params).id
   const result = await getSignleProduct({ productId });
-  const {data} = await getCurrentUser()
-
+  const {data} = await getSavedListsAction({page: 1,limit: 10, includeArchived:true})
+   
   // If the API shape differs, ensure a safe product object
   const product: IProduct | null = result?.data?.product ?? null;
 
@@ -157,7 +158,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
               </div>
             </div>
            </div>
-<BuyPanel product={product} user={data?.user as IUser || {}} />
+<BuyPanel product={product} data={data?.lists || []} />
       
         </div>
 

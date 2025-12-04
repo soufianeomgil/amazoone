@@ -4,9 +4,11 @@ import { action } from "@/lib/handlers/action";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors";
 import { CreateListSchema } from "@/lib/zod";
-import SavedList, { ISavedList } from "@/models/savedList.model";
+import { IVariant } from "@/models/product.model";
+import SavedList, { ISavedItem, ISavedList } from "@/models/savedList.model";
 // server/actions/createSavedListAction.ts
 import mongoose from "mongoose";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 
@@ -55,7 +57,7 @@ export  async function createSavedListAction(params: CreateListParams): Promise<
 
     mongoSession.endSession();
 
-    return { success: true, data: { list: created } }
+    return { success: true, data: { list: JSON.parse(JSON.stringify(created))} }
   } catch (err) {
     return handleError(err) as ErrorResponse;
   }
@@ -200,3 +202,222 @@ export async function getSavedListsAction(params: GetListsParams): Promise<Actio
     return handleError(err) as ErrorResponse;
   }
 }
+
+
+
+
+interface AddToListParams {
+  listId: string;
+  productId: string;
+  variantId?: string;
+  variant?: IVariant;
+  thumbnail?: string;
+}
+
+// export async function addItemToSavedListAction(params: AddToListParams): Promise<ActionResponse> {
+//    const validatedResult = await action({params,schema:AddItemToListSchema,authorize:true})
+//    if(validatedResult instanceof Error) {
+//      return handleError(validatedResult) as ErrorResponse;
+//    }
+//   try {
+//     await connectDB()
+
+//     const { listId, productId, variantId, thumbnail, variant } = validatedResult.params!;
+
+//     const list = await SavedList.findById(listId) 
+
+//     if (!list) throw new NotFoundError("List")
+
+//     // Prevent duplicates
+//     const alreadyExists = list.items.some(
+//       (i) =>
+//         String(i.productId) === String(productId) &&
+//         (!variantId || i.variantId === variantId)
+//     );
+
+//     if (alreadyExists) {
+//       return { success: true, message: "Item already in list" };
+//     }
+
+//     list.items.push({
+//       productId: new mongoose.Types.ObjectId(productId),
+//       variantId,
+//       variant,
+//       thumbnail,
+//       addedAt: new Date(),
+//     });
+
+//     await list.save();
+
+//     revalidatePath("/lists"); // or wherever you show the lists
+
+//     return { success: true, message: "Item added to list" };
+//   } catch (err) {
+//     console.error(err);
+//     return handleError(err) as ErrorResponse
+//   }
+// }
+interface paramsProps  {
+   listId: string;
+  variant: IVariant;
+  productId: string;
+  variantId?: string | null;
+  priceSnapshot?: number;
+  thumbnail?: string;
+  note?: string;
+}
+// export async function addItemToListAction(params:paramsProps): Promise<ActionResponse<{list: ISavedList}>> {
+//   const validatedResult = await action({params, authorize: true})
+//   if(validatedResult  instanceof Error) {
+//     return handleError(validatedResult) as ErrorResponse
+//   }
+
+//   // come back to validation
+//   const userId = validatedResult.session?.user.id
+//   if(!userId) throw new UnAuthorizedError("User")
+//   try {
+//     await connectDB()
+    
+//     const { listId,variant, variantId, priceSnapshot, thumbnail, note, productId } = validatedResult.params!
+//     const list = await SavedList.findOne({ _id: listId, userId }) 
+
+//     if (!list) throw new NotFoundError("List")
+
+//     await list.addItem({
+//       productId,
+//       variantId,
+//       priceSnapshot,
+//       variant,
+//       thumbnail,
+//       note,
+//     });
+
+//     revalidatePath("/profile/lists");
+//     return { success: true, data: {list: JSON.parse(JSON.stringify(list))}};
+
+//   } catch (err) {
+//     console.error("ADD ITEM ERROR:", err);
+//     return handleError(err) as ErrorResponse;
+//   }
+// }
+type ParamsProps = {
+  listId: string;
+  productId: string;
+  variant?: IVariant | null;
+  variantId?: string | null;
+  priceSnapshot?: number;
+  thumbnail?: string;
+  note?: string;
+};
+
+
+
+
+// server/action (updated)
+export async function addItemToListAction(params: ParamsProps): Promise<
+  ActionResponse<{ list: ISavedList; added: boolean; item?: ISavedItem }>
+> {
+  // validate & auth
+  const validatedResult = await action({ params, authorize: true });
+  if (validatedResult instanceof Error) {
+    return handleError(validatedResult) as ErrorResponse;
+  }
+
+  const userId = validatedResult.session?.user.id;
+  if (!userId) throw new UnAuthorizedError("User");
+
+  try {
+    await connectDB();
+
+    const {
+      listId,
+      variant,
+      variantId,
+      priceSnapshot,
+      thumbnail,
+      note,
+      productId,
+    } = validatedResult.params as ParamsProps;
+
+    // load list as full document (so methods available)
+    const list = await SavedList.findOne({ _id: listId, userId }).exec();
+    if (!list) throw new NotFoundError("List");
+
+    // matching logic (same as schema)
+    const pid = String(productId);
+
+    const existingIndex = list.items.findIndex((it: ISavedItem) => {
+      const sameProduct = String(it.productId) === pid;
+      if (!sameProduct) return false;
+      if (variantId == null) return true;
+      if (it.variantId && String(it.variantId) === String(variantId)) return true;
+      if (it.variant && (it.variant as any)._id && String((it.variant as any)._id) === String(variantId)) return true;
+      if (it.variant && (it.variant as any).sku && String((it.variant as any).sku) === String(variantId)) return true;
+      return false;
+    });
+
+    // Populate helper - choose which product fields to include
+    const populateOptions = { path: "items.productId", select: "_id name basePrice thumbnail brand slug" };
+
+    if (existingIndex !== -1) {
+      // Populate the list so the existing item has product info
+      await list.populate(populateOptions);
+
+      const existingItem = list.items[existingIndex];
+
+      return {
+        success: true,
+        data: {
+          list: JSON.parse(JSON.stringify(list)),
+          added: false,
+          item: JSON.parse(JSON.stringify(existingItem)),
+        },
+      };
+    }
+
+    // Not present => add item (uses instance method which saves)
+    await list.addItem({
+      productId,
+      variantId: variantId ?? null,
+      variant: variant ?? undefined,
+      priceSnapshot,
+      thumbnail,
+      note,
+    });
+
+    // reload the list and populate the product references
+    const updated = await SavedList.findById(list._id).populate(populateOptions).exec();
+
+    // find the newly inserted item (should be first because addItem unshifts)
+    const updatedDoc = updated ?? list;
+    const newItem = (updatedDoc.items || []).find((it: ISavedItem) => {
+      const sameProduct = String(it.productId && (it.productId as any)._id ? (it.productId as any)._id : it.productId) === pid;
+      if (!sameProduct) return false;
+      if (variantId == null) return true;
+      if (it.variantId && String(it.variantId) === String(variantId)) return true;
+      if (it.variant && (it.variant as any)._id && String((it.variant as any)._id) === String(variantId)) return true;
+      if (it.variant && (it.variant as any).sku && String((it.variant as any).sku) === String(variantId)) return true;
+      return false;
+    }) as ISavedItem | undefined;
+
+    // revalidate client-side path
+    try {
+      revalidatePath("/profile/lists");
+    } catch (e) {
+      console.warn("revalidatePath failed", e);
+    }
+
+    return {
+      success: true,
+      data: {
+        list: JSON.parse(JSON.stringify(updatedDoc)),
+        added: true,
+        item: newItem ? JSON.parse(JSON.stringify(newItem)) : undefined,
+      },
+    };
+  } catch (err) {
+    console.error("ADD ITEM ERROR:", err);
+    return handleError(err) as ErrorResponse;
+  }
+}
+

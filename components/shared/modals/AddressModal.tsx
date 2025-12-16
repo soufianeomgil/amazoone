@@ -108,7 +108,11 @@ export function AddressModal({
               })}
 
               <div
-                onClick={() => setOpenAddressModal(true)}
+                onClick={() => {
+                 
+                  setOpenAddressModal(true)
+                  
+                }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setOpenAddressModal(true)}

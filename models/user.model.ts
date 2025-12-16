@@ -25,7 +25,7 @@ interface Address {
   city: string;
   stateOrRegion: string;
   postalCode: string;
-  country: string;
+ 
   phoneNumber?: string;
   deliveryInstructions?: string;
   isDefault: boolean;

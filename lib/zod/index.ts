@@ -249,10 +249,59 @@ export const ToggleWishlistSchema  = z.object({
 
 /**
  * Zod schema for adding/editing an address.
- * - Defaults country to "Morocco"
+ 
  * - Validates Moroccan phone numbers: accepts +212... or 0... with leading 5/6/7
  * - Validates Moroccan postal codes (5 digits)
  */
+export const VariantAttributeSchema = z.object({
+  name: z.string(),
+  value: z.string(),
+});
+export const VariantSchema = z.object({
+  _id: z.string().optional(),
+  sku: z.string().optional(),
+  priceModifier: z.number(),
+  stock: z.number().optional(),
+  attributes: z.array(VariantAttributeSchema).optional(),
+  images: z
+    .array(
+      z.object({
+        url: z.string().optional(),
+        preview: z.string().optional(),
+        public_id: z.string().optional(),
+      })
+    )
+    .optional(),
+});
+export const SaveForLaterSnapshotSchema = z.object({
+  price: z.number(),
+  thumbnail: z.string(),
+  title: z.string(),
+  sku: z.string().optional()
+});
+export const CancelOrderSchema = z.object({
+  orderId: z.string().min(1, {message: "Order ID is required"}),
+  reason: z.string().optional()
+})
+export const SaveForLaterPayloadSchema = z.object({
+  productId: z.string().min(1, "productId is required"),
+
+  variantId: z.string().nullable().optional(),
+
+  variant: VariantSchema.nullable(),
+
+  quantity: z.number().int().positive().optional(),
+
+  note: z.string().optional(),
+
+  snapshot: SaveForLaterSnapshotSchema.optional(),
+});
+
+// ----- Final params schema -----
+export const AddToSaveForLaterSchema = z.object({
+  payload: SaveForLaterPayloadSchema,
+  userId: z.string().optional(),
+});
 export const AddAddressSchema = z.object({
   name: z
     .string()
@@ -284,8 +333,7 @@ export const AddAddressSchema = z.object({
     .string()
     .regex(/^\d{5}$/, { message: "Postal code must be 5 digits" }),
 
-  // Default the country to Morocco; keep as literal if you never want it changed
-  country: z.string().default("Morocco"),
+ 
   state: z.string().min(1, {message: "state feild is required"}),
   // Phone: accept +2125XXXXXXXX or 0[5|6|7]XXXXXXXX (10 digits total after leading 0)
   phone: z
@@ -304,6 +352,12 @@ export const AddAddressSchema = z.object({
     .optional()
     .transform((v) => (typeof v === "string" ? v.trim() : v)),
 });
+export const MoveToCartSchema = z.object({
+ id: z.string().min(1, { message: "saved item Id is required" }),
+})
+export const RemoveFromSaveSchema = z.object({
+ id: z.string().min(1, { message: "Id is required" }),
+})
 export const EditAddressSchema = AddAddressSchema.extend({
   id: z.string().min(1, { message: "Address Id is required" }),
 });
@@ -313,4 +367,52 @@ export const CreateListSchema = z.object({
   isDefault: z.boolean().optional().default(false),
 });
 
+
+// export const writeReviewSchema = z.object({
+//   rating: z.number().min(1, "Please select a rating"),
+//   headline: z
+//     .string()
+//     .min(5, "Title is too short")
+//     .max(120, "Title is too long"),
+//   comment: z
+//     .string()
+//     .min(20, "Review must be at least 20 characters")
+//     .max(5000),
+//   recommend: z.boolean(),
+//   variantSnapshot: z.any().optional(),
+// })
+
+// export type WriteReviewFormValues = z.infer<typeof writeReviewSchema>
+const ReviewImageSchema = z.object({
+  url: z.string().url(),
+  preview: z.string().url().optional(),
+  public_id: z.string().min(1),
+  type: z.enum(["image", "video"]).default("image"),
+});
+
+const VariantSnapshotSchema = z.object({
+  variantId: z.string().optional(),
+  attributes: z.array(
+    z.object({
+      name: z.string(),
+      value: z.string(),
+    })
+  ).optional(),
+});
+
+export const CreateReviewSchema = z.object({
+  productId: z.string().min(1, {message: "product ID is required"}),
+  rating: z.number().min(1).max(5),
+  headline: z.string().min(3, {message: "review headline is required"}).max(120),
+  comment: z.string().min(10, {message: "review body must be at least 10 characters long"}).max(5000),
+
+  images: z.array(ReviewImageSchema).max(5, {message: "review images should not exeed 5"}).optional(),
+
+  isRecommendedByBuyer: z.boolean().optional().default(false),
+  variantSnapshot: VariantSnapshotSchema.optional(),
+});
+
+
+
+export type CreateReviewParams = z.infer<typeof CreateReviewSchema>;
 export type AddAddressInput = z.infer<typeof AddAddressSchema>;

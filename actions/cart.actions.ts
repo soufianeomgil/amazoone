@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import connectDB from '@/database/db';
 import { action } from '@/lib/handlers/action';
 import handleError from '@/lib/handlers/error';
-import { Cart, ICart } from '@/models/cart.model';
+import { Cart, ICart, ICartItem } from '@/models/cart.model';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
 
@@ -80,52 +80,52 @@ export async function addToCart({ guestId, item }: AddToCartParams): Promise<Act
   }
 }
 
-export async function removeFromCart({
-  guestId,
-  productId,
-  variantId,
-}: {
-  guestId?: string | null;
-  productId: string;
-  variantId?: string | null;
-}): Promise<ActionResponse> {
-  try {
-    const session = await auth();
-    const userId = session?.user?.id ?? null;
-    await connectDB();
+// export async function removeFromCart({
+//   guestId,
+//   productId,
+//   variantId,
+// }: {
+//   guestId?: string | null;
+//   productId: string;
+//   variantId?: string | null;
+// }): Promise<ActionResponse> {
+//   try {
+//     const session = await auth();
+//     const userId = session?.user?.id ?? null;
+//     await connectDB();
 
-    let cart;
+//     let cart;
 
-    if (userId) {
-      cart = await Cart.findOne({ userId });
-    } else if (guestId) {
-      cart = await Cart.findOne({ guestId });
-    }
+//     if (userId) {
+//       cart = await Cart.findOne({ userId });
+//     } else if (guestId) {
+//       cart = await Cart.findOne({ guestId });
+//     }
 
-    if (!cart) throw new Error('Cart not found');
+//     if (!cart) throw new Error('Cart not found');
 
-    const normalizedVariantId = variantId ?? null;
+//     const normalizedVariantId = variantId ?? null;
 
-    cart.items = cart.items.filter(
-      (item: any) =>
-        !(
-          item.productId.toString() === productId &&
-          (item.variantId ?? null) === normalizedVariantId
-        )
-    );
+//     cart.items = cart.items.filter(
+//       (item: ICartItem) =>
+//         !(
+//           item.productId.toString() === productId &&
+//           (item.variant._id) === normalizedVariantId
+//         )
+//     );
 
-    await cart.save();
+//     await cart.save();
 
-    try {
-      revalidatePath('/cart');
-      revalidatePath('/');
-    } catch (e) {}
+//     try {
+//       revalidatePath('/cart');
+//       revalidatePath('/');
+//     } catch (e) {}
 
-    return { success: true, cart: JSON.parse(JSON.stringify(cart)), message: "product has been removed from your cart" };
-  } catch (error) {
-    return handleError(error) as ErrorResponse;
-  }
-}
+//     return { success: true, cart: JSON.parse(JSON.stringify(cart)), message: "product has been removed from your cart" };
+//   } catch (error) {
+//     return handleError(error) as ErrorResponse;
+//   }
+// }
 
 // export async function updateCartItemQuantity({
 //   guestId,
@@ -206,10 +206,10 @@ export async function updateCartItemQuantity({
     const normalizedVariantId = variantId && String(variantId).trim() !== "" ? String(variantId) : null;
 
     // find item robustly — productId / variantId may be stored as ObjectId or string
-    const item = cart.items.find((i: any) => {
+    const item = cart.items.find((i: ICartItem) => {
       const storedProductId = String(i.productId);
       // stored variant may be undefined/null/ObjectId/string
-      const storedVariant = i.variantId === undefined || i.variantId === null ? null : String(i.variantId);
+      const storedVariant = i.variant._id === undefined || i.variant._id === null ? null : String(i.variant._id);
       return storedProductId === String(productId) && storedVariant === normalizedVariantId;
     });
 
@@ -231,6 +231,54 @@ export async function updateCartItemQuantity({
   }
 }
 
+export async function removeFromCart({
+  guestId,
+  productId,
+  variantId,
+}: {
+  guestId?: string | null;
+  productId: string;
+  variantId?: string | null;
+}): Promise<ActionResponse> {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id ?? null;
+    await connectDB();
+
+    let cart;
+
+    if (userId) {
+      cart = await Cart.findOne({ userId });
+    } else if (guestId) {
+      cart = await Cart.findOne({ guestId });
+    }
+
+    if (!cart) throw new Error('Cart not found');
+
+    const normalizedVariantId = variantId ?? null;
+
+    cart.items = cart.items.filter((item: ICartItem) => {
+      const itemVariantId = String(item.variant?._id) ?? null; // safely handle missing variant
+      return !(item.productId.toString() === productId && itemVariantId === normalizedVariantId);
+    });
+
+    await cart.save();
+
+    // Revalidate Next.js paths if needed
+    try {
+      revalidatePath('/cart');
+      revalidatePath('/');
+    } catch (e) {}
+
+    return {
+      success: true,
+      cart: JSON.parse(JSON.stringify(cart)),
+      message: "Product has been removed from your cart",
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
 
 export const syncCarts = async (guestId: string | null): Promise<ActionResponse<{ mergedCart: any }>> => {
   const session = await auth();

@@ -124,7 +124,7 @@ export const addItemAsync = createAsyncThunk(
 export const removeItemAsync = createAsyncThunk(
   'cart/removeItem',
   async (
-    payload: { productId: string; variantId?: string | null },
+    payload: { productId: string; variantId?: string | null | undefined },
     { getState }
   ) => {
     const state = getState() as { cart: CartState };

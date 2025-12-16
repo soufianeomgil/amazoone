@@ -43,7 +43,7 @@ export default async function addAddressAction(
     addressLine2,
     state,
     city,
-    country,
+   
     DeliveryInstructions, // prefer camelCase from schema
     postalCode,
     isDefault = false,
@@ -57,7 +57,7 @@ export default async function addAddressAction(
     addressLine2: addressLine2 ? String(addressLine2).trim() : "",
     state: String(state).trim(),
     city: String(city).trim(),
-    country: String(country).trim(),
+   
     DeliveryInstructions: DeliveryInstructions ? String(DeliveryInstructions).trim() : "",
     postalCode: String(postalCode).trim(),
     isDefault: !!isDefault,
@@ -108,7 +108,7 @@ export default async function addAddressAction(
             addressLine2: clean.addressLine2,
             state: clean.state,
             city: clean.city,
-            country: clean.country,
+           
             DeliveryInstructions: clean.DeliveryInstructions,
             isDefault: clean.isDefault,
             zipCode: clean.postalCode,
@@ -206,7 +206,7 @@ export async function editAddressAction(params: EditAddressParams): Promise<Acti
     id,
     name,
     city,
-    country,
+    
     phone,
     state,
     addressLine1,
@@ -220,7 +220,7 @@ export async function editAddressAction(params: EditAddressParams): Promise<Acti
   const clean = {
     name: typeof name === "string" ? name.trim() : undefined,
     city: typeof city === "string" ? city.trim() : undefined,
-    country: typeof country === "string" ? country.trim() : undefined,
+   
     phone: typeof phone === "string" ? phone.trim() : undefined,
     state: typeof state === "string" ? state.trim() : undefined,
     addressLine1: typeof addressLine1 === "string" ? addressLine1.trim() : undefined,
@@ -259,7 +259,7 @@ export async function editAddressAction(params: EditAddressParams): Promise<Acti
       // Apply updates only if provided
       if (typeof clean.name !== "undefined") address.name = clean.name;
       if (typeof clean.city !== "undefined") address.city = clean.city;
-      if (typeof clean.country !== "undefined") address.country = clean.country;
+     
       if (typeof clean.phone !== "undefined") address.phone = clean.phone; // keep as string
       if (typeof clean.state !== "undefined") address.state = clean.state;
       if (typeof clean.postalCode !== "undefined") address.postalCode = clean.postalCode;

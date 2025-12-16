@@ -243,7 +243,7 @@ const payload = {
                       const unitPrice = getUnitPrice(item);
                       const image = getImage(item);
                       return (
-                        <div key={key} className="flex flex-col sm:flex-row gap-3">
+                        <div key={key} className="flex max-sm:shadow-lg hover:shadow-lg hover:rounded-2xl p-2.5 flex-col sm:flex-row gap-3">
                           <img src={image} alt={name} className="w-24 h-24 object-contain self-center sm:self-start mr-4 mb-0" />
                           <div className="grow">
                             <h4 className="font-semibold text-gray-800">{name}</h4>

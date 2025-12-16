@@ -3,110 +3,131 @@ import connectDB from "@/database/db";
 import { action } from "@/lib/handlers/action";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors";
+import { CreateReviewParams, CreateReviewSchema } from "@/lib/zod";
 import Order from "@/models/order.model";
-import { IReview, Product } from "@/models/product.model";
+import {  Product } from "@/models/product.model";
+import Review, { IReview } from "@/models/review.model";
 // server/actions/createProductReviewAction.ts
-import mongoose from "mongoose";
-import { z } from "zod";
 
-const CreateReviewSchema = z.object({
-  productId: z.string().min(1),
-  rating: z.number().min(1).max(5),
-  comment: z.string().min(1).max(2000).optional().default(""),
-  // optional: if client passes orderId to help verification
-  orderId: z.string().optional(),
-});
 
-export type CreateReviewParams = z.infer<typeof CreateReviewSchema>;
-
-export default async function createProductReviewAction(
+    // 3️⃣ Verified purchase check
+    export default async function createProductReviewAction(
   params: CreateReviewParams
 ): Promise<ActionResponse<{ review: IReview; verifiedPurchase: boolean }>> {
-  const validated = await action({ params, schema: CreateReviewSchema, authorize: true });
-  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
+  const validated = await action({
+    params,
+    schema: CreateReviewSchema,
+    authorize: true,
+  });
+
+  if (validated instanceof Error)
+    return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
-  if (!session?.user?.id) throw new UnAuthorizedError("")
+  if (!session?.user?.id) throw new UnAuthorizedError("");
 
-  const { productId, rating, comment, orderId } = validated.params as CreateReviewParams;
+  const {
+    productId,
+    rating,
+    headline,
+    comment,
+    images = [],
+    isRecommendedByBuyer,
+    variantSnapshot,
+  } = validated.params!;
 
   try {
     await connectDB();
 
-    const mongoSession = await mongoose.startSession();
-    let createdReview: IReview | null = null;
-    let verifiedPurchase = false;
+    // 1️⃣ Ensure product exists
+    const product = await Product.findById(productId);
+    if (!product) throw new NotFoundError("Product");
 
-    await mongoSession.withTransaction(async () => {
-      // 1) load product
-      const product = await Product.findById(productId).session(mongoSession);
-      if (!product) throw new NotFoundError("Product");
-
-      // 2) prevent duplicate reviews by same user
-      const already = (product.reviews || []).some((r: IReview) => String(r.user) === String(session.user.id));
-      if (already) {
-        throw new Error("You have already submitted a review for this product");
-      }
-
-      // 3) check verified purchase (best-effort)
-      try {
-        // If Order model exists, try to find an order by this user that contains the product
-        if (typeof Order !== "undefined" && Order) {
-          const statusAccepted = ["DELIVERED", "COMPLETED", "PAID", "SHIPPED", "FULFILLED"];
-          const orderQuery: any = {
-            userId: session.user.id,
-            "items.productId": product._id,
-            status: { $in: statusAccepted },
-          };
-
-          // if client provided orderId, prefer checking that specific order
-          if (orderId) {
-            orderQuery._id = orderId;
-          }
-
-          const found = await Order.findOne(orderQuery).session(mongoSession)
-          verifiedPurchase = !!found;
-        }
-      } catch (err) {
-        // if any error occurs during order lookup, just treat as not verified (do not fail the review)
-        verifiedPurchase = false;
-      }
-
-      // 4) create review object and push
-      const reviewObj = {
-        user: session.user.id,
-        name: session.user.name ?? undefined, // if you store user's name in session
-        rating,
-        comment: (comment || "").trim(),
-        createdAt: new Date(),
-      };
-
-      product.reviews = product.reviews || [];
-      // @ts-ignore
-      product.reviews.push(reviewObj);
-
-      // update reviewCount & rating (incremental average)
-      const prevCount = product.reviewCount ?? 0;
-      const prevAvg = product.rating ?? 0;
-      const newCount = prevCount + 1;
-      const newAvg = (prevAvg * prevCount + rating) / newCount;
-
-      product.reviewCount = newCount;
-      product.rating = Math.round((newAvg + Number.EPSILON) * 100) / 100; // round to 2 decimals
-
-      await product.save({ session: mongoSession });
-
-      // return last pushed review (the one we just added)
-      createdReview = product.reviews[product.reviews.length - 1];
+    // 2️⃣ Prevent duplicate review
+    const existing = await Review.findOne({
+      product: productId,
+      user: session.user.id,
     });
 
-    mongoSession.endSession();
+    if (existing) {
+      throw new Error("You have already reviewed this product");
+    }
+
+    // 3️⃣ Verified purchase check
+   
+    // 4️⃣ Create review
+   // 3️⃣ Verified purchase check (SERVER-ONLY)
+let verifiedPurchase = false;
+let verifiedOrderId: string | undefined;
+
+if (typeof Order !== "undefined") {
+  const statusAccepted = [
+    "DELIVERED",
+    "COMPLETED",
+    "PAID",
+    "SHIPPED",
+    "FULFILLED",
+  ];
+
+  const order = await Order.findOne({
+    userId: session.user.id,
+    "items.productId": product._id,
+    status: { $in: statusAccepted },
+  }).sort({ createdAt: -1 }); // most recent purchase
+
+  if (order) {
+    verifiedPurchase = true;
+    verifiedOrderId = String((order as any)._id);
+  }
+}
+  
+   // 🔐 Final image sanitization (server-side)
+const safeImages = images.map(img => ({
+  url: img.url,
+  preview: img.preview,
+  public_id: img.public_id,
+  type: img.type ?? "image",
+}));
+
+
+    
+  
+    // 4️⃣ Create review
+    const review = await Review.create({
+      product: productId,
+      user: session.user.id,
+      userName: session.user.name ?? "Anonymous",
+      rating,
+      headline,
+      images: safeImages,
+      comment,
+      orderId: verifiedOrderId,
+      isVerifiedPurchase: verifiedPurchase,
+      isRecommendedByBuyer,
+      variantSnapshot,
+      status: verifiedPurchase ? "APPROVED" : "PENDING",
+    });
+
+    // 5️⃣ Update product aggregates
+    const newCount = (product.reviewCount ?? 0) + 1;
+    const newAvg =
+      ((product.rating ?? 0) * (newCount - 1) + rating) / newCount;
+
+    product.reviewCount = newCount;
+    product.rating = Math.round(newAvg * 100) / 100;
+
+    await product.save();
 
     return {
       success: true,
-      data: { review: createdReview, verifiedPurchase },
-    } as ActionResponse<{ review: any; verifiedPurchase: boolean }>;
+      data: {
+        review: JSON.parse(JSON.stringify(review)),
+       
+        verifiedPurchase,
+      },
+    }
   } catch (err) {
     return handleError(err) as ErrorResponse;
   }
 }
+

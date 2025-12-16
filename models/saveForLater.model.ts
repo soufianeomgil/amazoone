@@ -19,6 +19,7 @@ export interface ISaveForLaterSnapshot {
 }
 
 export interface ISaveForLaterDoc {
+  _id:string | Types.ObjectId;
   userId: Types.ObjectId;
   productId: Types.ObjectId;
   variant: IVariant;
@@ -33,8 +34,8 @@ export interface ISaveForLaterDoc {
   updatedAt?: Date;
 }
 
-export interface ISaveForLaterDocument extends ISaveForLaterDoc, Document {}
-export interface ISaveForLaterModel extends Model<ISaveForLaterDocument> {
+// export interface ISaveForLaterDocument extends ISaveForLaterDoc {}
+export interface ISaveForLaterModel extends Model<ISaveForLaterDoc> {
   addOrUpdate(opts: {
     userId: Types.ObjectId | string;
     productId: Types.ObjectId | string;
@@ -43,11 +44,11 @@ export interface ISaveForLaterModel extends Model<ISaveForLaterDocument> {
     quantity?: number;
     note?: string;
     snapshot?: ISaveForLaterSnapshot;
-  }): Promise<ISaveForLaterDocument>;
+  }): Promise<ISaveForLaterDoc>;
 
-  removeItem(opts: { userId: Types.ObjectId | string; id: Types.ObjectId | string }): Promise<ISaveForLaterDocument | null>;
+  removeItem(opts: { userId: Types.ObjectId | string; id: Types.ObjectId | string }): Promise<ISaveForLaterDoc | null>;
 
-  listForUser(opts: { userId: Types.ObjectId | string; page?: number; perPage?: number }): Promise<ISaveForLaterDocument[]>;
+  listForUser(opts: { userId: Types.ObjectId | string; page?: number; perPage?: number }): Promise<ISaveForLaterDoc[]>;
 
   moveToCart(opts: { userId: Types.ObjectId | string; id: Types.ObjectId | string; cartAddFn: (params: { userId: string; productId: string; variantId?: string | null; quantity?: number }) => Promise<any> }): Promise<{ moved: boolean; reason?: string }>;
 }
@@ -88,36 +89,24 @@ const SnapshotSchema = new Schema<ISaveForLaterSnapshot>(
     public_id: { type: String },
   },
   default: {},}],})
-const SaveForLaterSchema = new Schema<ISaveForLaterDocument>(
+const SaveForLaterSchema = new Schema<ISaveForLaterDoc>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true},
     variantId: { type: Schema.Types.ObjectId, ref: "Variant", required: false, default: null },
      variant: { type: VariantSchema, default: null },
     quantity: { type: Number, required: true, default: 1, min: 1 },
     note: { type: String },
     addedAt: { type: Date, default: () => new Date() },
     snapshot: { type: SnapshotSchema, default: {} },
-    active: { type: Boolean, default: true, index: true },
+    active: { type: Boolean, default: true },
   },
   {
     timestamps: true,
-    versionKey: false,
   }
 );
 
-/**
- * Indexes
- * - Unique (user+product+variant) for active entries only (soft-unique)
- * - compound indexes support common queries
- */
-SaveForLaterSchema.index({ userId: 1, productId: 1, variantId: 1 }, { unique: true, partialFilterExpression: { active: true } });
-SaveForLaterSchema.index({ userId: 1, addedAt: -1 });
-SaveForLaterSchema.index({ productId: 1 });
 
-/**
- * Statics
- */
 
 // Add or update saved item — upsert, prevent duplicates, and update snapshot/quantity
 SaveForLaterSchema.statics.addOrUpdate = async function ({
@@ -140,8 +129,8 @@ SaveForLaterSchema.statics.addOrUpdate = async function ({
   const filter = {
     userId: typeof userId === "string" ? new Types.ObjectId(userId) : userId,
     productId: typeof productId === "string" ? new Types.ObjectId(productId) : productId,
-   //  variantId: variantId ? (typeof variantId === "string" ? new Types.ObjectId(variantId) : variantId) : null,
-    variantId,
+     variantId: variantId ? (typeof variantId === "string" ? new Types.ObjectId(variantId) : variantId) : null,
+    // variantId,
     active: true,
   };
 
@@ -187,10 +176,8 @@ SaveForLaterSchema.statics.listForUser = async function ({ userId, page = 0, per
     .skip(skip)
     .limit(perPage)
     .populate([
-      { path: "productId", select: "name basePrice thumbnail images status" },
-      { path: "variantId", select: "sku priceModifier stock attributes" },
+      { path: "productId", select: "name basePrice brand thumbnail images status" },
     ])
-    .lean()
     .exec();
   return docs;
 };
@@ -249,5 +236,5 @@ SaveForLaterSchema.pre("save", function (next) {
 /**
  * Export model
  */
-export const SaveForLaterModel = mongoose.models.SaveForLater || mongoose.model<ISaveForLaterDocument, ISaveForLaterModel>("SaveForLater", SaveForLaterSchema);
+const SaveForLaterModel = mongoose.models.SaveForLater || mongoose.model("SaveForLater", SaveForLaterSchema);
 export default SaveForLaterModel;

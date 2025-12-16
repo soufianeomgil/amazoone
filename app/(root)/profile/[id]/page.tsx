@@ -4,7 +4,9 @@ import { ROUTES } from '@/constants/routes';
 import { FilterIcon, Heart, UserCircleIcon, XIcon } from 'lucide-react';
 import Link from 'next/link';
 import FilterSidebar from '@/components/shared/FilterSidebar';
-import { MainCard } from "@/components/cards/MainCard";
+import MainCard from "@/components/cards/MainCard";
+import { IProduct } from "@/models/product.model";
+
 
 interface AccountCardProps {
     icon: React.ReactNode;
@@ -141,7 +143,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ icon, title, description, hre
 
 
 
-const Profile: React.FC = () => {
+const page = () => {
      
     return (
         <div className="bg-white">
@@ -165,7 +167,7 @@ const Profile: React.FC = () => {
                     {/* <FilterSidebar /> */}
                          <div className="flex  overflow-x-auto space-x-6 pb-4">
                          {browsingHistoryItems.map(item => (
-                            <MainCard key={item.id} {...item} />
+                            <MainCard key={item.id} product={{} as IProduct} />
                         ))}
                     </div>
                   
@@ -212,4 +214,4 @@ const Profile: React.FC = () => {
     );
 };
 
-export default Profile;
+export default page

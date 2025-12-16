@@ -1,41 +1,36 @@
-"use client"
-import { IProduct } from '@/models/product.model'
-import { IUser } from '@/types/actionTypes'
-import Link from 'next/link'
-import React, { useState } from 'react'
-import { Button } from '../ui/button'
-import { Minus, Plus, ShoppingBag, ShoppingCart } from 'lucide-react'
-import { ModePaiment } from './ModePaiment'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/lib/store'
-import { useRouter } from 'next/navigation'
-import { addItemAsync } from '@/lib/store/cartSlice'
-import { Spinner } from '../ui/spinner'
-import FixedQTY from './FixedQTY'
-import AddToListButton from './clientBtns/ListBtn'
-import { ISavedList } from '@/models/savedList.model'
+"use client";
 
-const BuyPanel = ({product,data}: {product: IProduct, data:ISavedList[]}) => {
-  const items = [
-     {
-       img: "https://www.marjanemall.ma/images/auth-white.png",
-       name: `Produits 100% authentiques`
-     },
-      {
-       img: "https://www.marjanemall.ma/images/return-white.png",
-       name: "Satisfait ou remboursé"
-     },
-      {
-       img: "https://www.marjanemall.ma/images/morocco-white.png",
-       name: "Livraison partout au Maroc"
-     },
-      {
-       img: "https://www.marjanemall.ma/images/globe-white.png",
-       name: "Offre nationale et internationale"
-     },
-  ]
-    const variants = product?.variants ?? [];
+import React, { useState } from "react";
+import { Minus, Plus, ShoppingCart, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/lib/store";
+import { addItemAsync, removeItemAsync, updateQuantityAsync } from "@/lib/store/cartSlice";
+import { Button } from "../ui/button";
+import { Spinner } from "../ui/spinner";
+import CartSidebar from "./CartSidebar";
+import FixedQTY from "./FixedQTY";
+import AddToListButton from "./clientBtns/ListBtn";
+import { IProduct, IVariant } from "@/models/product.model";
+import { ISavedList } from "@/models/savedList.model";
+import { LocationIcon } from "./icons";
+import AmazonPrice from "./AmazonPrice";
 
+type LocalCartItem = {
+  _id: string;
+  productId: string;
+  title: string;
+  price: number;
+  listPrice?: number | null;
+  variant: IVariant;
+  quantity: number;
+  thumbnail?: { url?: string };
+  sku?: string;
+};
+
+const BuyPanel = ({ product, data }: { product: IProduct; data: ISavedList[] }) => {
+  const variants = product?.variants ?? [];
   const selectedVariantIndex = useSelector(
     (state: RootState) => state.product.selectedVariant[product?._id as string]
   );
@@ -44,133 +39,162 @@ const BuyPanel = ({product,data}: {product: IProduct, data:ISavedList[]}) => {
   const defaultStock = variants.length ? variants[0].stock ?? 0 : product?.stock ?? 0;
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [addedItems, setAddedItems] = useState<LocalCartItem[]>([]);
 
-  const currentVariantStock = defaultStock;
   const dispatch = useDispatch();
   const router = useRouter();
-    const handleAddToCart = async () => {
-      try {
-        setLoading(true);
-  
-        const variant = selectedVariant ?? null;
-  
-        const payload = {
-          productId: product?._id as string,
-          brand: product?.brand as string,
-          name: product?.name as string,
-          imageUrl: product?.thumbnail ?? { url: product?.images?.[0]?.url ?? "" },
-          basePrice: product?.basePrice as number,
-          quantity: quantity,
-          _id: `${product?._id ?? ""}:${variant?.sku ?? ""}`,
-          variantId: variant?.sku ?? undefined,
-          variant: variant ?? undefined,
-        };
-  
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await dispatch(addItemAsync(payload) as any);
-        router.refresh?.();
-      } catch (err) {
-        console.error("Add to cart failed:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const currentVariantStock = defaultStock;
+
+  const handleAddToCart = async () => {
+    try {
+      setLoading(true);
+
+      const variant = selectedVariant ?? null;
+
+      const payload = {
+        productId: String(product?._id),
+        brand: product?.brand ?? "",
+        name: product?.name ?? "",
+        imageUrl: product?.thumbnail,
+        basePrice: Number(product?.basePrice ?? 0),
+        quantity,
+        variantId: variant?._id ?? null,
+        variant,
+        _id: `${String(product?._id)}:${variant?._id ?? ""}`,
+      };
+
+      await dispatch(addItemAsync(payload) as any);
+
+      setAddedItems((prev) => [
+        {
+          _id: payload._id,
+          productId: payload.productId,
+          title: payload.name,
+          price: payload.basePrice,
+          variant: payload.variant,
+          quantity: payload.quantity,
+          thumbnail: payload.imageUrl,
+        },
+        ...prev,
+      ]);
+
+      setOpen(true);
+      router.refresh?.();
+    } finally {
+      setLoading(false);
+    }
+  };
+/// We apologize but this account has not met the minimum eligibility requirements to write a review. If you would like to learn more about our eligibility requirements, please see our community guidelines.
   return (
     <>
- <div className='bg-white lg:grid hidden shadow-2xl h-fit rounded-lg py-3 lg:col-span-3 '> 
-       <div className="flex flex-col items-center justify-center gap-3">
-            <h4 className='font-bold text-xl  text-[hsl(178,100%,34%)] '>
-                £ {product.basePrice}
-            </h4>
-            <div className='flex px-2 border-b mx-auto pb-3 text-center justify-center w-full border-gray-300 items-center gap-3'>
-    
-                 <p className='line-through font-medium text-sm text-gray-500 '>
-                   £ 58.00
-                 </p>
-                  <div className='rounded-md  bg-[rgb(212,0,84)] font-medium text-xs py-1 text-white px-3 '>
-                      -19%
-                  </div>
-            </div>
-            <div className='border-b  px-2 pb-3 border-gray-300 flex w-full gap-3 flex-col'>
-                   <div className='flex  justify-between w-full  items-center gap-3'>
+      {/* DESKTOP BUY PANEL */}
+      <aside className="hidden lg:block lg:col-span-3">
+        <div className=" rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden">
           
-                 <p className='text-gray-800 font-bold text-sm '>
-                   Livraison à domicile
-                 </p>
-                  <p className='underline text-[hsl(178,100%,34%)] font-medium text-xs '>
-                      <Link href={"/"}>
-                         Details
-                      </Link>
-                  </p>
+          {/* PRICE */}
+          <div className="p-5 border-b flex items-center gap-4.5 border-gray-100 bg-gradient-to-br from-gray-50 to-white">
+            {/* <p className="text-3xl font-bold text-[hsl(178,100%,34%)]">
+              ${product.basePrice}
+            </p> */}
+            <div>
+ <AmazonPrice price={29.99} />
             </div>
-            <div className='flex  justify-between w-full  items-center gap-3'>
-          
-                 <p className='text-gray-800 text-xs font-light '>
-                   Frais de livraison
-                 </p>
-                  <p className='text-gray-700 font-medium text-xs '>
-                       £ 15.00
-                  </p>
-            </div>
-            </div>
-                <div className='flex  px-2 mx-auto pb-3 text-center
-                  justify-center flex-col w-full border-gray-300 items-center gap-3'>
-    
-                    <div className="flex items-center space-x-2">
-                      <button
-                        aria-label="Decrease quantity"
-                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="p-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-                       
-                      >
-                        <Minus className="w-4 h-4"  />
-                      </button>
-                
-                      <span
-                        className="px-3 py-1 border border-gray-300 rounded min-w-12 text-center text-sm"
-                        aria-live="polite"
-                        aria-atomic="true"
-                      >
-                        {quantity}
-                      </span>
-                
-                      <button
-                        aria-label="Increase quantity"
-                        onClick={() => setQuantity(Math.min(currentVariantStock, quantity + 1))}
-                        className="p-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-                      
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                  <Button onClick={handleAddToCart} className='bg-[hsl(178,100%,34%)] w-full text-white font-medium hover:opacity-80 cursor-pointer '>
-                     {loading ? <Spinner /> : <><ShoppingCart /> Add to cart</>}  
-                  </Button>
-                  <AddToListButton product={product} data={data} />
-            </div>
-            <div className="
-             ">
-              <ModePaiment isMobile={false} />
-             </div>
-             <div className='bg-[hsl(178,100%,34%)] grid grid-cols-2 gap-5 w-[95%] p-3 rounded-lg mx-auto '>
-                 {items.map((item,index) => (
-                    <div className='items-center flex gap-2 text-white' key={index}>
-                       <img className='w-[25px] object-contain ' src={item.img} alt="" />
-                          <p className='text-xs font-medium  '>
-                             {item.name}
-                          </p>
-                         
-                    </div>
-                 ))}
-             </div>
-             
-       </div>
-       
-    </div>
-     <FixedQTY pending={loading} handleAddToCart={handleAddToCart} product={product} />
-    </>
-   
-  )
-}
+           
+  <div>
+ <AmazonPrice price={32.95} className="line-through text-2xl! text-gray-500! font-bold!" />
 
-export default BuyPanel
+            </div>
+
+
+            {/* <div className="flex items-center gap-2 mt-2">
+              <span className="line-through text-sm text-gray-400">£58.00</span>
+              <span className="text-xs font-semibold bg-red-600 text-white px-2 py-0.5 rounded">
+                -19%
+              </span>
+            </div> */}
+          </div>
+              <div className="flex  py-2.5 gap-2 items-start px-5">
+                <LocationIcon />
+                  <p className="text-xs text-blue-600 font-medium"> Deliver to HMAMOU - Meknes <br /> 50000‌</p>
+              </div>
+       
+          {/* STOCK */}
+          <div className="px-5 py-2 border-b border-gray-100 flex items-center gap-2 text-sm">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span className="font-medium text-green-700">
+              In stock — ready to ship
+            </span>
+          </div>
+
+          {/* DELIVERY */}
+         
+
+          {/* ACTIONS */}
+          <div className="p-5 space-y-4">
+            {/* Quantity */}
+          <div className="flex w-[75%] justify-center mx-auto 
+           items-center border border-gray-300 rounded-md overflow-hidden">
+  {/* Decrement */}
+  <button
+    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+    className="h-10 mx-auto  flex items-center justify-center text-gray-700 hover:bg-gray-100 transition"
+  >
+    <Minus className="w-4 h-4" />
+  </button>
+
+  {/* Quantity */}
+  <input
+    type="text"
+    value={quantity}
+    readOnly
+    className="w-14 text-center border-l border-r border-gray-300 h-10 text-sm font-medium focus:outline-none"
+  />
+
+  {/* Increment */}
+  <button
+    onClick={() => setQuantity(Math.min(currentVariantStock, quantity + 1))}
+    className="h-10 mx-auto  flex items-center justify-center text-gray-700 hover:bg-gray-100 transition"
+  >
+    <Plus className="w-4 h-4" />
+  </button>
+</div>
+
+
+
+            {/* CTA */}
+            <Button
+              onClick={handleAddToCart}
+              className="w-full h-11 bg-[hsl(178,100%,34%)] text-white font-semibold hover:opacity-90"
+            >
+              {loading ? <Spinner /> : <><ShoppingCart className="mr-2" /> Add to cart</>}
+            </Button>
+
+            <AddToListButton product={product} data={data} />
+          </div>
+
+          {/* TRUST */}
+          <div className="p-4 bg-[hsl(178,100%,34%)] grid grid-cols-2 gap-3 text-white text-xs">
+            <div className="flex items-center gap-2">
+              <img className="w-5" src="https://www.marjanemall.ma/images/auth-white.png" />
+              <span>100% authentic</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <img className="w-5" src="https://www.marjanemall.ma/images/return-white.png" />
+              <span>Money-back guarantee</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* CART SIDEBAR */}
+      <CartSidebar open={open} onClose={() => setOpen(false)} setOpen={setOpen} items={addedItems} />
+
+      {/* MOBILE CTA */}
+      <FixedQTY pending={loading} handleAddToCart={handleAddToCart} product={product} />
+    </>
+  );
+};
+
+export default BuyPanel;
+

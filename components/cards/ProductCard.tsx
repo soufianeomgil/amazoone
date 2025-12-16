@@ -6,6 +6,7 @@ import { IProduct } from "@/models/product.model";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import Rating from "../shared/Rating";
+import AmazonPrice from "../shared/AmazonPrice";
 
 const ProductCard = ({
   product,
@@ -63,7 +64,8 @@ const ProductCard = ({
        
 <div className="flex items-center justify-between">
     <div className="mt-auto flex flex-col pt-1">
-          <p className="text-lg font-bold text-[#131921] ">${product.basePrice}</p>
+          {/* <p className="text-lg font-bold text-[#131921] ">${product.basePrice}</p> */}
+          <AmazonPrice price={product.basePrice} className="text-[#131921] text-lg font-bold " />
            <p className="text-[10px] font-medium text-gray-900">List Price: <span className=" line-through text-[12px] text-gray-900">${product.basePrice + 50}</span></p>
         </div>
       <div className="flex items-center cursor-pointer bg-[#131921] justify-center rounded-full w-[30px] h-[30px] ">

@@ -53,7 +53,7 @@ export interface IOrderAddress {
   city: string;
   state?: string | null;
   zipCode?: string | null;
-  country?: string | null;
+  
   DeliveryInstructions?: string | null;
 }
 
@@ -94,7 +94,9 @@ export interface IOrder {
   shippedAt?: Date | null;
   deliveredAt?: Date | null;
   cancelledAt?: Date | null;
+  cancelReason?: string;
   refundedAt?: Date | null;
+  canceledBy?: Types.ObjectId;
   // soft-delete / archived
   archived?: boolean;
   createdAt?: Date;
@@ -146,7 +148,7 @@ const VariantSchema = new Schema<IVariant>(
 // OrderItem schema (embedded)
 const OrderItemSchema = new Schema<IOrderItem>(
   {
-    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true, index: true },
+    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     name: { type: String, required: true },
     variant: { type: VariantSchema, default: null },
     quantity: { type: Number, required: true, min: 1, default: 1 },
@@ -168,7 +170,7 @@ const AddressSchema = new Schema<IOrderAddress>(
     city: { type: String, required: true },
     state: { type: String, default: null },
     zipCode: { type: String, default: null },
-    country: { type: String, default: "Morocco" }, // default to Morocco if your app targets Morocco
+   
     DeliveryInstructions: { type: String, default: null },
   },
   { _id: false }
@@ -191,7 +193,7 @@ const PaymentSchema = new Schema<IPaymentSnapshot>(
 // Main Order schema
 const OrderSchema = new Schema<IOrderDoc, IOrderModel>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     items: { type: [OrderItemSchema], required: true, default: [] },
     shippingAddress: { type: AddressSchema, required: true },
     billingAddress: { type: AddressSchema, default: null },
@@ -208,6 +210,8 @@ const OrderSchema = new Schema<IOrderDoc, IOrderModel>(
     trackingNumber: { type: String, default: null },
     shippedAt: { type: Date, default: null },
     deliveredAt: { type: Date, default: null },
+    cancelReason: { type: String},
+    canceledBy: {type: Schema.Types.ObjectId, ref: "User" },
     cancelledAt: { type: Date, default: null },
     refundedAt: { type: Date, default: null },
     archived: { type: Boolean, default: false, index: true },

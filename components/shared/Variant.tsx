@@ -7,6 +7,7 @@ import { IProduct, IVariant } from "@/models/product.model";
 import { CheckCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import AmazonPrice from "./AmazonPrice";
 
 const Variant = ({ product }: { product: IProduct }) => {
   const dispatch = useDispatch();
@@ -80,7 +81,8 @@ const Variant = ({ product }: { product: IProduct }) => {
       <div className="space-y-3">
         <div className="flex items-baseline justify-between">
           <div className="text-sm text-gray-600">Price</div>
-          <div className="text-2xl font-semibold text-red-600">${finalPrice.toLocaleString()}</div>
+          {/* <div className="text-2xl font-semibold text-red-600">${finalPrice.toLocaleString()}</div> */}
+          <AmazonPrice price={finalPrice} className="text-2xl font-semibold text-red-600" />
         </div>
 
         {savings > 0 && <div className="text-sm text-green-700">You save: ${savings}</div>}
@@ -131,9 +133,15 @@ const Variant = ({ product }: { product: IProduct }) => {
                   key={index}
                   onClick={() => handleVariantClick(index)}
                   aria-pressed={localSelectedVariant === index}
-                  className={`w-full p-3 text-left border rounded-lg transition-all flex items-center space-x-3 ${
-                    localSelectedVariant === index ? "border-orange-500 bg-orange-50" : "border-gray-200 hover:border-gray-300"
-                  } ${hiddenBySize ? "opacity-50" : "opacity-100"}`}
+                  // className={`w-full p-3 text-left border rounded-lg transition-all flex items-center space-x-3 ${
+                  //   localSelectedVariant === index ? "border-orange-500 bg-orange-50" : "border-gray-200 hover:border-gray-300"
+                  // } ${hiddenBySize ? "opacity-50" : "opacity-100"}`}
+                  className={`w-full p-4 rounded-xl border transition-all flex gap-4 ${
+  localSelectedVariant === index
+    ? "border-orange-500 bg-orange-50 ring-1 ring-orange-200"
+    : "border-gray-200 hover:border-gray-300"
+}`}
+
                 >
                   <div className="w-14 h-14 shrink-0 rounded overflow-hidden border bg-white">
                     {img ? (
@@ -147,12 +155,13 @@ const Variant = ({ product }: { product: IProduct }) => {
                     <div className="font-medium text-sm truncate">{label}</div>
                     <div className="text-xs text-gray-600 flex items-center gap-2 mt-1">
                       {colorAttr && <span className="capitalize truncate">{colorAttr}</span>}
-                      {sizeAttr && <span className="inline-block px-2 py-0.5 bg-gray-100 rounded text-xs font-medium">Size: {sizeAttr}</span>}
+                      {sizeAttr && !sizeAttr.includes("same") && <span className="inline-block px-2 py-0.5 bg-gray-100 rounded text-xs font-medium">Size: {sizeAttr}</span>}
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="font-medium text-sm">${price.toLocaleString()}</div>
+                    {/* <div className="font-medium text-sm">${price.toLocaleString()}</div> */}
+                    <AmazonPrice price={price} className="font-medium text-xl" />
                     {typeof variant.stock === "number" && variant.stock < 5 && (
                       <div className="text-xs text-red-600">Only {variant.stock} left</div>
                     )}

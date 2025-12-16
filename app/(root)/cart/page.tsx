@@ -1,125 +1,149 @@
+import { getAuthenticatedUserCart } from "@/actions/cart.actions";
+import { getUserSaveForLaterItems } from "@/actions/saveForLater.actions";
+import { getCurrentUser } from "@/actions/user.actions";
+import { auth } from "@/auth";
+import AddressCard from "@/components/cards/AddressCard";
+import CartItemComponent from "./_component/CartItem";
+import { MoveToCartBtn } from "@/components/shared/clientBtns/MoveToCartBtn";
+import Link from "next/link";
+import CheckoutBox from "./_component/CheckoutBox";
+import { Button } from "@/components/ui/button";
+import EmptyCart from "@/components/shared/Empty";
 
-import { CartItemComponent } from './_component/CartItem';
-import { CheckoutBox } from './_component/CheckoutBox';
-import { auth } from '@/auth';
-import { getAuthenticatedUserCart } from '@/actions/cart.actions';
+const page = async () => {
+  // Authorize & fetch resources in parallel
+  const session = await auth()
+  const userId = session?.user?.id || ''
+      const result = await getAuthenticatedUserCart({userId: userId})
+      const res = await getCurrentUser()
+      const {data,error} = await getUserSaveForLaterItems({})
+      console.log(data?.items, "data items")
+      console.log('error:', error)
+  
+  const totalQty = result?.data?.qty ?? 0;
+  
 
-import EmptyCart from '@/components/shared/Empty';
+  // UI-level booleans
+  const hasCartItems = Array.isArray(result?.data?.userCart?.items) && result.data.userCart.items.length > 0;
+  const hasSavedItems = Array.isArray(data?.items) && data.items.length > 0;
 
-import AddressCard from '@/components/cards/AddressCard';
-import { getCurrentUser } from '@/actions/user.actions';
-import { Button } from '@/components/ui/button';
-// TODO: ADD BELOW USER SAVED LIST
+  return (
+    <div className="max-w-7xl mx-auto p-4">
+      {hasCartItems ? (
+        <>
+          <h1 className="text-2xl mb-7 font-semibold">Shopping Cart</h1>
 
+          <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-x-6">
+            {/* Left/main column */}
+            <div className="lg:col-span-3 ">
+              <div className="flex flex-col gap-6">
+                {/* Address (only if user present) */}
+                {userId && <AddressCard user={res.data?.user} />}
 
+                {/* Cart items card */}
+                <section className="bg-white p-4 rounded-md shadow-sm">
+                  <div className="flex justify-between items-baseline pb-2">
+                    <h2 className="text-lg font-bold">Products ({totalQty})</h2>
+                  </div>
 
-const page = async() => {
+                  <hr className="my-3" />
 
-   const session = await auth()
-    
-     const userId = session?.user.id || "";
+                  <div className="space-y-4">
+                    {result?.data?.userCart.items.map((item: any) => (
+                      <CartItemComponent
+                        key={String(item._id ?? `${item.productId}:${item.variantId ?? ""}`)}
+                        userId={res.data?.user?._id ?? null}
+                        item={item}
+                      />
+                    ))}
+                  </div>
+                </section>
 
-     const result = await getAuthenticatedUserCart({userId})
-     const res = await getCurrentUser()
-   
-    return (
-        <div className='max-w-7xl mx-auto p-4'>
-            {result.data && result.data.userCart.items.length > 0 ? (
-                <>
- <h1 className="text-2xl mb-7 font-semibold">Shopping Cart</h1>
-   <div className=" grid grid-cols-1  lg:grid-cols-4 lg:gap-x-4">
-           {/* Desktop Layout */}
-           <div className='lg:col-span-3 h-fit order-2 lg:order-1!'>
-            <div className='flex flex-col gap-5'>
-                {userId &&  <AddressCard />}
-           
-           <div className=" ">
-              <div className=" bg-white p-4 rounded-md shadow-sm">
+                {/* Saved-for-later area */}
+                {hasSavedItems && (
+ <section className="bg-white p-4 rounded-md shadow-sm">
+                  <h3 className="sm:text-xl text-lg font-bold pb-3">Your Items</h3>
+
+                  <div className="flex flex-col gap-3 mt-1">
+                    <div className="text-blue-700 font-bold sm:text-lg text-base">
+                      Saved for later ({data?.items?.length} items)
+                    </div>
+
+                    <div className="border border-gray-200 p-3 rounded">
+                      {hasSavedItems ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                          {/* MoveToCartBtn component expects data prop (client component) */}
+                          <MoveToCartBtn data={data} />
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-600">
+                          You have no items saved for later.{" "}
+                          <Link href="/" className="text-blue-600 hover:underline">
+                            Continue shopping.
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+                )}
                
-                 <div className="flex justify-between items-baseline pb-2 ">
-                    <h1 className="text-lg font-bold">
-                         Produits ({result.data?.qty})
-                    </h1>
-                    {/* <span className="text-sm text-gray-500">Price</span> */}
-                </div>
-              
-                <hr/>
-                {  result.data?.userCart.items.map((item:any, key: number) => (
-                    <CartItemComponent key={key} userId={res.data?.user?._id as string | null} item={item} />
-                ))}
-                
-            </div>
-           </div>
-             <div className=" ">
-              <div className=" bg-white p-4 rounded-md shadow-sm">
-               
-                 <div className=" pb-2 ">
-                    <h1 className="sm:text-xl text-lg font-bold">
-                        Your Items
-                    </h1>
-                    {/* <span className="text-sm text-gray-500">Price</span> */}
-                </div>
-              
-               <div className='flex flex-col mt-3 gap-2.5 '>
-                   <h3 className="text-blue-700 font-bold  sm:text-lg text-base  ">Saved for later (5 items)</h3>
-                   <div className='border border-gray-500 p-3 '>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                                 {/* {products.map((product) => (
-                                   <ProductCard onQuickViewClick={()=> handleQuickView(product)} key={product.id} product={product} />
-                                 ))} */}
-                                 {[0,1,2,3,4].map((_,index) => (
-                                   <div className='flex flex-col border border-gray-300 p-2.5 gap-2.5' key={index}>
-                                        <div className='w-full flex items-center justify-center '>
-                                             <img src="https://m.media-amazon.com/images/I/71oiOtOHqDL._AC_AA220_.jpg" alt="product name" />
-                                        </div>
-                                        <article>
-                                             <p className='line-clamp-2 text-gray-800 text-sm font-medium '>Studded Hobo Bags for Women Soft Vegan Leather Studded Shoulder Handbag Slouchy Tote Purses</p>
-                                             <span className="text-xs font-normal text-gray-800">100+ bought in past month</span>
-                                             <p className="text-xs font-normal text-green-800">InStock</p>
-                                             <p className='text-gray-900 font-bold text-xs mt-1.5 '>Color: <span className='text-gray-700 font-normal '>Black</span></p>
-                                             <Button type='button' className="border mt-2.5 cursor-pointer bg-transparent hover:bg-gray-100 text-gray-700 font-medium text-sm border-gray-500 rounded-full w-full">
-                                                 Move to cart
-                                             </Button>
-                                             <div className='flex flex-col mt-3 gap-1.5'>
-                                                     <button type='button' className="  cursor-pointer  w-fit bg-transparent hover:underline text-blue-600 font-medium text-xs ">
-                                                 Delete
-                                             </button>
-                                              <button type='button' className="  cursor-pointer w-fit bg-transparent hover:underline text-blue-600 font-medium text-xs ">
-                                                 Add to list
-                                             </button>
-                                              
-                                             </div>
-                                        </article>
-                                   </div>
-                                 ))}
-                               </div>
-                   </div>
-               </div>
-               
-                
-            </div>
-           </div>
+              </div>
             </div>
 
-           </div>
-          
-            <div className="lg:col-span-1 order-1 max-lg:order-2! max-sm:mt-5 lg:order-2!">
+            {/* Right/checkout column */}
+            <aside className="lg:col-span-1 max-lg:mt-3">
+              <div className="sticky top-24 space-y-4">
+                {/* Desktop */}
                 <div className="hidden lg:block">
-                  <CheckoutBox  user={res.data?.user || null} data={result.data?.userCart} />
+                  <CheckoutBox user={res.data?.user ?? null} data={result?.data?.userCart} />
                 </div>
+
+                {/* Mobile */}
                 <div className="lg:hidden">
-                    <CheckoutBox user={res.data?.user || null} isMobile  data={result.data?.userCart} />
+                  <CheckoutBox user={res.data?.user ?? null} isMobile data={result?.data?.userCart} />
                 </div>
+
+                {/* Optional: quick link to saved for later if cart empty but saved items exist */}
+                {!hasCartItems && hasSavedItems && (
+                  <div className="bg-white p-3 rounded shadow-sm">
+                    <h4 className="font-semibold">Saved for later</h4>
+                    <p className="text-sm text-gray-600">You can move saved items back to your cart.</p>
+                    <Link href="/saved-for-later" className="mt-2 inline-block">
+                      <Button variant="outline">View saved items</Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </aside>
+          </div>
+        </>
+      ) : hasSavedItems ? (
+        // No cart items but has saved items
+        <div className="space-y-6">
+          <div className="bg-white p-4 rounded-md shadow-sm">
+            <h2 className="text-lg font-bold">Your Amazon Cart is empty</h2>
+            <p className="text-sm text-gray-700">
+              Check your Saved for later items below or{" "}
+              <Link href="/" className="text-blue-700 hover:underline">
+                continue shopping.
+              </Link>
+            </p>
+          </div>
+
+          <div className="bg-white p-4 rounded-md shadow-sm">
+            <h3 className="sm:text-xl text-lg font-bold pb-3">Saved for later ({data.items.length})</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <MoveToCartBtn data={data} />
             </div>
+          </div>
         </div>
-                </>
-            ): (
-                 <EmptyCart />
-            )}
-            
-        </div>
-     
-    );
+      ) : (
+        // Nothing in cart and nothing saved
+        <EmptyCart message="Your cart is empty — explore our products and add something you like!" />
+      )}
+    </div>
+  );
 };
 
-export default page
+export default page;

@@ -67,7 +67,7 @@ const AddAddressForm = () => {
   const form = useForm<z.infer<typeof AddAddressSchema>>({
       resolver: zodResolver(AddAddressSchema) as Resolver<z.infer<typeof AddAddressSchema>>,
       defaultValues: {
-        country: "Morocco",
+       
         name: "",
         phone: "",
         addressLine1: "",
@@ -108,20 +108,8 @@ const AddAddressForm = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
             <div className="space-y-4">
-              {/* Country (fixed to Morocco) */}
-              <FormField
-                control={form.control}
-                name="country"
-                render={() => (
-                  <FormItem>
-                    <FormLabel>Country/Region</FormLabel>
-                    <FormControl>
-                      <Input value="Morocco" readOnly className="bg-gray-100" />
-                    </FormControl>
-                     <FormMessage className="text-red-500 text-sm font-medium" />
-                  </FormItem>
-                )}
-              />
+              
+              
 
               {/* Full name */}
               <FormField

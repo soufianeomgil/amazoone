@@ -1,10 +1,4 @@
-"use client";
-
-import Image from "next/image";
-import { ChevronLeft, Phone } from "lucide-react";
-
-// Local asset path provided by you — will be transformed to a URL by the environment.
-const HERO_IMG = "/mnt/data/x.jpg";
+import Link from "next/link";
 
 const STATUS_ORDER = [
   { key: "pending", label: "En attente de confirmation", time: "vendredi 21 novembre 2025 22:41", active: true, color: "#00BFA6" },
@@ -20,13 +14,13 @@ const STATUS_ORDER = [
     <div className="min-h-screen bg-white text-gray-900">
       {/* Top bar */}
       <div className="bg-teal-900 text-white">
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-4">
             <div className="text-2xl font-extrabold tracking-tight">marjanemall</div>
           </div>
           <div className="text-sm text-right">
             <div className="font-semibold">Une question ?</div>
-            <div>Contactez-nous au <span className="font-bold">08 02 00 77 00</span></div>
+            <div className="text-xs sm:text-sm">Contactez-nous au <span className="font-bold">08 02 00 77 00</span></div>
           </div>
         </div>
       </div>
@@ -83,9 +77,9 @@ const STATUS_ORDER = [
                   </div>
 
                   <div className="mt-8 text-center">
-                    <button className="inline-flex items-center gap-2 px-6 py-2 bg-teal-600 text-white rounded-full shadow hover:bg-teal-700 transition">
-                      Revenir sur le site
-                    </button>
+                    <Link href="/" className="inline-flex font-medium text-sm items-center gap-2 px-6 py-2 bg-teal-600 text-white rounded-full shadow hover:bg-teal-700 transition">
+                      Continue shopping
+                    </Link>
                   </div>
                 </div>
 

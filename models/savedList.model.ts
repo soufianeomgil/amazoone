@@ -223,6 +223,6 @@ SavedListSchema.statics.toggleItem = async function (userId: ObjectId | string, 
 
 const SavedList = mongoose.models.SavedList as ISavedListModel || mongoose.model<ISavedListDoc, ISavedListModel>("SavedList", SavedListSchema);
 // add after schema definition
-SavedListSchema.index({ "items.productId": 1, "items.variantId": 1 });
+// SavedListSchema.index({ "items.productId": 1, "items.variantId": 1 });
 
 export default SavedList;

@@ -256,4 +256,14 @@ pre[class*="language-"] {
 .mdx-editor-tall .cm-content li {
   word-break: normal !important;
 }
+/* Hide scrollbar but still scrollable */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 

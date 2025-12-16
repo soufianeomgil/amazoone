@@ -88,18 +88,31 @@ export default function AddToListButton({ data,product }: {data: ISavedList[], p
 
   // UI pieces
   return (
-    <div className="relative inline-block w-[80%] border-t pt-5 border-gray-300 ">
+    <div className="relative inline-block w-full border-t pt-5 border-gray-300 ">
       <Button
       type="button"
        
-         className="flex items-center text-sm justify-between border border-gray-600 rounded-lg w-full "
+         className="
+        w-full appearance-none
+        rounded-xl
+        border border-gray-300
+        bg-gray-50
+        flex-1
+        px-4 py-3
+        text-sm text-gray-900
+        transition
+        focus:bg-white
+        focus:border-orange-400
+        focus:ring-2 focus:ring-orange-200
+        outline-none
+      "
       ref={btnRef}  onClick={() => { setOpen((o) => !o); setHighlightIndex(-1); }} 
         aria-haspopup="true"
         aria-expanded={open}
       >
         Add to List
        {data &&  <svg
-          className={`w-4 h-4 ml-2 transform transition-transform ${open ? "rotate-180" : "rotate-0"}`}
+          className={`w-4 h-4 ml-2 transform shrink-0 transition-transform ${open ? "rotate-180" : "rotate-0"}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden

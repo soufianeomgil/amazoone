@@ -5,6 +5,7 @@ import Features from "./Features";
 import { Button } from "@/components/ui/button";
 import { IUser } from "@/types/actionTypes";
 import { useRouter } from "next/navigation";
+import AmazonPrice from "@/components/shared/AmazonPrice";
 
 type Props = {
   isMobile?: boolean;
@@ -75,6 +76,7 @@ export const CheckoutBox: React.FC<Props> = ({ isMobile = false, data, user }) =
             <div className="flex border-b border-gray-300 pb-4 items-center justify-between">
               <p className="font-bold text-lg">Total à payer</p>
               <p className="text-lg font-bold">{formattedSubtotal}</p>
+              {/* <AmazonPrice className="text-lg font-bold" price={totalPriceNumber} /> */}
             </div>
 
             <div className="flex items-center my-2">

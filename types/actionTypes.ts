@@ -219,7 +219,7 @@ export interface  AddAddressParams  {
      city: string;
      postalCode: string;
      state: string;
-     country: string;
+    
      phone: number | string;
 
      isDefault: boolean;

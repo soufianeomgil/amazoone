@@ -10,7 +10,7 @@ export interface IAddress {
     state: string;
     city: string;
     zipCode: string;
-    country: string;
+   
     phone: number;
     userId: mongoose.Schema.Types.ObjectId;
     isDefault: boolean;
@@ -45,11 +45,7 @@ const AddressSchema = new Schema<IAddress>({
      type: String,
      required: true,
    },
-   country: {
-     type: String,
-     default: "morocco",
-     required: true
-   },
+  
    zipCode: {
      type: String,
      required: true

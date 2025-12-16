@@ -89,19 +89,7 @@ export default function AddressCard() {
     );
   }
 
-  // if (error) {
-  //   return (
-  //     <div className="border border-red-200 bg-white rounded-lg p-4">
-  //       <p className="text-red-600 font-medium">Error loading address</p>
-  //       <p className="text-sm text-gray-600 mt-1">{error}</p>
-  //       <div className="mt-3">
-  //         <Link href="/account/addresses" className="text-sm text-blue-600 hover:underline">
-  //           Manage addresses
-  //         </Link>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+
 
   // If no saved addresses -> show empty, actionable state
   if (!address || error) {

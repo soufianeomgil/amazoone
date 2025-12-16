@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { DeleteIcon } from "lucide-react";
 import QuantitySelector from "@/components/shared/QTY";
 import { addToSaveForLater } from "@/actions/saveForLater.actions";
+import AmazonPrice from "@/components/shared/AmazonPrice";
 
 
 interface Props {
@@ -47,7 +48,7 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }>
       await dispatch(
         updateQuantityAsync({
           productId: product._id as string,
-          variantId: variant?.sku ?? "",
+          variantId: variant?._id ?? "",
           quantity: newQty,
         }) as any
       );
@@ -59,7 +60,7 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }>
       setPending(false);
     }
   };
-   const handleRemoveItem = async(productId:string, variantId:string | null)=> {
+   const handleRemoveItem = async(productId:string, variantId:string | undefined)=> {
       try {
          setPending(true)
          await new Promise(resolve => setTimeout(resolve, 500) )
@@ -92,44 +93,91 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }>
     }
     return null;
   };
- const handleAddToSaveForLater = async () => {
+//  const handleAddToSaveForLater = async () => {
+//   try {
+   
+
+//     const { error, success } = await addToSaveForLater({
+//       payload: {
+//         productId: String(product._id),
+//         variant,
+//         variantId: variant?._id,
+//         quantity: item.quantity,
+//         snapshot: {
+//           price: item.productId.basePrice,
+//           thumbnail: item.productId.thumbnail,
+//           title: item.productId.name,
+//         },
+//       },
+//       userId: userId as string,
+//     });
+
+//     if (error) {
+//       alert(error.message);
+//       return;
+//     }
+
+//     if (success) {
+//       // Wait for the removal to finish
+//       dispatch(
+//         removeItemAsync({
+//           productId: product._id,
+//           variantId: variant ?  variant._id : null,
+//         }) as any
+//       );
+//     }
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+const handleAddToSaveForLater = async () => {
   try {
-    const normalizedVariantId =  variant?.sku ?? variant?._id;
+    const payload = {
+      productId: String(product._id),
+      variant,
+      variantId: variant?._id ?? null, // normalize: string or null
+      quantity: item.quantity,
+      snapshot: {
+        price: item.productId.basePrice,
+        thumbnail: item.productId.thumbnail,
+        title: item.productId.name,
+      },
+    };
 
     const { error, success } = await addToSaveForLater({
-      payload: {
-        productId: String(product._id),
-        variant,
-        variantId: normalizedVariantId,
-        quantity: item.quantity,
-        snapshot: {
-          price: item.productId.basePrice,
-          thumbnail: item.productId.thumbnail,
-          title: item.productId.name,
-        },
-      },
+      payload,
       userId: userId as string,
     });
 
     if (error) {
+      console.error("addToSaveForLater error:", error);
       alert(error.message);
       return;
     }
 
     if (success) {
-      // Wait for the removal to finish
-      await dispatch(
-        removeItemAsync({
-          productId: String(product._id),
-          variantId: normalizedVariantId,
-        }) as any
-      );
+      // Wait for the thunk to finish and unwrap errors if any
+      try {
+        await dispatch(
+          removeItemAsync({
+            productId: String(product._id),
+            variantId: payload.variantId, // null when no variant
+          }) as any
+        ).unwrap();
+
+        // optional: refresh UI
+        // router.refresh?.();
+      } catch (removeErr: any) {
+        console.error("Failed to remove item from cart after saving:", removeErr);
+        // fallback: refresh to sync UI
+        // router.refresh?.();
+      }
     }
   } catch (err) {
-    console.log(err);
+    console.error("handleAddToSaveForLater unexpected error:", err);
   }
 };
-
 
   return (
     <article className="w-full  border-b border-gray-200 py-4">
@@ -208,9 +256,10 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }>
 
         {/* PRICE & QUANTITY */}
         <div className="text-right flex flex-col items-end gap-2">
-          <p className="text-lg font-bold text-gray-900">
+          {/* <p className="text-lg font-bold text-gray-900">
             ${unitPrice.toFixed(2)}
-          </p>
+          </p> */}
+          <AmazonPrice price={unitPrice} className="text-lg font-bold text-gray-900 " />
 
           {/* Quantity Selector */}
           <QuantitySelector
@@ -224,8 +273,8 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }>
 
       {/* ===================== ACTIONS (SHARED) ===================== */}
       <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-2">
-        <button className="text-sm hover:underline" onClick={()=> handleRemoveItem(product._id as string,variant?.sku ?? variant?.id)}>
-          <DeleteIcon className="w-4 h-4 cursor-pointer" />
+        <button className="text-sm hover:underline" onClick={()=> handleRemoveItem(product?._id,variant?._id)}>
+          <img src="/trashe.png" className="cursor-pointer w-5 h-5 object-contain " alt="trash icon" />
         </button>
 
         <button

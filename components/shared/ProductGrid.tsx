@@ -1,8 +1,9 @@
 
 
 import { IProduct } from '@/models/product.model';
+import MainCard from '../cards/MainCard';
 
-import { MainCard } from '../cards/MainCard';
+
 
 
 
@@ -103,7 +104,7 @@ const ProductGrid = ({ products }: { products: (IProduct & { id: string })[] }) 
                  <div className="mt-6 bg-white p-4">
                     <h2 className="text-xl font-bold mb-4">Best selling Bags under 50$</h2>
                     <main className="sm:container mx-auto  sm:px-4 py-8">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-6">
           {/* {products.map((product) => (
             <ProductCard onQuickViewClick={()=> handleQuickView(product)} key={product.id} product={product} />
           ))} */}
@@ -122,5 +123,5 @@ const ProductGrid = ({ products }: { products: (IProduct & { id: string })[] }) 
         </>
     );
 };
-
+// cart slide sidebar // twick product card a bit / fix that add to cart shit / order fns
 export default ProductGrid;

@@ -189,7 +189,7 @@ export async function getAllProducts(
     const normalized = (products || []).map((p: IProduct) => {
      // const thumbnail = p.thumbnail?.url ?? p.thumbnail ?? (Array.isArray(p.images) && p.images[0]?.url) ?? null;
       return {
-         _id: p._id?.toString?.() ?? p.id,
+         _id: p._id?.toString?.(),
         name: p.name,
        //  slug: p.slug ?? null,
         description: p.description,
@@ -263,3 +263,120 @@ export async function getSignleProduct(params:GetSingleProductParams): Promise<A
       return handleError(error) as ErrorResponse;
    }
 }
+
+//  interface GetSearchInputResultsParams {
+//   query: string;
+//   limit : number;
+// }
+// export async function getSuggestionResult(
+//   params: GetSearchInputResultsParams
+// ): Promise<ActionResponse<{ products: IProduct[] }>> {
+//   const { query, limit } = params
+
+//   if (!query || typeof query !== 'string' || !query.trim()) {
+//     return { success: false }
+//   }
+
+//   try {
+//     await connectDB()
+
+//     const products = await Product.aggregate([
+//       {
+//         $search: {
+//           index: 'default', // or your custom index name
+//           text: {
+//             query,
+//             path: ['name', 'description', 'category'],
+//             fuzzy: {
+//               maxEdits: 2, // allows small typos
+//               prefixLength: 1, // first character must match
+//             },
+//           },
+//         },
+//       },
+//       { $limit: limit },
+//       {
+//         $project: {
+//           name: 1,
+//           basePrice: 1,
+//           thumbnail: 1,
+//           variants: 1,
+//           brand: 1,
+//           images: 1,
+//           description: 1,
+//           category: 1,
+//           score: { $meta: 'searchScore' },
+//         },
+//       },
+//     ])
+
+//     return {
+//       success: true,
+//       data: { products: JSON.parse(JSON.stringify(products))},
+//     }
+//   } catch (error) {
+//     return handleError(error) as ErrorResponse
+//   }
+// }
+
+interface GetSearchInputResultsParams {
+  query: string
+  limit?: number
+}
+
+export async function getSuggestionResult(
+  params: GetSearchInputResultsParams
+): Promise<ActionResponse<{ products: IProduct[] }>> {
+  const { query, limit = 2 } = params
+
+  if (!query?.trim()) {
+    return { success: true, data: { products: [] } }
+  }
+
+  try {
+    await connectDB()
+
+   const products = await Product.aggregate([
+  {
+    $search: {
+      index: "products_search",
+      text: {
+        query,
+        path: ["name", "description", "brand", "tags"],
+        fuzzy: {
+          maxEdits: 2,
+          prefixLength: 1
+        }
+      }
+    }
+  },
+  {
+    $match: {
+      status: "ACTIVE"
+    }
+  },
+  {
+    $project: {
+      name: 1,
+      basePrice: 1,
+      thumbnail: 1,
+      brand: 1,
+      score: { $meta: "searchScore" }
+    }
+  },
+  { $sort: { score: -1 } },
+  { $limit: limit }
+])
+
+
+    console.log(products, "product suggestions")
+
+    return {
+      success: true,
+      data: { products : JSON.parse(JSON.stringify(products))}
+    }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
+  }
+}
+

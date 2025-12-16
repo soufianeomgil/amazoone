@@ -134,7 +134,7 @@ const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, pr
   </p>
 
   <p className="leading-tight">
-    {address.country} {address.state && `• ${address.state}`}
+     {address.state && `• ${address.state}`}
   </p>
 
   <p className="text-gray-600">

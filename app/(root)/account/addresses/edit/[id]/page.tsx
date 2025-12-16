@@ -6,7 +6,7 @@ import { getAddressDetails } from "@/actions/address.actions";
 import { IAddress } from "@/models/address.model";
 
 const page = async({params}: {params: Promise<{id:string}>}) => {
-  // map incoming Address -> form values (country fixed to Morocco)
+  
   const id = (await params).id
   const result = await getAddressDetails({id})
   // vqQ3w74VvmTAt9zbiz

@@ -1,20 +1,11 @@
-import { Schema, model, Document, Model, models } from 'mongoose';
+import { Schema, model, Document, Types, Model, models } from 'mongoose';
 
 
-/**
- * Interface for a customer review.
- */
-export interface IReview  {
-  user: Schema.Types.ObjectId; // Reference to the user who wrote the review
-   isVerifiedPurchase: boolean;
-  name: string; // User's name to display
-  rating: number; // Rating from 1 to 5
-  headline: string;
-  isRecommendedByBuyer: boolean;
-  images?: ImageState[]
-  comment: string;
-  createdAt: Date;
-}
+// add product vedios;
+
+
+
+
 
 /**
  * Interface for individual variant attributes (e.g., { name: 'Color', value: 'Red' }).
@@ -32,7 +23,8 @@ export interface ImageState {
   public_id?: string;
   preview?: string;
 }
-export interface IVariant extends Document {
+export interface IVariant {
+  _id: string;
   sku: string; // Stock Keeping Unit for this specific variant
   priceModifier: number; // Amount to add/subtract from the base price
   stock: number;
@@ -43,20 +35,23 @@ export interface IVariant extends Document {
 /**
  * Interface for the main Product document.
  */
-export interface IProduct extends Document {
+export interface IProduct {
+  _id: string;
   createdAt: any;
   updatedAt: any;
   name: string;
   description: string;
   brand: string;
   category: string; // Reference to a Category model
+  isBestSeller: boolean;
+  isTrendy: boolean;
   basePrice: number;
   status: "ACTIVE" | "DRAFT" | "INACTIVE" | "OUT OF STOCK",
   thumbnail: ImageState // Main display image
   images: ImageState[]; // Additional gallery images
   rating: number; // Average rating, calculated from reviews
   reviewCount: number;
-  reviews: IReview[];
+ // reviews: IReview[];
   variants: IVariant[];
   attributes: IVariantAttribute[]; // General attributes like 'Material', 'Dimensions'
   tags: string[];
@@ -66,33 +61,8 @@ export interface IProduct extends Document {
 }
 
 
-// --- Mongoose Schemas ---
 
-/**
- * Schema for customer reviews. It's embedded within the Product schema.
- */
-const ReviewSchema = new Schema<IReview>({
-  // Assuming a User model exists for linking reviews to users
-  user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
-  name: { type: String, required: true },
-  isVerifiedPurchase: {type: Boolean , default: false, required: true},
-  rating: { type: Number, required: true, min: 1, max: 5 },
-  headline: { type: String, required: true},
-   images: [{ type: {
-    url: { type: String },
-    preview: { type: String },
-    public_id: { type: String },
-  },
-  default: {},}],
-  isRecommendedByBuyer: {type: Boolean, default: false},
-  comment: { type: String, required: true },
-}, {
-  timestamps: { createdAt: true, updatedAt: false }, // Only track creation time for reviews
-});
 
-/**
- * Schema for product variants. This is also embedded in the Product schema.
- */
  const VariantSchema = new Schema<IVariant>({
   sku: { type: String, required: true },
   priceModifier: { type: Number, required: true, default: 0 },
@@ -151,11 +121,13 @@ const ProductSchema = new Schema<IProduct>({
 ],
   rating: { type: Number, required: true, default: 0, min: 0, max: 5 },
   reviewCount: { type: Number, required: true, default: 0, min: 0 },
-  reviews: [ReviewSchema],
+  //reviews: [ReviewSchema],
   variants: [VariantSchema],
   attributes: [attributeSchema],
   tags: [{ type: String }],
   isFeatured: { type: Boolean, default: false },
+  isBestSeller: { type: Boolean, default: false },
+  isTrendy: { type: Boolean, default: false },
   // Default stock for products that don't have variants.
   // If variants exist, their individual stock levels should be used.
   stock: { type: Number, required: true, default: 0, min: 0 },

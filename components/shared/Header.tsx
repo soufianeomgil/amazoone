@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { ROUTES } from '@/constants/routes';
 import { useSelector } from 'react-redux';
 import { getTotalItems } from '@/lib/store/cartSlice';
+import SearchInput from './SearchInput';
 
 // TODO: CREATE A SUB HEADER FOR FREE SHIPPING [TOWN]
 // RENDER CART ITEMS
@@ -62,15 +63,15 @@ const Header = ({qty,data}: {
                         <div className="hidden md:flex items-center p-2 border border-transparent hover:border-white rounded-sm space-x-1">
                             <LocationIcon />
                             <div>
-                                <p className="text-xs text-gray-300">Deliver to</p>
-                                <p className="text-sm font-bold">New York 10001</p>
+                                <p className="text-xs text-gray-300">Deliver to HMAMOU</p>
+                                <p className="text-sm text-white font-bold">Meknes 50000</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Center Search (Desktop) */}
                     <div className="hidden md:flex grow mx-4">
-                        <div className="flex w-full">
+                        {/* <div className="flex w-full">
                             <button className="bg-gray-200 text-gray-700 text-xs px-3 rounded-l-md border-r border-gray-300 flex items-center space-x-1">
                                 <span>All</span>
                                 <CaretDownIcon />
@@ -79,7 +80,8 @@ const Header = ({qty,data}: {
                             <button className="bg-[#FEBD69] hover:bg-orange-400 p-2 rounded-r-md">
                                 <SearchIcon />
                             </button>
-                        </div>
+                        </div> */}
+                        <SearchInput />
                     </div>
                     
                     {/* Right Side */}
@@ -163,8 +165,9 @@ const Header = ({qty,data}: {
                 </div>
 
                 {/* Mobile Search */}
+              
                 <div className="md:hidden px-2 pb-2">
-                    <div className="flex w-full">
+                    {/* <div className="flex w-full">
                         <button className="bg-gray-200 text-gray-700 text-xs px-3 rounded-l-md border-r border-gray-300 flex items-center space-x-1">
                             <span>All</span>
                             <CaretDownIcon />
@@ -173,7 +176,8 @@ const Header = ({qty,data}: {
                         <button className="bg-[#FEBD69] hover:bg-orange-400 p-2 rounded-r-md">
                             <SearchIcon />
                         </button>
-                    </div>
+                    </div> */}
+                    <SearchInput />
                 </div>
 
                 {/* Bottom Navigation */}
@@ -209,7 +213,7 @@ const Header = ({qty,data}: {
                                 <ul>
                                     {items.map(item => (
                                         <li key={item}>
-                                            <a href="#" className="block p-4 py-3 text-gray-700 hover:bg-gray-100">{item}</a>
+                                            <Link href="#" className="block p-4 py-3 text-gray-700 hover:bg-gray-100">{item}</Link>
                                         </li>
                                     ))}
                                 </ul>

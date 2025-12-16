@@ -13,7 +13,7 @@ const mockOrder = {
         name: 'John Doe',
         street: '123 Amazon Lane',
         cityStateZip: 'Seattle, WA 98109',
-        country: 'United States'
+       
     },
     items: [
         {
@@ -59,7 +59,7 @@ const ThankYou: React.FC = () => {
                             {mockOrder.shippingAddress.name} <br />
                             {mockOrder.shippingAddress.street} <br />
                             {mockOrder.shippingAddress.cityStateZip} <br />
-                            {mockOrder.shippingAddress.country}
+                            
                         </address>
                     </div>
                      <div className="sm:col-span-2 md:col-span-1 md:text-right">

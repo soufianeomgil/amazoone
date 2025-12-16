@@ -53,7 +53,7 @@ const EditAddressForm = ({address}: {address:IAddress}) => {
   const form = useForm<z.infer<typeof EditAddressSchema>>({
    resolver: zodResolver(EditAddressSchema) as Resolver<z.infer<typeof EditAddressSchema>>,
          defaultValues: {
-           country: address.country || "Morocco",
+          
            id: address._id,
            name: address.name || "",
            phone: String(address.phone) || "",
@@ -89,20 +89,8 @@ const EditAddressForm = ({address}: {address:IAddress}) => {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                   <div className="space-y-4">
-                    {/* Country (fixed to Morocco) */}
-                    <FormField
-                      control={form.control}
-                      name="country"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel>Country/Region</FormLabel>
-                          <FormControl>
-                            <Input value="Morocco" readOnly className="bg-gray-100" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                   
+                   
         
                     {/* Full name */}
                     <FormField

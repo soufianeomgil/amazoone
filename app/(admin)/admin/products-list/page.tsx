@@ -3,6 +3,8 @@ import React from 'react';
 import { SearchIcon,  CaretDownIcon,  TrashIcon } from "@/components/shared/icons"
 import { FilterIcon, PencilIcon } from 'lucide-react';
 import Link from 'next/link';
+import { getAllProducts } from '@/actions/product.actions';
+import EditDeleteBtn from './_components/ClientBtns/EditDeleteBtn';
 
 type ProductStatus = 'Active' | 'Draft' | 'Out of Stock';
 
@@ -25,8 +27,8 @@ const mockProducts: Product[] = [
     { id: 'SKU-006', name: 'Ring Video Doorbell – 1080p HD video, improved motion detection', image: 'https://m.media-amazon.com/images/I/61DD1d-5TJL._AC_UY218_.jpg', status: 'Active', inventory: 75, category: 'Smart Home', price: 59.99 },
 ];
 
-const AdminProducts: React.FC = () => {
-
+const AdminProducts = async () => {
+   const result = await getAllProducts({})
     const getStatusClass = (status: ProductStatus) => {
         switch (status) {
             case 'Active': return 'bg-green-100 text-green-800';
@@ -90,19 +92,19 @@ const AdminProducts: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {mockProducts.map((product) => (
-                                <tr key={product.id} className="hover:bg-gray-50">
+                            {result.data?.products.map((product) => (
+                                <tr key={product._id} className="hover:bg-gray-50">
                                     <td className="p-4">
                                         <input type="checkbox" className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="flex-shrink-0 h-10 w-10">
-                                                <img className="h-10 w-10 rounded-md object-contain" src={product.image} alt={product.name} />
+                                            <div className="shrink-0 h-10 w-10">
+                                                <img className="h-10 w-10 rounded-md object-contain" src={product.thumbnail.url} alt={product.name} />
                                             </div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                                                <div className="text-sm text-gray-500">{product.id}</div>
+                                                <div className="text-sm text-gray-500">{product._id}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -111,13 +113,10 @@ const AdminProducts: React.FC = () => {
                                             {product.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.inventory} in stock</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${product.price.toFixed(2)}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.totalStock} in stock</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${product.basePrice.toFixed(2)}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div className="flex items-center justify-end space-x-4">
-                                             <button className="text-gray-400 hover:text-blue-600"><PencilIcon /></button>
-                                             <button className="text-gray-400 hover:text-red-600"><TrashIcon /></button>
-                                        </div>
+                                        <EditDeleteBtn id={product._id} />
                                     </td>
                                 </tr>
                             ))}

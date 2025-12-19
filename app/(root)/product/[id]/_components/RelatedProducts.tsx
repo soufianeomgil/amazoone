@@ -66,8 +66,8 @@ export const relatedProducts: IProduct[] = [
     description: "Stylish everyday sneakers with cushioned sole.",
     basePrice: 99.99,
     status: "DRAFT",
-    images: [{ url: "/products/puma-rsx3.jpg",  }],
-    thumbnail: { url: "/products/puma-rsx3-thumb.jpg", preview: "" },
+    images: [{ url: "https://m.media-amazon.com/images/I/81XscoFRknL._AC_UF480,480_SR480,480_.jpg",  }],
+    thumbnail: { url: "https://m.media-amazon.com/images/I/81XscoFRknL._AC_UF480,480_SR480,480_.jpg", preview: "" },
     brand: "Puma",
     tags: ["sneakers", "casual"],
     createdAt: Date.now(),
@@ -90,8 +90,8 @@ export const relatedProducts: IProduct[] = [
     description: "Timeless casual sneakers for everyday wear.",
     basePrice: 110.0,
     status: "DRAFT",
-    images: [{ url: "/products/reebok-classic.jpg",  }],
-    thumbnail: { url: "/products/reebok-classic-thumb.jpg", preview: "" },
+    images: [{ url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg",  }],
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Reebok",
     tags: ["classic", "casual"],
     createdAt: Date.now(),
@@ -114,8 +114,8 @@ export const relatedProducts: IProduct[] = [
     description: "Premium running shoes with superior comfort and style.",
     basePrice: 175.0,
     status: "DRAFT",
-    images: [{ url: "/products/newbalance-990v5.jpg", }],
-    thumbnail: { url: "/products/newbalance-990v5-thumb.jpg", preview: "" },
+    images: [{ url: "https://m.media-amazon.com/images/I/71KWgFCMbYL._AC_UF480,480_SR480,480_.jpg", }],
+    thumbnail: { url: "https://m.media-amazon.com/images/I/71KWgFCMbYL._AC_UF480,480_SR480,480_.jpg", preview: "" },
     brand: "New Balance",
     tags: ["running", "premium"],
     createdAt: Date.now(),
@@ -138,8 +138,8 @@ export const relatedProducts: IProduct[] = [
     description: "Iconic casual sneakers with a timeless look.",
     basePrice: 60.0,
     status: "DRAFT",
-    images: [{ url: "/products/converse-chuck.jpg" }],
-    thumbnail: { url: "/products/converse-chuck-thumb.jpg", preview: "" },
+    images: [{ url: "https://images-na.ssl-images-amazon.com/images/I/712Q5D1puML._AC_UL165_SR165,165_.jpg" }],
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/712Q5D1puML._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Converse",
     tags: ["casual", "sneakers"],
     createdAt: Date.now(),
@@ -162,8 +162,8 @@ export const relatedProducts: IProduct[] = [
     description: "Classic skate shoes with a durable canvas upper.",
     basePrice: 70.0,
     status: "DRAFT",
-    images: [{ url: "/products/vans-oldskool.jpg", }],
-    thumbnail: { url: "/products/vans-oldskool-thumb.jpg", preview: "" },
+    images: [{ url: "https://images-na.ssl-images-amazon.com/images/I/71iDp0O8UJL._AC_UL165_SR165,165_.jpg", }],
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71iDp0O8UJL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Vans",
     tags: ["skate", "casual"],
     createdAt: Date.now(),
@@ -187,7 +187,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 160.0,
     status: "DRAFT",
     images: [{ url: "/products/asics-gel-kayano.jpg", }],
-    thumbnail: { url: "/products/asics-gel-kayano-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "ASICS",
     tags: ["running", "stability"],
     createdAt: Date.now(),
@@ -211,7 +211,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 140.0,
     status: "DRAFT",
     images: [{ url: "/products/ua-hovr.jpg",  }],
-    thumbnail: { url: "/products/ua-hovr-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Under Armour",
     tags: ["running", "tech"],
     createdAt: Date.now(),
@@ -308,7 +308,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 75.0,
     status: "DRAFT",
     images: [{ url: "/products/fila-disruptor.jpg", }],
-    thumbnail: { url: "/products/fila-disruptor-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Fila",
     tags: ["retro", "casual"],
     createdAt: Date.now(),
@@ -332,7 +332,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 150.0,
     status: "DRAFT",
     images: [{ url: "/products/jordan-air1.jpg",  }],
-    thumbnail: { url: "/products/jordan-air1-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Jordan",
     tags: ["basketball", "classic"],
     createdAt: Date.now(),
@@ -356,7 +356,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 140.0,
     status: "DRAFT",
     images: [{ url: "/products/on-cloud-x.jpg" }],
-    thumbnail: { url: "/products/on-cloud-x-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "On",
     tags: ["training", "lightweight"],
     createdAt: Date.now(),
@@ -380,7 +380,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 160.0,
     status: "DRAFT",
     images: [{ url: "/products/hoka-clifton.jpg" }],
-    thumbnail: { url: "/products/hoka-clifton-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Hoka One One",
     tags: ["running", "cushioned"],
     createdAt: Date.now(),
@@ -404,7 +404,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 130.0,
     status: "DRAFT",
     images: [{ url: "/products/merrell-moab2.jpg"}],
-    thumbnail: { url: "/products/merrell-moab2-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Merrell",
     tags: ["hiking", "outdoor"],
     createdAt: Date.now(),
@@ -428,7 +428,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 120.0,
     status: "DRAFT",
     images: [{ url: "/products/columbia-redmond.jpg" }],
-    thumbnail: { url: "/products/columbia-redmond-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Columbia",
     tags: ["hiking", "waterproof"],
     createdAt: Date.now(),
@@ -452,7 +452,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 150.0,
     status: "DRAFT",
     images: [{ url: "/products/salomon-speedcross.jpg",  }],
-    thumbnail: { url: "/products/salomon-speedcross-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Salomon",
     tags: ["trail", "running"],
     createdAt: Date.now(),
@@ -476,7 +476,7 @@ export const relatedProducts: IProduct[] = [
     basePrice: 145.0,
     status: "DRAFT",
     images: [{ url: "/products/altra-lone-peak.jpg" }],
-    thumbnail: { url: "/products/altra-lone-peak-thumb.jpg", preview: "" },
+    thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Altra",
     tags: ["trail", "running"],
     createdAt: Date.now(),
@@ -492,7 +492,7 @@ export const relatedProducts: IProduct[] = [
 ];
 
 
-const RelatedProducts = () => {
+const RelatedProducts = ({title}: {title:string}) => {
     const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -505,8 +505,10 @@ const RelatedProducts = () => {
     }
   };
   return (
-    <section className="mt-10 relative">
-      <h2 className="text-2xl font-semibold mb-4">Products related to this item</h2>
+    <section className="mt-10 relative px-4">
+      <h2 className="text-2xl font-semibold mb-4">
+         {title}
+      </h2>
       <button
         onClick={() => scroll("left")}
         className="absolute left-0 max-sm:hidden sm:left-[-45px] top-1/2 flex items-center justify-center -translate-y-1/2 z-10 bg-white dark:bg-gray-900 w-[40px] h-[40px] rounded-full shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition"
@@ -538,7 +540,7 @@ const RelatedProducts = () => {
         //     <h3 className="text-sm font-medium line-clamp-2">{product.title}</h3>
         //     <p className="text-gray-900 font-bold mt-1">${product.price.toFixed(2)}</p>
         //   </div>
-        <MainCard product={product} />
+        <MainCard key={index} product={product} />
         ))}
       </div>
     </section>

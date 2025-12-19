@@ -77,7 +77,7 @@ const Variant = ({ product }: { product: IProduct }) => {
   const savings = (currentVariant.priceModifier ?? 0) > 0 ? Math.round((currentVariant.priceModifier ?? 0) * 0.1) : 0;
 
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm">
+    <div className="bg-white rounded-lg p-4  shadow-sm">
       <div className="space-y-3">
         <div className="flex items-baseline justify-between">
           <div className="text-sm text-gray-600">Price</div>
@@ -143,9 +143,9 @@ const Variant = ({ product }: { product: IProduct }) => {
 }`}
 
                 >
-                  <div className="w-14 h-14 shrink-0 rounded overflow-hidden border bg-white">
+                  <div className="w-16 h-16 shrink-0 rounded overflow-hidden border border-gray-100 bg-white">
                     {img ? (
-                      <img src={img} alt={`${product.name} ${label}`} className="w-full h-full object-cover" />
+                      <img src={img} alt={`${product.name} ${label}`} className="w-full h-full object-contain" />
                     ) : (
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">No image</div>
                     )}

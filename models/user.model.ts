@@ -56,7 +56,7 @@ interface PrimeMembership {
 
 // --- The Core User Schema ---
 
-interface IUser {
+export interface IUser {
   
   // --- Core Account Information ---
   fullName: string;
@@ -68,13 +68,22 @@ interface IUser {
   isAdmin: boolean;
   // --- Profile & Personalization ---
   profilePictureUrl?: string;
-
+ interests: {
+  tag: string;
+  score: number;
+  source: 'manual' | 'auto';
+  updatedAt: Date;
+}[];
   
   // --- Related Data Collections (Relationships) ---
   addresses: Schema.Types.ObjectId[];
   paymentMethods: PaymentMethod[];
   orderHistory: Schema.Types.ObjectId[]; // Array of order IDs
-  browsingHistory: Schema.Types.ObjectId[]; // Array of product IDs
+  browsingHistory: {
+    product: Schema.Types.ObjectId[],
+    viewedAt: Date,
+    viewCount:number
+  }[] // Array of product IDs
   wishLists: Schema.Types.ObjectId[]; // Array of wish list IDs
   
 
@@ -92,6 +101,33 @@ const UserSchema = new Schema<IUser>({
     required: true,
     unique: true
   },
+  interests: [
+  {
+    tag: {
+      type: String,
+      required: true,
+      index: true, // important for recommendations
+      lowercase: true,
+      trim: true
+    },
+    score: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 50
+    },
+    source: {
+      type: String,
+      enum: ['manual', 'auto'],
+      default: 'manual'
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }
+],
+
   hashedPassword: {
     type : String,
     required: true
@@ -120,11 +156,25 @@ const UserSchema = new Schema<IUser>({
        ref: "Order",
        required: true
    }],
-    browsingHistory: [{
-       type: Schema.Types.ObjectId,
-       ref: "Product",
-       required: true
-   }],
+    browsingHistory: [
+  {
+    product: {
+      type: Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+      index: true
+    },
+    viewedAt: {
+      type: Date,
+      default: Date.now
+    },
+    viewCount: {
+      type: Number,
+      default: 1
+    }
+  }
+]
+,
     wishLists: [{
        type: Schema.Types.ObjectId,
        ref: "Product",

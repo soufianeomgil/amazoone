@@ -1,5 +1,9 @@
 "use client";
 
+// handle language part
+// handle address header open modal click
+// finish the profile page
+// handle image profile pic;
 
 import { z } from "zod";
 import { useForm, type Resolver } from "react-hook-form";

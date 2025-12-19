@@ -1,7 +1,8 @@
 
 import { getAllProducts } from '@/actions/product.actions'
 import { getSavedListsAction } from '@/actions/savedList.actions'
-import { MainCard } from '@/components/cards/MainCard'
+import MainCard from '@/components/cards/MainCard'
+
 import OpenListModelBtn from '@/components/shared/clientBtns/OpenListModelBtn'
 import { DotsVerticalIcon } from '@/components/shared/icons'
 
@@ -42,7 +43,7 @@ const page = async() => {
       <div className="w-[60px] h-[60px] bg-white border border-gray-100 rounded-md flex items-center justify-center overflow-hidden">
         <img
           className="w-full h-full object-contain"
-          src={list?.items[0]?.variant?.images[0]?.url || "https://m.media-amazon.com/images/I/41qmXnVZFmL.jpg"}
+          src={list.items?.[0]?.variant?.images?.[0]?.url ?? "https://m.media-amazon.com/images/I/41qmXnVZFmL.jpg"}
           alt="list preview"
         />
       </div>

@@ -9,11 +9,12 @@ import Link from "next/link";
 import CheckoutBox from "./_component/CheckoutBox";
 import { Button } from "@/components/ui/button";
 import EmptyCart from "@/components/shared/Empty";
+import SoldWith from "./_component/SoldWith";
 
 const page = async () => {
   // Authorize & fetch resources in parallel
-  const session = await auth()
-  const userId = session?.user?.id || ''
+      const session = await auth()
+      const userId = session?.user?.id || ''
       const result = await getAuthenticatedUserCart({userId: userId})
       const res = await getCurrentUser()
       const {data,error} = await getUserSaveForLaterItems({})
@@ -28,7 +29,7 @@ const page = async () => {
   const hasSavedItems = Array.isArray(data?.items) && data.items.length > 0;
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
+    <div className="max-w-7xl overflow-hidden mx-auto p-4">
       {hasCartItems ? (
         <>
           <h1 className="text-2xl mb-7 font-semibold">Shopping Cart</h1>
@@ -38,7 +39,7 @@ const page = async () => {
             <div className="lg:col-span-3 ">
               <div className="flex flex-col gap-6">
                 {/* Address (only if user present) */}
-                {userId && <AddressCard user={res.data?.user} />}
+                {userId && <AddressCard {...({ user: res.data?.user } as any)} />}
 
                 {/* Cart items card */}
                 <section className="bg-white p-4 rounded-md shadow-sm">
@@ -87,7 +88,7 @@ const page = async () => {
                   </div>
                 </section>
                 )}
-               
+                <SoldWith title="Frequently bought with items in your cart" />
               </div>
             </div>
 
@@ -96,12 +97,17 @@ const page = async () => {
               <div className="sticky top-24 space-y-4">
                 {/* Desktop */}
                 <div className="hidden lg:block">
-                  <CheckoutBox user={res.data?.user ?? null} data={result?.data?.userCart} />
+                  <CheckoutBox user={res.data?.user ?? null} 
+                    // @ts-ignore
+                  data={result?.data?.userCart} />
                 </div>
 
                 {/* Mobile */}
                 <div className="lg:hidden">
-                  <CheckoutBox user={res.data?.user ?? null} isMobile data={result?.data?.userCart} />
+                
+                  <CheckoutBox user={res.data?.user ?? null} isMobile
+                    // @ts-ignore
+                   data={result?.data?.userCart} />
                 </div>
 
                 {/* Optional: quick link to saved for later if cart empty but saved items exist */}

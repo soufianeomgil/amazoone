@@ -11,7 +11,7 @@ type Props = {
   isMobile?: boolean;
   user: IUser | null
   data: {
-    items: ItemProps[];
+    items: ItemProps[] | undefined;
   };
 };
 

@@ -42,6 +42,8 @@ export interface IProduct {
   name: string;
   description: string;
   brand: string;
+  isDeleted:boolean;
+  deletedAt:Date | null
   category: string; // Reference to a Category model
   isBestSeller: boolean;
   isTrendy: boolean;
@@ -123,6 +125,16 @@ const ProductSchema = new Schema<IProduct>({
   reviewCount: { type: Number, required: true, default: 0, min: 0 },
   //reviews: [ReviewSchema],
   variants: [VariantSchema],
+  isDeleted: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
   attributes: [attributeSchema],
   tags: [{ type: String }],
   isFeatured: { type: Boolean, default: false },
@@ -153,7 +165,10 @@ ProductSchema.virtual('totalStock').get(function() {
 ProductSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' });
 ProductSchema.index({ category: 1, basePrice: 1 });
 ProductSchema.index({ isFeatured: -1 });
-
+ProductSchema.pre(/^find/, function (this: any, next) {
+  this.where({ isDeleted: { $ne: true } });
+  next();
+});
 /**
  * The Mongoose model for the Product.
  */

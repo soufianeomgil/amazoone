@@ -6,6 +6,7 @@ import SyncCart from "@/components/shared/SyncCart"
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner";
+import { initServer } from "@/lib/init";
 
 
 const roboto  = Roboto({
@@ -29,6 +30,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth() 
+  initServer();
 //  if(!session) {
 //     redirect("/sign-up")
 //  }

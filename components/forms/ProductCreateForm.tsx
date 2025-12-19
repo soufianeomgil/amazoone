@@ -630,7 +630,7 @@ console.log(form.formState.errors, "errors")
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Product Description</FormLabel>
+              <FormLabel className="text-black">Product Description</FormLabel>
               <FormControl>
               <Editor
                   value={field.value}

@@ -177,7 +177,7 @@ const Footer: React.FC = () => {
       </div>
 
       {/* BOTTOM GRID */}
-      <div className="bg-[#131921] py-8 text-xs">
+      {/* <div className="bg-[#131921] py-8 text-xs">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-x-4 gap-y-6">
             {footerBottomGrid.map((item, index) => (
@@ -202,7 +202,7 @@ const Footer: React.FC = () => {
             © 1996-2024, Amazon.com, Inc. or its affiliates
           </p>
         </div>
-      </div>
+      </div> */}
     </footer>
   );
 };

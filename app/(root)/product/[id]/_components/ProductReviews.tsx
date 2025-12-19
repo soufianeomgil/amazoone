@@ -47,8 +47,8 @@ const ProductReviews = ({productId,product}:  {product:IProduct,productId:string
   },
 }
   return (
-    <>
-    <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+    <div id="reviews">
+    <div  className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
       {/* <div className="flex flex-col-reverse  justify-between w-full">
          
         <div className="flex flex-col gap-2 w-full justify-end!">
@@ -257,7 +257,7 @@ const ProductReviews = ({productId,product}:  {product:IProduct,productId:string
 
 </div>
         <WriteReviewModal product={product}  id={productId} open={open} setOpen={setOpen} />
-    </>
+    </div>
   )
 }
 

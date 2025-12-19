@@ -1,5 +1,4 @@
 
-
 import { getAllProducts } from '@/actions/product.actions';
 import Hero from '@/components/shared/Hero';
 
@@ -12,7 +11,13 @@ import { Star, StarIcon } from 'lucide-react';
 import Link from 'next/link';
 
 import React from 'react';
-
+// best sellers in school and work bags
+// bags under 50
+// best sellers in sport bags
+// best sellers in class bags
+// popular bags
+// new arrivals
+// trendy bags
 
 const categoryData = [
     {

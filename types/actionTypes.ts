@@ -1,6 +1,6 @@
 import { IAddress } from "@/models/address.model";
 import { OrderStatus } from "@/models/order.model";
-import { IReview } from "@/models/product.model";
+
 import { ObjectId, Schema } from "mongoose";
 
 export enum ProductStatus {
@@ -82,7 +82,7 @@ export interface IProduct {
   sellerId: string;
   averageRating: number;
   reviewCount: number;
-  recentReviews: IReview[];
+ 
   technicalSpecifications: ProductAttribute[];
 }
  

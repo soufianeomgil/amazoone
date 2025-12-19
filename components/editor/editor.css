@@ -1,99 +1,132 @@
 /* editor.css */
-@import url('@radix-ui/colors/tomato.css'); 
+@import url('@radix-ui/colors/tomato.css');
 @import url('@radix-ui/colors/mauve.css');
 
+/* Root */
 .mdx-editor-tall {
-  
   width: 100%;
   box-sizing: border-box;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
+/* Light theme (Product-friendly) */
 .light-editor {
-  --accentBase: var(--tomato-1);
-  --accentBgSubtle: var(--tomato-2);
-  --accentBg: var(--tomato-3);
-  --accentBgHover: var(--tomato-4);
-  --accentBgActive: var(--tomato-5);
-  --accentLine: var(--tomato-6);
-  --accentBorder: var(--tomato-7);
-  --accentBorderHover: var(--tomato-8);
   --accentSolid: var(--tomato-9);
   --accentSolidHover: var(--tomato-10);
   --accentText: var(--tomato-11);
-  --accentTextContrast: var(--tomato-12);
 
-  --baseBase: var(--mauve-1);
-  --baseBgSubtle: var(--mauve-2);
-  --baseBg: var(--mauve-3);
-  --baseBgHover: var(--mauve-4);
-  --baseBgActive: var(--mauve-5);
-  --baseLine: var(--mauve-6);
-  --baseBorder: var(--mauve-7);
-  --baseBorderHover: var(--mauve-8);
-  --baseSolid: var(--mauve-9);
-  --baseSolidHover: var(--mauve-10);
-  --baseText: var(--mauve-11);
-  --baseTextContrast: var(--mauve-12);
+  --baseBg: #ffffff;
+  --baseBorder: #e5e7eb;
+  --baseText: #111827;
 
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 
+  background: var(--baseBg);
   color: var(--baseText);
-  --basePageBg: "#f3f3f3";
-  background: var(--basePageBg);
-}
-/* Ensure unordered and ordered lists display correctly */
-.mdx-editor-tall .cm-content ul {
-  list-style-type: disc; /* Show bullets */
-  padding-left: 1.5rem;  /* Indent */
-  margin: 0.5rem 0;
 }
 
-.mdx-editor-tall .cm-content ol {
-  list-style-type: decimal; /* Numbered lists */
-  padding-left: 1.5rem;
-  margin: 0.5rem 0;
+/* Dark theme */
+.dark-editor {
+  background: rgb(49, 49, 49);
+  color: #f9fafb;
 }
 
-/* Nested lists */
-.mdx-editor-tall .cm-content ul ul,
-.mdx-editor-tall .cm-content ol ol {
-  padding-left: 1.5rem;
-}
-
-/* Ensure light text color */
-.mdx-editor-tall .cm-content li {
-  color: var(--mauve-12);
-}
-
-/* Optional: better spacing between list items */
-.mdx-editor-tall .cm-content li + li {
-  margin-top: 0.25rem;
-}
-
-/* Responsive adjustments */
-.mdx-editor-tall .mdx-editor-toolbar {
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.mdx-editor-tall textarea,
+/* Editor surface */
 .mdx-editor-tall .cm-editor {
+  min-height: 320px;
+  padding: 1rem 1.25rem;
+  line-height: 1.75;
   font-size: 1rem;
-  line-height: 1.6;
-  padding: 0.75rem;
+}
+
+/* Typography */
+.mdx-editor-tall .cm-content {
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.mdx-editor-tall .cm-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.mdx-editor-tall .cm-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.mdx-editor-tall .cm-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+}
+
+/* Paragraphs */
+.mdx-editor-tall .cm-content p {
+  margin: 0.5rem 0;
+}
+
+/* Lists */
+.mdx-editor-tall .cm-content ul,
+.mdx-editor-tall .cm-content ol {
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.mdx-editor-tall .cm-content li {
+  margin: 0.35rem 0;
+}
+
+/* Quotes */
+.mdx-editor-tall blockquote {
+  border-left: 4px solid var(--accentSolid);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #374151;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+/* Tables */
+.mdx-editor-tall table {
   width: 100%;
-  box-sizing: border-box;
+  border-collapse: collapse;
+  margin: 1rem 0;
 }
 
-.mdx-editor-tall .cm-editor {
-  min-height: 300px;
+.mdx-editor-tall th,
+.mdx-editor-tall td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
 }
 
-/* Adjust buttons in toolbar for mobile */
-.mdx-editor-tall .mdx-editor-toolbar button {
-  font-size: 0.875rem;
+.mdx-editor-tall th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+/* Toolbar */
+.mdx-editor-toolbar {
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafafa;
+  padding: 0.5rem;
+}
+
+.mdx-editor-toolbar button {
+  font-size: 0.85rem;
   padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .mdx-editor-tall .cm-editor {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
 }

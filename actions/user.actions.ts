@@ -3,12 +3,14 @@
 import connectDB from "@/database/db";
 import { action } from "@/lib/handlers/action";
 import handleError from "@/lib/handlers/error"
-import { NotFoundError } from "@/lib/http-errors";
-import { ToggleWishlistSchema } from "@/lib/zod";
+import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors";
+import { EditUserProfileSchema, ToggleWishlistSchema, UpdateUserInterestsParams, UpdateUserInterestsSchema } from "@/lib/zod";
 import { auth } from "@/auth"
 import { Product } from "@/models/product.model";
-import User from "@/models/user.model";
-import { IUser, ToggleWishlistParams } from "@/types/actionTypes";
+import User, { IUser } from "@/models/user.model";
+import { ToggleWishlistParams } from "@/types/actionTypes";
+import bcrypt from "bcryptjs";
+import z from "zod";
 export async function getCurrentUser(): Promise<ActionResponse<{user: IUser | null}>>{
   const currentUser = await auth()
  if(!currentUser?.user)  return {
@@ -77,3 +79,137 @@ export async function toggleAddToWishlist(params: ToggleWishlistParams): Promise
     return handleError(error) as ErrorResponse;
   }
 }
+interface EditProfileParams {
+  name:string;
+  email: string;
+  gender: 'male' | "female"
+  phone:string;
+  password?:string
+}
+export async function editUserProfile(
+  params: EditProfileParams
+): Promise<ActionResponse> {
+  const validatedResult = await action({
+    params,
+    schema: EditUserProfileSchema,
+    authorize: true,
+  });
+
+  if (validatedResult instanceof Error) {
+    return handleError(validatedResult) as ErrorResponse;
+  }
+
+  const session = validatedResult.session;
+  if (!session?.user?.id) throw new UnAuthorizedError("");
+
+  const { name, email, password, phone, gender } = validatedResult.params!;
+
+  try {
+    await connectDB();
+
+    const user = (await User.findById(session.user.id)) 
+    if (!user) throw new NotFoundError("User");
+
+    /* -------------------- EMAIL UNIQUENESS -------------------- */
+    if (email && email !== user.email) {
+      const exists = await User.findOne({ email });
+      if (exists) {
+        throw new Error("Email is already in use");
+      }
+      user.email = email;
+    }
+
+    /* -------------------- BASIC PROFILE UPDATES -------------------- */
+    if (name && name !== user.fullName) {
+      user.fullName = name;
+    }
+
+    if (phone !== undefined && phone !== user.phoneNumber) {
+      user.phoneNumber = phone;
+    }
+
+    if (gender && gender !== user.gender) {
+      user.gender = gender;
+    }
+
+    /* -------------------- PASSWORD UPDATE (OPTIONAL) -------------------- */
+    if (password) {
+      const hashed = await bcrypt.hash(password,12); // 🔐 your existing util
+      user.hashedPassword = hashed;
+    }
+
+    await user.save();
+
+    return {
+      success: true,
+      message: "Profile updated successfully",
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+
+
+export async function updateUserInterests(
+  params: { interests: string[] }
+): Promise<ActionResponse> {
+  const validated = await action({
+    params,
+    schema: z.object({
+      interests: z.array(z.string().min(1)).max(20),
+    }),
+    authorize: true,
+  })
+
+  if (validated instanceof Error)
+    return handleError(validated) as ErrorResponse
+
+  const session = validated.session
+  if (!session?.user?.id) throw new UnAuthorizedError("")
+
+  try {
+    await connectDB()
+
+    const user = await User.findById(session.user.id)
+    if (!user) throw new NotFoundError("User")
+
+    const now = new Date()
+
+    /** ✅ Merge with existing interests (DON’T wipe scores) */
+    const existingMap = new Map(
+      user.interests.map((i: any) => [i.tag, i])
+    )
+
+    const updatedInterests = params.interests.map(tag => {
+      const existing = existingMap.get(tag)
+
+      if (existing) {
+        const rawExisting = (existing && typeof (existing as any).toObject === "function")
+          ? (existing as any).toObject()
+          : (existing as any)
+
+        return {
+          ...rawExisting,
+          updatedAt: now,
+          source: "manual",
+        }
+      }
+
+      return {
+        tag,
+        score: 50,
+        source: "manual",
+        updatedAt: now,
+      }
+    })
+
+    user.interests = updatedInterests
+    await user.save()
+
+    return { success: true }
+  } catch (err) {
+    return handleError(err) as ErrorResponse
+  }
+}
+

@@ -1,14 +1,18 @@
 "use server"
 
 import { ROUTES } from "@/constants/routes"
+import cron from "node-cron";
 import connectDB from "@/database/db"
 import { action } from "@/lib/handlers/action"
+import { deleteFromCloudinary } from "@/lib/handlers/cloudinaryHelper"
 import handleError from "@/lib/handlers/error"
-import { NotFoundError } from "@/lib/http-errors"
-import { GetSingleProductSchema, productSchema} from "@/lib/zod"
+import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors"
+import { DeleteProductSchema, GetSingleProductSchema, productSchema} from "@/lib/zod"
 import { IProduct, Product } from "@/models/product.model"
 import { CreateProductParams, GetSingleProductParams } from "@/types/actionTypes"
 import { revalidatePath } from "next/cache"
+import Review from "@/models/review.model";
+import { auth } from "@/auth";
 export async function CreateProductAction(params:CreateProductParams): Promise<ActionResponse> {
    const validatedResult = await action({ params, schema: productSchema, authorize: true })
    if(validatedResult instanceof Error) {
@@ -189,7 +193,7 @@ export async function getAllProducts(
     const normalized = (products || []).map((p: IProduct) => {
      // const thumbnail = p.thumbnail?.url ?? p.thumbnail ?? (Array.isArray(p.images) && p.images[0]?.url) ?? null;
       return {
-         _id: p._id?.toString?.(),
+        _id: p._id?.toString?.(),
         name: p.name,
        //  slug: p.slug ?? null,
         description: p.description,
@@ -199,8 +203,8 @@ export async function getAllProducts(
         status: p.status,
         thumbnail:  p.thumbnail,
         tags: p.tags,
-        reviews: p.reviews,
-        
+        isTrendy: p.isTrendy,
+        isBestSeller: p.isBestSeller,
         images: p.images ?? [],
         rating: p.rating ?? 0,
         reviewCount: p.reviewCount ?? 0,
@@ -264,60 +268,7 @@ export async function getSignleProduct(params:GetSingleProductParams): Promise<A
    }
 }
 
-//  interface GetSearchInputResultsParams {
-//   query: string;
-//   limit : number;
-// }
-// export async function getSuggestionResult(
-//   params: GetSearchInputResultsParams
-// ): Promise<ActionResponse<{ products: IProduct[] }>> {
-//   const { query, limit } = params
 
-//   if (!query || typeof query !== 'string' || !query.trim()) {
-//     return { success: false }
-//   }
-
-//   try {
-//     await connectDB()
-
-//     const products = await Product.aggregate([
-//       {
-//         $search: {
-//           index: 'default', // or your custom index name
-//           text: {
-//             query,
-//             path: ['name', 'description', 'category'],
-//             fuzzy: {
-//               maxEdits: 2, // allows small typos
-//               prefixLength: 1, // first character must match
-//             },
-//           },
-//         },
-//       },
-//       { $limit: limit },
-//       {
-//         $project: {
-//           name: 1,
-//           basePrice: 1,
-//           thumbnail: 1,
-//           variants: 1,
-//           brand: 1,
-//           images: 1,
-//           description: 1,
-//           category: 1,
-//           score: { $meta: 'searchScore' },
-//         },
-//       },
-//     ])
-
-//     return {
-//       success: true,
-//       data: { products: JSON.parse(JSON.stringify(products))},
-//     }
-//   } catch (error) {
-//     return handleError(error) as ErrorResponse
-//   }
-// }
 
 interface GetSearchInputResultsParams {
   query: string
@@ -377,6 +328,224 @@ export async function getSuggestionResult(
     }
   } catch (error) {
     return handleError(error) as ErrorResponse
+  }
+}
+
+
+
+interface DeleteProductParams {
+  productId: string;
+}
+
+export async function softDeleteProduct(
+  params: DeleteProductParams
+): Promise<ActionResponse> {
+  const validated = await action({
+    params,
+    schema: DeleteProductSchema,
+    authorize: true,
+  });
+
+  if (validated instanceof Error)
+    return handleError(validated) as ErrorResponse;
+
+  const session = validated.session;
+
+  if (!session?.user?.isAdmin) {
+    throw new UnAuthorizedError("Admin access required");
+  }
+
+  const { productId } = validated.params!;
+
+  try {
+    await connectDB();
+
+    const product = await Product.findById(productId);
+    if (!product) throw new NotFoundError("Product");
+
+    // ⛔ Already deleted
+    if (product.isDeleted) {
+      return {
+        success: true,
+        message: "Product already deleted",
+      };
+    }
+
+    product.isDeleted = true;
+    product.deletedAt = new Date();
+    
+    await product.save();
+
+    return {
+      success: true,
+      message: "Product soft deleted successfully",
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+export async function restoreProduct(
+  params: DeleteProductParams
+): Promise<ActionResponse> {
+  const validated = await action({
+    params,
+    schema: DeleteProductSchema,
+    authorize: true,
+  });
+
+  if (validated instanceof Error)
+    return handleError(validated) as ErrorResponse;
+
+  const session = validated.session;
+  if (!session?.user?.isAdmin)
+    throw new UnAuthorizedError("Admin access required");
+
+  try {
+    await connectDB();
+
+    const product = await Product.findById(params.productId);
+    if (!product) throw new NotFoundError("Product");
+
+    product.isDeleted = false;
+    product.deletedAt = null;
+
+    await product.save();
+    revalidatePath(ROUTES.admin.products)
+    revalidatePath("/")
+    return {
+      success: true,
+      message: "Product restored successfully",
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+
+const HARD_DELETE_AFTER_DAYS = 30;
+
+export async function startHardDeleteCron() {
+  // ⏰ Runs every day at 03:00 AM
+  cron.schedule("0 3 * * *", async () => {
+    console.log("🧹 Running hard delete job...");
+
+    try {
+      await connectDB();
+
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - HARD_DELETE_AFTER_DAYS);
+
+      const productsToDelete = await Product.find({
+        isDeleted: true,
+        deletedAt: { $lte: cutoffDate },
+      });
+
+      for (const product of productsToDelete) {
+        // 🖼️ Delete images from Cloudinary
+        if (product.images?.length) {
+          for (const img of product.images) {
+            if (img.public_id) {
+              await deleteFromCloudinary(img.public_id);
+            }
+          }
+        }else if(product.thumbnail.url && product.thumbnail.public_id) {
+            await deleteFromCloudinary(product.thumbnail.public_id)
+        } 
+
+        // ❌ Permanent DB delete
+       
+      
+        await Review.deleteMany({product: product._id})
+        
+         await Product.findByIdAndDelete(product._id);
+        // delete relevant stuff
+        console.log(`🔥 Hard deleted product ${product._id}`);
+      }
+
+      console.log(`✅ Hard delete job finished (${productsToDelete.length} products)`);
+    } catch (error) {
+      console.error("❌ Hard delete cron failed", error);
+    }
+  });
+}
+
+export async function getDeletedProducts(): Promise<ActionResponse<{products:IProduct[]}>> {
+  const session = await auth()
+  if(!session) throw new UnAuthorizedError("")
+    if(session && !session.user.isAdmin) throw new UnAuthorizedError("admin access only")
+  await connectDB();
+ 
+  try {
+    const products = await Product.find({ isDeleted: true })
+    .sort({ deletedAt: -1 })
+
+  return {
+    success: true,
+    data: { products: JSON.parse(JSON.stringify(products))}
+  }
+  } catch (error) {
+     return handleError(error) as ErrorResponse
+  }
+  
+}
+
+export async function hardDeleteProduct(
+  params: DeleteProductParams
+): Promise<ActionResponse> {
+
+  const validatedResult = await action({
+    params,
+    schema: DeleteProductSchema,
+    authorize: true,
+  });
+
+  if (validatedResult instanceof Error)
+    return handleError(validatedResult) as ErrorResponse;
+
+  const session = validatedResult.session;
+  if (!session?.user?.isAdmin)
+    throw new UnAuthorizedError("Admin access only");
+
+  const { productId } = validatedResult.params!;
+
+  try {
+    await connectDB();
+
+    const product = await Product.findOne({
+      _id: productId,
+      isDeleted: true,
+    });
+
+    if (!product) {
+      throw new NotFoundError("Deleted product");
+    }
+
+    /* 🖼️ Delete gallery images */
+    if (product.images?.length) {
+      for (const img of product.images) {
+        if (img.public_id) {
+          await deleteFromCloudinary(img.public_id);
+        }
+      }
+    }
+
+    /* 🖼️ Delete thumbnail */
+    if (product.thumbnail?.public_id) {
+      await deleteFromCloudinary(product.thumbnail.public_id);
+    }
+
+    /* 🗑️ Delete related reviews */
+    await Review.deleteMany({ product: product._id });
+
+    /* ❌ Delete product */
+    await Product.findByIdAndDelete(product._id);
+
+    console.log(`🔥 Hard deleted product ${product._id}`);
+
+    return { success: true };
+
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
   }
 }
 

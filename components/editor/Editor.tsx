@@ -42,10 +42,11 @@ const Editor = ({ value, editorRef, disabled, fieldChange, ...props }: Props) =>
   const editorClassName =
     resolvedTheme === "dark"
       ? "mdx-editor-tall markdown-editor !bg-[rgb(49,49,49)] dark-editor w-full border !text-white"
-      : "mdx-editor-tall markdown-editor light-editor w-full border";
+      : "mdx-editor-tall markdown-editor light-editor  shadow-sm w-full ";
 
   return (
-    <MDXEditor
+    <MDXEditor 
+      placeholder="Describe your product benefits, materials, use cases…"
       key={resolvedTheme}
       markdown={value}
       ref={editorRef}
@@ -65,6 +66,7 @@ const Editor = ({ value, editorRef, disabled, fieldChange, ...props }: Props) =>
         toolbarPlugin({
           toolbarContents: () => (
             <ConditionalContents
+            
               options={[
                 {
                   fallback: () => (
@@ -76,9 +78,9 @@ const Editor = ({ value, editorRef, disabled, fieldChange, ...props }: Props) =>
                       <ListsToggle />
                       <Separator />
                       <CreateLink />
-                      <InsertImage />
+                      
                       <Separator />
-                      <InsertTable />
+                      
                       <InsertThematicBreak />
                     </div>
                   ),

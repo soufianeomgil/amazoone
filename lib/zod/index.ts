@@ -399,6 +399,62 @@ const VariantSnapshotSchema = z.object({
     })
   ).optional(),
 });
+export const EditProfileSchema = z.object({
+  fullName: z.string().min(1, {message: "fullName is required"}),
+   phone: z
+    .string()
+    .min(1, { message: "Phone number is required" })
+    .regex(/^(\+212|0)(5|6|7)\d{8}$/, {
+      message:
+        "Invalid phone. Use +212XXXXXXXXX or 0XXXXXXXXX (Moroccan numbers start with 5/6/7).",
+    }),
+  email: z.email({message: "Email address is required"}),
+  password: z.string().optional(),
+  gender: z.enum(["male","female"], {message: "please provide a valid gender type"}),
+
+})
+export const DeleteProductSchema = z.object({
+  productId: z.string().min(1, {message: "Product ID is required"})
+})
+export const EditUserProfileSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(60, "Name is too long"),
+
+  email: z
+    .string()
+    .email("Invalid email address"),
+
+  gender: z.enum(["male", "female"]),
+
+  phone: z
+    .string()
+    .min(6, "Phone number is too short")
+    .max(20, "Phone number is too long"),
+
+  password: z
+    .string()
+    // .min(8, "Password must be at least 8 characters")
+    // .max(100)
+    .optional(),
+});
+export const trackProductViewSchema = z.object({
+  userId: z.string().min(1,'userId is required'),
+  productId: z.string().min(1,'productId is required'),
+  productTags: z.array(z.string().min(1))
+})
+export const UpdateUserInterestsSchema = z.object({
+  interests: z
+    .array(z.string().min(1))
+    .min(1, "Select at least one interest")
+    .max(20, "Too many interests"),
+});
+
+export type UpdateUserInterestsParams = z.infer<
+  typeof UpdateUserInterestsSchema
+>;
+
 
 export const CreateReviewSchema = z.object({
   productId: z.string().min(1, {message: "product ID is required"}),

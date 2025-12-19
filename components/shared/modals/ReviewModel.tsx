@@ -88,9 +88,9 @@ export function WriteReviewModal({open,setOpen,id,product}: {
     />
 
     {/* MODAL */}
-    <div className="relative z-10 sm:max-w-2xl w-[95%] h-[90vh] overflow-hidden rounded-2xl bg-white shadow-xl">
+    <div className="relative z-10 sm:max-w-2xl w-[95%] h-[95%]  overflow-hidden rounded-2xl bg-white shadow-xl">
       {/* HEADER */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+      <div className="  bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">
             Write a review
@@ -109,7 +109,7 @@ export function WriteReviewModal({open,setOpen,id,product}: {
       </div>
 
       {/* CONTENT */}
-      <div className="h-full overflow-y-auto">
+      <div className="h-full overflow-y-scroll" >
        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
 
@@ -373,7 +373,7 @@ export function WriteReviewModal({open,setOpen,id,product}: {
             </div>
 
             {/* FOOTER */}
-            <div className="border-t border-gray-100 px-6 py-4 flex items-center justify-between bg-gray-50">
+            <div className="border-t border-gray-100 px-6 py-4 mt-auto flex items-center justify-between bg-gray-50">
               <p className="text-xs text-gray-500">
                 Reviews are public and follow our guidelines
               </p>

@@ -130,7 +130,7 @@ const UserSchema = new Schema<IUser>({
 
   hashedPassword: {
     type : String,
-    required: true
+    default: null
   },
    isVerified: {
      type: Boolean,
@@ -143,7 +143,7 @@ const UserSchema = new Schema<IUser>({
    gender:  {
      type: String,
      enum: ["male", "female"],
-     required: true
+     default: "female"
    },
    phoneNumber: {
      type : String
@@ -154,7 +154,7 @@ const UserSchema = new Schema<IUser>({
    orderHistory: [{
        type: Schema.Types.ObjectId,
        ref: "Order",
-       required: true
+       default: []
    }],
     browsingHistory: [
   {
@@ -178,12 +178,12 @@ const UserSchema = new Schema<IUser>({
     wishLists: [{
        type: Schema.Types.ObjectId,
        ref: "Product",
-       required: true
+       default: []
    }],
     addresses: [{
        type: Schema.Types.ObjectId,
        ref: "Address",
-       required: true
+        default: []
    }],
    lastLogin: {
       type: Date,

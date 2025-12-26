@@ -6,6 +6,8 @@ import { EditProfileForm } from '@/components/forms/EditUserProfile'
 import EditBtn from './_components/EditBtn'
 import { getCurrentUser } from '@/actions/user.actions'
 import { IUser } from '@/models/user.model'
+import ProfileItems from '@/components/shared/navbars/ProfileItems'
+import RightSidebar from '@/components/shared/navbars/RightSidebar'
 
 
 const page = async() => {
@@ -13,14 +15,16 @@ const page = async() => {
   return (
     <div className='w-full bg-white'>
       
- <div className=' max-w-7xl gap-7 flex max-lg:flex-col mx-auto py-6'>
-  <div className='flex sm:flex-col max-sm:px-3 items-center sm:w-[250px] w-full  gap-2'>
+ <div className=' max-w-7xl gap-7 flex max-lg:flex-col mx-auto sm:py-6'>
+  {/* <div className='flex sm:flex-col max-sm:px-3 items-center sm:w-[250px] w-full  gap-2'>
     
         <img className='sm:w-[100px] w-[70px] h-[70px] sm:h-[100px] rounded-full object-contain '
          src={result.data?.user?.profilePictureUrl ?? "https://yt3.ggpht.com/MH9TWKPxjVZNjfGbZGLa9D71D-LVpTOPJbkh_abunMIfS6Mzqeh7M4c19eQdcp5i9dTQvIodUA=s48-c-k-c0x00ffffff-no-rj"} alt={result.data?.user?.fullName} />
     
     <EditBtn user={result.data?.user} />
-  </div>
+  </div> */}
+  <ProfileItems />
+        <RightSidebar />
     <div className='flex flex-col px-3 flex-1'>
  <div className='flex flex-col space-y-2.5'>
              <h2 className='capitalize font-bold text-black sm:text-3xl text-xl  '>Your profile</h2>

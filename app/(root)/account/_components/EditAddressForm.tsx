@@ -100,7 +100,7 @@ const EditAddressForm = ({address}: {address:IAddress}) => {
                         <FormItem>
                           <FormLabel>Full name (First and Last name)</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input className="input_styles" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -115,7 +115,7 @@ const EditAddressForm = ({address}: {address:IAddress}) => {
                         <FormItem>
                           <FormLabel>Phone number</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input className="input_styles" {...field} />
                           </FormControl>
                           <p className="text-xs text-gray-500 mt-1">
                             May be used to assist delivery
@@ -133,7 +133,7 @@ const EditAddressForm = ({address}: {address:IAddress}) => {
                         <FormItem>
                           <FormLabel>Address</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="Street address or P.O. Box" />
+                            <Input className="input_styles" {...field} placeholder="Street address or P.O. Box" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -148,7 +148,7 @@ const EditAddressForm = ({address}: {address:IAddress}) => {
                           <FormControl>
                             <Input
                               placeholder="Apt, suite, unit, building, floor, etc. (optional)"
-                              className="mt-2"
+                              className="input_styles"
                               name={field.name}
                               value={field.value ?? ""}
                               onChange={field.onChange}
@@ -171,7 +171,7 @@ const EditAddressForm = ({address}: {address:IAddress}) => {
                             <FormItem>
                               <FormLabel>City</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input className="input_styles" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -218,7 +218,7 @@ const EditAddressForm = ({address}: {address:IAddress}) => {
                             <FormItem>
                               <FormLabel>Postal Code</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input className="input_styles" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -261,7 +261,7 @@ const EditAddressForm = ({address}: {address:IAddress}) => {
                                    Delivery Instuctions
                                 </FormLabel>
                                 <FormControl>
-                                  <Textarea className="border border-gray-300" rows={4} {...field} />
+                                  <Textarea className="input_styles" rows={4} {...field} />
                                 </FormControl>
                                 <FormMessage className="text-red-500 text-sm font-medium" />
                                 <FormDescription className="text-sm text-gray-700 font-medium">

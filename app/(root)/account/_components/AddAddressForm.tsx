@@ -123,7 +123,13 @@ const AddAddressForm = () => {
                   <FormItem>
                     <FormLabel>Full name (First and Last name)</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="John Doe" />
+                      <Input className="
+                          w-full rounded-xl border border-gray-300 bg-gray-50
+                          px-4 py-3 text-sm text-gray-900
+                          placeholder:text-gray-700
+                          focus:bg-white focus:border-orange-400
+                          focus:ring-2 focus:ring-orange-200 outline-none
+                        " {...field} placeholder="John Doe" />
                     </FormControl>
                      <FormMessage className="text-red-500 text-sm font-medium" />
                   </FormItem>
@@ -138,7 +144,13 @@ const AddAddressForm = () => {
                   <FormItem>
                     <FormLabel>Phone number</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="+212 6 12 34 56 78" />
+                      <Input className="
+                          w-full rounded-xl border border-gray-300 bg-gray-50
+                          px-4 py-3 text-sm text-gray-900
+                          placeholder:text-gray-700
+                          focus:bg-white focus:border-orange-400
+                          focus:ring-2 focus:ring-orange-200 outline-none
+                        " {...field} placeholder="+212 6 12 34 56 78" />
                     </FormControl>
                     <p className="text-xs text-gray-500 mt-1">
                       May be used to assist delivery
@@ -156,7 +168,13 @@ const AddAddressForm = () => {
                   <FormItem>
                     <FormLabel>Address</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Street address or P.O. Box" />
+                      <Input className="
+                          w-full rounded-xl border border-gray-300 bg-gray-50
+                          px-4 py-3 text-sm text-gray-900
+                          placeholder:text-gray-700
+                          focus:bg-white focus:border-orange-400
+                          focus:ring-2 focus:ring-orange-200 outline-none
+                        " {...field} placeholder="Street address or P.O. Box" />
                     </FormControl>
                      <FormMessage className="text-red-500 text-sm font-medium" />
                   </FormItem>
@@ -172,7 +190,13 @@ const AddAddressForm = () => {
                       <Input
                         {...field}
                         placeholder="Apt, suite, unit, building, floor, etc. (optional)"
-                        className="mt-2"
+                        className="
+                          w-full rounded-xl border border-gray-300 bg-gray-50
+                          px-4 py-3 text-sm text-gray-900
+                          placeholder:text-gray-700
+                          focus:bg-white focus:border-orange-400
+                          focus:ring-2 focus:ring-orange-200 outline-none
+                        "
                       />
                     </FormControl>
                      <FormMessage className="text-red-500 text-sm font-medium" />
@@ -190,7 +214,13 @@ const AddAddressForm = () => {
                       <FormItem>
                         <FormLabel>City</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input className="
+                          w-full rounded-xl border border-gray-300 bg-gray-50
+                          px-4 py-3 text-sm text-gray-900
+                          placeholder:text-gray-700
+                          focus:bg-white focus:border-orange-400
+                          focus:ring-2 focus:ring-orange-200 outline-none
+                        " {...field} placeholder="Agadir city" />
                         </FormControl>
                          <FormMessage className="text-red-500 text-sm font-medium" />
                       </FormItem>
@@ -206,16 +236,16 @@ const AddAddressForm = () => {
                       <FormItem>
                         <FormLabel>Region</FormLabel>
                         <FormControl>
-                          <Select
+                          <Select 
                             onValueChange={(val) => field.onChange(val)}
                             value={field.value}
                           >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select region" />
+                            <SelectTrigger className="w-full border border-gray-100 bg-gray-50">
+                              <SelectValue className="text-gray-700 font-medium text-sm" placeholder="Select region" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-white">
                               {moroccoRegions.map((r) => (
-                                <SelectItem key={r} value={r}>
+                                <SelectItem className="hover:bg-gray-100" key={r} value={r}>
                                   {r}
                                 </SelectItem>
                               ))}
@@ -237,7 +267,13 @@ const AddAddressForm = () => {
                       <FormItem>
                         <FormLabel>Postal Code</FormLabel>
                         <FormControl>
-                          <Input {...field}  />
+                          <Input className="
+                          w-full rounded-xl border border-gray-300 bg-gray-50
+                          px-4 py-3 text-sm text-gray-900
+                          placeholder:text-gray-700
+                          focus:bg-white focus:border-orange-400
+                          focus:ring-2 focus:ring-orange-200 outline-none
+                        " placeholder="50 000" {...field}  />
                         </FormControl>
                          <FormMessage className="text-red-500 text-sm font-medium" />
                       </FormItem>
@@ -282,7 +318,13 @@ const AddAddressForm = () => {
                            Delivery Instuctions
                         </FormLabel>
                         <FormControl>
-                          <Textarea className="border border-gray-300" rows={4} {...field} />
+                          <Textarea className="
+                          w-full rounded-xl border border-gray-300 bg-gray-50
+                          px-4 py-3 text-sm text-gray-900
+                          placeholder:text-gray-700
+                          focus:bg-white focus:border-orange-400
+                          focus:ring-2 focus:ring-orange-200 outline-none
+                        " rows={4} {...field} />
                         </FormControl>
                         <FormMessage className="text-red-500 text-sm font-medium" />
                         <FormDescription className="text-sm text-gray-700 font-medium">

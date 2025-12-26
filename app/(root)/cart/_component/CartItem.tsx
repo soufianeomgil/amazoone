@@ -93,43 +93,6 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }>
     }
     return null;
   };
-//  const handleAddToSaveForLater = async () => {
-//   try {
-   
-
-//     const { error, success } = await addToSaveForLater({
-//       payload: {
-//         productId: String(product._id),
-//         variant,
-//         variantId: variant?._id,
-//         quantity: item.quantity,
-//         snapshot: {
-//           price: item.productId.basePrice,
-//           thumbnail: item.productId.thumbnail,
-//           title: item.productId.name,
-//         },
-//       },
-//       userId: userId as string,
-//     });
-
-//     if (error) {
-//       alert(error.message);
-//       return;
-//     }
-
-//     if (success) {
-//       // Wait for the removal to finish
-//       dispatch(
-//         removeItemAsync({
-//           productId: product._id,
-//           variantId: variant ?  variant._id : null,
-//         }) as any
-//       );
-//     }
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
 
 const handleAddToSaveForLater = async () => {
   try {
@@ -139,7 +102,7 @@ const handleAddToSaveForLater = async () => {
       variantId: variant?._id ?? null, // normalize: string or null
       quantity: item.quantity,
       snapshot: {
-        price: item.productId.basePrice,
+        price: unitPrice,
         thumbnail: item.productId.thumbnail,
         title: item.productId.name,
       },
@@ -212,15 +175,7 @@ const handleAddToSaveForLater = async () => {
             <p className="text-xs text-gray-500">Eligible for FREE Shipping</p>
           </div>
 
-          {/* Quantity Selector */}
-          {/* <div className="mt-2">
-            <QuantitySelector
-              value={item.quantity}
-              max={variant?.stock ?? product.stock ?? 10}
-              onChange={handleUpdateQuantity}
-              size="sm"
-            />
-          </div> */}
+         
         </div>
       </div>
 

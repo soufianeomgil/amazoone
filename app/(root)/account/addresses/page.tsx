@@ -1,5 +1,8 @@
 import { getUserAddresses } from '@/actions/address.actions';
 import RemoveAddressBtn from '@/components/shared/clientBtns/RemoveAddressBtn';
+import ProfileItems from '@/components/shared/navbars/ProfileItems';
+import RightSidebar from '@/components/shared/navbars/RightSidebar';
+
 import { ROUTES } from '@/constants/routes';
 import { ChevronRightIcon, PlusIcon, StarIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -99,20 +102,24 @@ const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, pr
 );
     const result = await getUserAddresses()
     return (
-        <div className='bg-white'>
-  <div className="container mx-auto px-4 py-8">
+        <div className="min-h-screen w-full bg-gray-50 lg:px-10 lg:py-8">
+             <div className=" flex lg:flex-row flex-col  gap-5">
+              <ProfileItems />
+              <RightSidebar />
+               <div className="flex-1 p-4 w-full lg:px-3">
+                 
             <h1 className="text-2xl flex items-center gap-1 md:text-3xl font-bold text-gray-800 mb-6">
            <img src="/location.png" alt="location icon" className="w-[22px] object-contain " />  <span>Your Addresses</span>
         </h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Add Address Card */}
+               
                 <Link href={ROUTES.addAddress} className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center h-full min-h-[200px] hover:bg-gray-50 cursor-pointer">
                     <PlusIcon className="h-10 w-10 text-gray-400" />
                     <span className="mt-2 text-xl font-medium text-gray-700">Add Address</span>
                 </Link>
 
-                {/* Existing Address Cards */}
+               
                 {result.data?.addresses.map((address) => (
                     <div key={address._id} className="border border-gray-300 rounded-lg p-5 flex flex-col">
                         {address.isDefault && (
@@ -152,8 +159,12 @@ const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, pr
                     </div>
                 ))}
             </div>
+      
+             
+               </div>
+ 
         </div>
-              <div className="mt-8  pt-6 border-t border-gray-200">
+             <div className="mt-8  pt-6 border-t border-gray-200">
                 <div className='max-w-7xl p-4 mx-auto'>
  <div className="flex justify-between flex-wrap items-center mb-4">
                         <h2 className="text-xl font-semibold">Your Browsing History</h2>
@@ -163,7 +174,7 @@ const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, pr
                         </Link>
                     </div>
                    
-                    {/* <FilterSidebar /> */}
+                   
                          <div className="flex  overflow-x-auto space-x-6 pb-4">
                          {browsingHistoryItems.map(item => (
                             <BrowsingHistoryCard key={item.id} {...item} />
@@ -178,6 +189,7 @@ const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, pr
                    
                 </div>
         </div>
+       
       
     );
 };

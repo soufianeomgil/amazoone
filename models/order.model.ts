@@ -80,6 +80,7 @@ export interface IOrder {
   shippingAddress: IOrderAddress;
   billingAddress?: IOrderAddress | null;
   subtotal: number; // sum of linePrice
+  checkoutId: string;
   shippingCost: number;
   tax: number;
   discount?: number;
@@ -200,6 +201,12 @@ const OrderSchema = new Schema<IOrderDoc, IOrderModel>(
     subtotal: { type: Number, required: true, default: 0 },
     shippingCost: { type: Number, required: true, default: 0 },
     tax: { type: Number, required: true, default: 0 },
+    checkoutId: {
+  type: String,
+  unique: true,
+  sparse: true,
+},
+
     discount: { type: Number, default: 0 },
     total: { type: Number, required: true, default: 0 },
     currency: { type: String, default: "MAD" },

@@ -8,6 +8,7 @@ import { clearCart } from "@/lib/store/cartSlice";
 import { LogOut } from "lucide-react";
 import { useDispatch } from "react-redux";
 
+
 const RightSidebar = () => {
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
@@ -54,12 +55,14 @@ const RightSidebar = () => {
             const isActive = item.pathname === pathname;
             const isLast = index === Items.length - 1;
 
-            if (
-              item.pathname.includes("edit") ||
-              item.pathname === "/customer/account/edit"
-            ) {
-              item.pathname = "/";
-            }
+           if (item.pathname.includes("edit")) {
+  item.pathname = `/customer/account/edit/${session.data?.user.id}`;
+}  
+ else if (item.pathname.includes("profile")) {
+  item.pathname = `/profile/${session.data?.user.id}`;
+}
+  
+
 
             return (
               <Link key={index} href={item.pathname} className="group">

@@ -5,30 +5,17 @@ import { FilterIcon, PencilIcon } from 'lucide-react';
 import Link from 'next/link';
 import { getAllProducts } from '@/actions/product.actions';
 import EditDeleteBtn from './_components/ClientBtns/EditDeleteBtn';
+import { getAdminUsersOverview } from '@/actions/user.actions';
 
 type ProductStatus = 'Active' | 'Draft' | 'Out of Stock';
 
-interface Product {
-    id: string;
-    name: string;
-    image: string;
-    status: ProductStatus;
-    inventory: number;
-    category: string;
-    price: number;
-}
 
-const mockProducts: Product[] = [
-    { id: 'SKU-001', name: 'Echo Dot (5th Gen) | Smart speaker with Alexa', image: 'https://m.media-amazon.com/images/I/71Que-d6-wL._AC_UY218_.jpg', status: 'Active', inventory: 120, category: 'Electronics', price: 49.99 },
-    { id: 'SKU-002', name: 'Kindle Paperwhite (16 GB) – Now with a 6.8" display', image: 'https://m.media-amazon.com/images/I/61-fwv2G7GL._AC_UY218_.jpg', status: 'Active', inventory: 85, category: 'Electronics', price: 139.99 },
-    { id: 'SKU-003', name: 'Amazon Basics 48-Pack AA Alkaline Batteries', image: 'https://m.media-amazon.com/images/I/71IdKRlm8+L._AC_UY218_.jpg', status: 'Out of Stock', inventory: 0, category: 'Household', price: 15.99 },
-    { id: 'SKU-004', name: 'Fire TV Stick 4K Max streaming device, Wi-Fi 6', image: 'https://m.media-amazon.com/images/I/51km+p3mP-L._AC_UY218_.jpg', status: 'Active', inventory: 250, category: 'Electronics', price: 54.99 },
-    { id: 'SKU-005', name: 'Blink Outdoor – wireless, weather-resistant HD security camera', image: 'https://m.media-amazon.com/images/I/51-iA8-jX-L._AC_UY218_.jpg', status: 'Draft', inventory: 30, category: 'Smart Home', price: 99.99 },
-    { id: 'SKU-006', name: 'Ring Video Doorbell – 1080p HD video, improved motion detection', image: 'https://m.media-amazon.com/images/I/61DD1d-5TJL._AC_UY218_.jpg', status: 'Active', inventory: 75, category: 'Smart Home', price: 59.99 },
-];
+
 
 const AdminProducts = async () => {
    const result = await getAllProducts({})
+   const response = await getAdminUsersOverview()
+   console.log(response, "USERS FOR ADMIN PREVIEW")
     const getStatusClass = (status: ProductStatus) => {
         switch (status) {
             case 'Active': return 'bg-green-100 text-green-800';

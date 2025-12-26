@@ -1,15 +1,5 @@
 import { Schema, model, Document, Types, Model, models } from 'mongoose';
 
-
-// add product vedios;
-
-
-
-
-
-/**
- * Interface for individual variant attributes (e.g., { name: 'Color', value: 'Red' }).
- */
 export interface IVariantAttribute {
   name: string;
   value: string;
@@ -37,8 +27,9 @@ export interface IVariant {
  */
 export interface IProduct {
   _id: string;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Date;
+
+  updatedAt: Date;
   name: string;
   description: string;
   brand: string;
@@ -53,6 +44,8 @@ export interface IProduct {
   images: ImageState[]; // Additional gallery images
   rating: number; // Average rating, calculated from reviews
   reviewCount: number;
+  listPrice: number;
+  weeklySales: number;
  // reviews: IReview[];
   variants: IVariant[];
   attributes: IVariantAttribute[]; // General attributes like 'Material', 'Dimensions'
@@ -102,7 +95,13 @@ const ProductSchema = new Schema<IProduct>({
   // Assuming a Category model exists for better organization
   category: { type: String, required: true},
   basePrice: { type: Number, required: true, min: 0 },
+  listPrice: {type: Number, min: 0, required: true},
   // 
+  weeklySales: {
+  type: Number,
+  default: 0,
+  index: true,
+},
  thumbnail: {
   type: {
     url: { type: String },

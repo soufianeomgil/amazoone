@@ -66,7 +66,7 @@ const ProfileItems = () => {
               key={index}
               href={item.pathname}
               aria-current={isActive ? "page" : undefined}
-              className="min-w-[84px] lg:min-w-0 flex-shrink-0 lg:flex-shrink rounded-lg"
+              className="min-w-[84px] lg:min-w-0 shrink-0 lg:shrink rounded-lg"
             >
               <div
                 className={`group relative flex flex-col items-center gap-2 transition-transform transform cursor-pointer
@@ -74,11 +74,7 @@ const ProfileItems = () => {
               >
                 {/* Outer ring */}
                 <div
-                  className={`rounded-full p-0.5 transition-shadow duration-200 ${
-                    isActive
-                      ? "bg-gradient-to-tr from-[#FF9900] to-[#FF7A00] shadow-lg"
-                      : "bg-transparent"
-                  }`}
+                  className={`rounded-full p-0.5 transition-shadow duration-200 `}
                   aria-hidden
                 >
                   {/* Inner circle */}
@@ -95,7 +91,7 @@ const ProfileItems = () => {
                   >
                     <div
                       className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors duration-200
-                                 ${isActive ? "bg-gradient-to-b from-[#FF9F3B] to-[#FF7A00] text-white" : "bg-gray-50 text-[#374151]"}`}
+                                 ${isActive ? "bg-[#232f3e] text-white" : "bg-gray-50 text-[#374151]"}`}
                       aria-hidden
                     >
                       <item.icon size={28} className={`${isActive ? "text-white" : "text-[#374151]"}`} />
@@ -106,14 +102,14 @@ const ProfileItems = () => {
                 <div className="text-center">
                   <div
                     className={`text-[12px] leading-none font-semibold transition-colors duration-150 ${
-                      isActive ? "text-[#FF7A00]" : "text-gray-700"
+                      isActive ? "text-[#232f3e]" : "text-gray-700"
                     }`}
                   >
                     {item.name}
                   </div>
 
                   {/* micro-info: show badge when active */}
-                  <div className="mt-1">
+                  {/* <div className="mt-1">
                     {isActive ? (
                       <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-[#FFF4E6] text-[#B85A00]">
                         Active
@@ -121,11 +117,11 @@ const ProfileItems = () => {
                     ) : (
                       <span className="sr-only">not active</span>
                     )}
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* subtle focus ring for keyboard users */}
-                <span className="absolute -inset-1 rounded-full focus-within:ring-2 focus-within:ring-[#FF9900]/40" />
+                {/* <span className="absolute -inset-1 rounded-full focus-within:ring-2 focus-within:ring-[#FF9900]/40" /> */}
               </div>
             </Link>
           );

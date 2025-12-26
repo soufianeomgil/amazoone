@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
@@ -46,6 +46,11 @@ export function WriteReviewModal({open,setOpen,id,product}: {
       isRecommendedByBuyer: false,
     },
   })
+useEffect(() => {
+  if (open) document.body.style.overflow = "hidden"
+  else document.body.style.overflow = ""
+  return () => (document.body.style.overflow = "")
+}, [open])
 
  
    
@@ -88,7 +93,7 @@ export function WriteReviewModal({open,setOpen,id,product}: {
     />
 
     {/* MODAL */}
-    <div className="relative z-10 sm:max-w-2xl w-[95%] h-[95%]  overflow-hidden rounded-2xl bg-white shadow-xl">
+    <div className="relative z-10 sm:max-w-2xl w-[95%] max-h-[95vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
       {/* HEADER */}
       <div className="  bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <div>
@@ -109,12 +114,12 @@ export function WriteReviewModal({open,setOpen,id,product}: {
       </div>
 
       {/* CONTENT */}
-      <div className="h-full overflow-y-scroll" >
+      
        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
 
             {/* BODY */}
-            <div className="overflow-y-auto px-6 py-6 space-y-8">
+           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
 
               {/* VERIFIED */}
               <div className="flex items-center gap-2 text-sm text-green-600">
@@ -384,7 +389,7 @@ export function WriteReviewModal({open,setOpen,id,product}: {
             </div>
           </form>
         </Form>
-      </div>
+    
     </div>
   </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { X, Check, ShoppingCart, Minus, Plus, Trash2, User } from "lucide-react";
 import Link from "next/link";
 import { IVariant } from "@/models/product.model";
@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { IOrder } from "@/models/order.model";
 import { Badge } from "../ui/badge";
 import { LocationIcon } from "./icons";
+import { useDispatch } from "react-redux";
 
 type ImageObject = { url?: string; preview?: string; public_id?: string };
 
@@ -26,25 +27,22 @@ export type CartItem = {
 type Props = {
   open: boolean;
   onClose: () => void;
-  item?: IOrder;
   currency?: string;
   setOpen: (v:boolean) => void;
-  
+  id:string
 };
 
-/**
- * Pixel-polished Cart Sidebar component (Tailwind).
- * - right sheet, overlay, keyboard accessible
- * - item rows with thumbnail, title, qty controls, price
- * - summary and two CTA buttons (Continue shopping, Go to cart)
- */
+
 export default function OrderDetailsSidebar({
   open,
   onClose,
-  item,
+  id,
   currency = "Dh",
   setOpen
 }: Props) {
+  const [order,setOrder] = useState<IOrder | null>()
+  const [error,setError] = useState('')
+  const dispatch = useDispatch()
   // lock scroll when open
   useEffect(() => {
     if (open) {
@@ -57,13 +55,27 @@ export default function OrderDetailsSidebar({
     };
   }, [open]);
 
-  const subtotal =150.00
+  
 
   const formatPrice = (n: number) =>
-    `${n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ${currency}`;
+    `${n.toFixed(2).replace(/\B(?=(\d{3})<+(?!\d))/g, ",")} ${currency}`;
 
   if (!open) return null;
+    useEffect(() => {
+  const fetchOrder = async () => {
+    try {
+      const response = await fetch(`/api/orders/${id}`);
+      const { data } = await response.json();
+      setOrder(data);
+    } catch (error) {
+      setError("Une erreur s'est produite lors du chargement de la commande.");
+    } 
+  };
 
+  if (id) {
+    fetchOrder();
+  }
+}, [id]);
   return (
     <>
       {/* overlay */}
@@ -130,7 +142,9 @@ export default function OrderDetailsSidebar({
                         ) )} */}
                       </div>
                      <div>
-                       <Badge className="text-white capitalize font-medium bg-red-600">Cancelled</Badge>
+                       <Badge className="text-white capitalize font-medium bg-red-600">
+                          {order?.status}
+                       </Badge>
                     </div>
                     </div>
                     <div className="flex mt-2.5 items-center justify-between gap-2">
@@ -155,14 +169,14 @@ export default function OrderDetailsSidebar({
           <div className="mt-5.5 flex gap-3 flex-col">
              <div className="flex items-center gap-2">
                   <User color="hsl(178,100%,34%)" />
-                  <p className="text-gray-800 font-bold text-sm"> <span>Hmimouch Samir</span> | <span>+212715120495</span> </p>
+                  <p className="text-gray-800 font-bold text-sm"> <span>{order?.shippingAddress.name} </span> | <span>+212{order?.shippingAddress.phone}</span> </p>
              </div>
              <div className="flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 text-[hsl(178,100%,34%)] w-5" fill="none" viewBox="0 0 24 24" stroke={"hsl(178,100%,34%)"}>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
-                  <p className="text-gray-800 font-bold text-sm"> <span>Meknès Médina</span> - <span>MEKNES</span> </p>
+                  <p className="text-gray-800 font-bold text-sm"> <span>{order?.shippingAddress.city} {order?.shippingAddress.addressLine1}</span> - <span className="uppercase">{order?.shippingAddress.city}</span> </p>
              </div>
           </div>
         </div>

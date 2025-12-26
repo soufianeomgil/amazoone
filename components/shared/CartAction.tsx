@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { addItemAsync } from "@/lib/store/cartSlice";
 import { RootState } from "@/lib/store";
+import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
 
 const CartAction = ({ product, user }: { product?: IProduct; user: IUser }) => {
   const variants = product?.variants ?? [];
@@ -72,6 +73,11 @@ const CartAction = ({ product, user }: { product?: IProduct; user: IUser }) => {
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await dispatch(addItemAsync(payload) as any);
+      await updateUserInterestsEngine({
+  userId: user._id,
+  tags: product?.tags!,
+  weight: 10,
+})
       router.refresh?.();
     } catch (err) {
       console.error("Add to cart failed:", err);

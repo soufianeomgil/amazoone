@@ -17,7 +17,7 @@ const SoldWith = ({title}: {title:string}) => {
     }
   };
   return (
-    <section className="mt-10 bg-white py-3 relative px-4">
+    <section className=" bg-white py-3 relative px-4">
       <h2 className="text-xl font-bold text-black mb-5">
          {title}
       </h2>

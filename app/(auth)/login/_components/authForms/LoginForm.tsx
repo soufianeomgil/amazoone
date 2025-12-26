@@ -17,6 +17,7 @@ import { LoginValidationSchema } from "@/lib/zod";
 import { syncWithUser } from "@/lib/store/cartSlice";
 import { useDispatch } from "react-redux";
 import { useSession } from "next-auth/react";
+import AuthFormBtns from "@/components/forms/AuthFormBtns";
 
 type LoginFormValues = z.infer<typeof LoginValidationSchema>;
 
@@ -112,6 +113,7 @@ export default function LoginForm() {
                 </Label>
                 <Input
                   id="email"
+                   disabled={isSubmitting}
                   type="email"
                   placeholder="you@example.com"
                   {...register("email")}
@@ -130,6 +132,7 @@ export default function LoginForm() {
                 </Label>
                 <Input
                   id="password"
+                   disabled={isSubmitting}
                   type="password"
                   placeholder="Your password"
                   {...register("password")}
@@ -199,10 +202,18 @@ export default function LoginForm() {
         </div>
 
         {/* footer */}
-        <div className="mt-6 text-center text-xs text-gray-500">
+       
+      </div>
+      <div className="flex items-center w-full max-w-sm gap-2 mt-7 mb-2">
+        <div className="flex-1 h-px bg-gray-500" />
+        <span className="text-xs text-black">or</span>
+        <div className="flex-1 h-px bg-gray-500" />
+      </div>
+
+      <AuthFormBtns />
+       <div className="mt-10 text-center text-xs text-gray-500">
           <p>© 1996–2024, Amazon.com, Inc. or its affiliates</p>
         </div>
-      </div>
     </div>
   );
 }

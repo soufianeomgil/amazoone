@@ -237,7 +237,7 @@ export const InterestsSection = ({
         onClick={onSave}
         className="
           text-sm px-4 py-2 rounded-full max-sm:w-full
-          bg-[#ffce12] text-gray-800
+          bg-[#ffce12] text-gray-800 mb-3
           disabled:bg-[#ffed94] disabled:text-gray-400
           disabled:border disabled:border-orange-100
         "

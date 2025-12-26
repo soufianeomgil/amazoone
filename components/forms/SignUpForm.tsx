@@ -146,17 +146,7 @@ export default function SignUpForm() {
                           />
                           <span className="ml-2">Female</span>
                         </label>
-                        <label className="inline-flex items-center text-sm">
-                          <input
-                            type="radio"
-                            value="other"
-                            checked={field.value === "other"}
-                            onChange={() => field.onChange("other")}
-                            className="h-4 w-4 accent-yellow-500"
-                            disabled={isSubmitting}
-                          />
-                          <span className="ml-2">Other</span>
-                        </label>
+                      
                       </div>
                       <FormMessage className="text-xs text-red-600" />
                     </FormItem>

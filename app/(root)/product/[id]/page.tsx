@@ -71,7 +71,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
   const totalStock = product.totalStock ?? (safeVariants.length ? safeVariants.reduce((s, v) => s + (v.stock ?? 0), 0) : product.stock ?? 0);
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-gray-50">
+    <div className=" w-full max-sm:overflow-hidden bg-gray-50">
       {/* Breadcrumb */}
       <div className="bg-white max-sm:hidden border-b">
         <div className="max-w-7xl  mx-auto px-4 py-3">
@@ -98,7 +98,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
       </span>
        <Rating reviews={4226} rating={4.4} isProductDetails />
               </div>
-               <p className="text-sm leading-snug font-normal text-gray-900">
+               <p className="text-sm mt-1.5 leading-snug font-normal text-gray-900">
       {product.name}
     </p>
           </div>
@@ -210,7 +210,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
   </div>
 </div>
 
-<BuyPanel product={product} data={data?.lists || []} />
+<BuyPanel userId={session?.user.id as string} product={product} data={data?.lists || []} />
       
         </div>
 

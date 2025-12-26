@@ -14,17 +14,27 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { MessageCircleWarning } from "lucide-react"
-import { IUser } from "@/types/actionTypes"
+import { Camera, MessageCircleWarning } from "lucide-react"
+
 import { EditProfileSchema } from "@/lib/zod"
 import { editUserProfile } from "@/actions/user.actions"
 import { toast } from "sonner"
 import { SpinnerIcon } from "../shared/icons"
+import { IUser } from "@/models/user.model"
+import { CldUploadWidget } from "next-cloudinary"
 
 
 
 
 export function EditProfileForm({user}: {user:IUser}) {
+    const widgetOptions = {
+    multiple: false,
+    maxFiles: 1,
+    singleUploadAutoClose: false,
+    showCompletedButton: true,
+    showUploadMoreButton: false,
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+  };
   // 1. Define your form.
   const form = useForm<z.infer<typeof EditProfileSchema>>({
     resolver: zodResolver(EditProfileSchema),
@@ -33,7 +43,8 @@ export function EditProfileForm({user}: {user:IUser}) {
       email: user.email || '',
       gender : user.gender || undefined,
       password:"",
-      phone: user.phoneNumber || ""
+      phone: user.phoneNumber || "",
+      profilePic: user.profilePictureUrl || ""
     },
   })
 
@@ -45,7 +56,8 @@ export function EditProfileForm({user}: {user:IUser}) {
        email: values.email,
        phone: values.phone,
        gender: values.gender,
-       password: values.password ?? values.password
+       password: values.password ?? values.password,
+       profilePic: values.profilePic
      })
      if(error) {
        toast.error(error.message)
@@ -63,6 +75,62 @@ export function EditProfileForm({user}: {user:IUser}) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 max-w-[450px] ">
+     <FormField
+  control={form.control}
+  name="profilePic"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-sm font-medium">Profile Picture</FormLabel>
+
+      <FormControl>
+        <CldUploadWidget
+          uploadPreset="amazone-clone" // 👈 REQUIRED
+          options={widgetOptions}
+          onSuccess={(result: any) => {
+            const url = result?.info?.secure_url
+            if (url) {
+              field.onChange(url)
+            }
+          }}
+        >
+          {(widget) => (
+            <div
+              onClick={() => widget.open()}
+              className="relative w-fit cursor-pointer group"
+            >
+              {/* Avatar */}
+              <img
+                src={field.value || user.profilePictureUrl || "/avatar-placeholder.png"}
+                alt="Profile picture"
+                className="sm:w-[100px] w-[70px] h-[70px] sm:h-[100px]
+                rounded-full object-cover border border-gray-200"
+              />
+
+              {/* Overlay */}
+              <div
+                className="absolute inset-0 rounded-full bg-black/60
+                opacity-0 group-hover:opacity-100 transition
+                flex items-center justify-center"
+              >
+                <div className="flex flex-col items-center text-white text-xs">
+                  <Camera size={18} />
+                  <span className="mt-1">Edit</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </CldUploadWidget>
+      </FormControl>
+
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+
+
+
+        
         <FormField
           control={form.control}
           name="fullName"

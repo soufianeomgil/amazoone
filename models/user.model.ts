@@ -57,7 +57,7 @@ interface PrimeMembership {
 // --- The Core User Schema ---
 
 export interface IUser {
-  
+  _id:string;
   // --- Core Account Information ---
   fullName: string;
   email: string;

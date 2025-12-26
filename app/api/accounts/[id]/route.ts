@@ -18,7 +18,7 @@ export async function GET(
   if (!id) throw new NotFoundError("Account");
 
   try {
-    await connectDB
+       await connectDB()
 
     const account = await Account.findById(id);
     if (!account) throw new NotFoundError("Account");

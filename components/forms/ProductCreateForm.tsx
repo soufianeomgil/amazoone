@@ -79,6 +79,7 @@ interface Attribute {
 
 interface IProductFormState {
   name: string;
+
   description: string;
   brand: string;
   category: string;
@@ -88,6 +89,8 @@ interface IProductFormState {
   stock: number | string;
   tags: string;
   isFeatured: boolean;
+  isTrendy: boolean;
+  isBestSeller: boolean;
   status: "ACTIVE" | "DRAFT" | "INACTIVE" | "OUT OF STOCK";
   variants: Variant[];
   attributes: Attribute[];
@@ -112,6 +115,8 @@ const CreateProduct: React.FC = () => {
     description: "",
     brand: "",
     category: "",
+    isTrendy: false,
+    isBestSeller:false,
     basePrice: "",
     imageUrl: { url: "", public_id: "", preview: "" } as any,
     images: [{ url: "", public_id: "", preview: "" }],
@@ -136,6 +141,8 @@ const CreateProduct: React.FC = () => {
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
+      isTrendy: false,
+      isBestSeller: false,
       description: "",
       brand: "",
       category: "",
@@ -255,21 +262,6 @@ const handleVariantAttributeChange = (vIndex: number, aIndex: number, field: key
     });
   };
 
-  // const addVariantImage = (vIndex: number) =>
-  // setProduct((prev) => {
-  //   const newVariants = [...prev.variants];
-  //   newVariants[vIndex].images = [...(newVariants[vIndex].images || []), { public_id: "", url: "", preview: "" }];
-  //   // sync to RHF
-  //   setValue(
-  //     "variants",
-  //     newVariants.map((v) => ({
-  //       ...v,
-  //       images: (v.images || []).map((img) => ({ url: img.url ?? "", public_id: img.public_id ?? "" })),
-  //     })),
-  //     { shouldValidate: true }
-  //   );
-  //   return { ...prev, variants: newVariants };
-  // });
 const addVariantImage = (vIndex: number) =>
   setProduct((prev) => {
     const newVariants = [...prev.variants];
@@ -388,10 +380,13 @@ const removeVariantImage = (vIndex: number, imgIndex: number) =>
        const { error, success } = await CreateProductAction({
          name: data.name,
          description: data.description,
+         listPrice: data.listPrice,
          isFeatured: data.isFeatured,
          category: data.category,
          tags: data.tags,
          brand: data.brand,
+         isTrendy: data.isTrendy,
+         isBestSeller: data.isBestSeller,
          imageUrl: data.imageUrl,
          images: data.images,
          status: data.status,
@@ -475,8 +470,8 @@ const handleVariantImageUpload = (vIndex: number, imgIndex: number, result: any)
 
       images[imgIndex] = {
         url: result.info.secure_url,
-        // public_id: result.info.public_id,
-         public_id: "https://res.cloudinary.com/djadlnbfq/image/upload/v1762472054/pbetjmrukunria4yetuo.jpg",
+        public_id: result.info.public_id,
+        //  public_id: result.info.,
         preview: result.info.secure_url,
       };
 
@@ -519,6 +514,80 @@ const handleVariantImageUpload = (vIndex: number, imgIndex: number, result: any)
 const isSubmitting = form.formState.isSubmitting === true;
 console.log(form.formState.errors, "errors")
    const editorRef = useRef<MDXEditorMethods>(null);
+interface ToggleCardProps {
+  name: "isFeatured" | "isBestSeller" | "isTrendy";
+  label: string;
+  description?: string;
+  icon?: React.ReactNode;
+}
+
+const ToggleCard = ({
+  name,
+  label,
+  description,
+  icon = "⭐",
+}: ToggleCardProps) => {
+  const isActive = !!control._formValues[name];
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-4 p-4 rounded-lg border transition",
+        isActive ? "border-orange-300 bg-orange-50" : "border-gray-200 bg-white"
+      )}
+    >
+      {/* Status bar */}
+      <div
+        className={cn(
+          "w-1 h-10 rounded-full transition",
+          isActive ? "bg-orange-500" : "bg-gray-300"
+        )}
+      />
+
+      {/* Icon */}
+      <div
+        className={cn(
+          "flex items-center justify-center w-9 h-9 rounded-full",
+          isActive
+            ? "bg-orange-500 text-white"
+            : "bg-gray-100 text-gray-400"
+        )}
+      >
+        {icon}
+      </div>
+
+      {/* Text */}
+      <div className="flex-1">
+        <FormLabel
+          htmlFor={name}
+          className="text-sm font-semibold text-gray-900 cursor-pointer"
+        >
+          {label}
+        </FormLabel>
+
+        {description && (
+          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+        )}
+      </div>
+
+      {/* Switch */}
+      <Controller
+        control={control}
+        name={name}
+        render={({ field }) => (
+          <Switch
+            id={name}
+            checked={!!field.value}
+            onCheckedChange={(val: boolean) => {
+              field.onChange(val);
+              handleSwitchChange(val);
+            }}
+          />
+        )}
+      />
+    </div>
+  );
+};
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -605,26 +674,7 @@ console.log(form.formState.errors, "errors")
 
                   <div className="space-y-2 md:col-span-2">
                   
-                       {/* <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-black">Product Description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                            rows={4}
-                              disabled={isSubmitting}
-                              className="text-sm font-medium text-gray-700"
-                              placeholder="Enter Product Description"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-500" />
-                        </FormItem>
-                      )}
-                    /> */}
-                    {/* Product Description */}
+                     
         <FormField
           control={form.control}
           name="description"
@@ -673,6 +723,28 @@ console.log(form.formState.errors, "errors")
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-black">Base Price ($)</FormLabel>
+                          <FormControl>
+                            <Input
+                              disabled={isSubmitting}
+                              type="number"
+                              min={0}
+                              className="text-sm font-medium text-gray-700"
+                              placeholder="0.00"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-500" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                   <div className="space-y-2">
+                       <FormField
+                      control={form.control}
+                      name="listPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-black">List Price ($)</FormLabel>
                           <FormControl>
                             <Input
                               disabled={isSubmitting}
@@ -773,30 +845,27 @@ console.log(form.formState.errors, "errors")
                     />
                 </div>
 
-               <div className="flex items-center space-x-3 p-4 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-  <Controller
-    control={control}
+          <div className="space-y-3">
+  <ToggleCard
     name="isFeatured"
-    render={({ field }) => (
-      <Switch
-        id="isFeatured"
-        // RHF value -> Switch checked prop
-        checked={!!field.value}
-        // When toggled, update RHF and local product state
-        onCheckedChange={(val: boolean) => {
-          field.onChange(val);
-          handleSwitchChange(val);
-        }}
-      />
-    )}
+    label="Featured Product"
+    description="Appears on homepage & recommendation sections"
   />
-  <div>
-    <Label htmlFor="isFeatured" className="text-sm font-medium text-gray-700 cursor-pointer">
-      Featured Product
-    </Label>
-    <p className="text-xs text-gray-500">Highlight this product on your store</p>
-  </div>
+
+  <ToggleCard
+    name="isBestSeller"
+    label="Best Seller"
+    description="Highlighted in best-selling collections"
+  />
+
+  <ToggleCard
+    name="isTrendy"
+    label="Trendy Product"
+    description="Boosted in trending & discovery feeds"
+  />
 </div>
+
+
 
               </CardContent>
             </Card>

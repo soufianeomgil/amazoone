@@ -1,11 +1,12 @@
 
 import { BoxIcon, LockIcon, MapPinIcon, CreditCardIcon, GiftIcon, StarIcon, ChevronRightIcon } from "@/components/shared/icons"
 import { ROUTES } from '@/constants/routes';
-import { FilterIcon, Heart, UserCircleIcon, XIcon } from 'lucide-react';
+import { ChevronRight, FilterIcon, Heart, UserCircleIcon, XIcon } from 'lucide-react';
 import Link from 'next/link';
 import FilterSidebar from '@/components/shared/FilterSidebar';
 import MainCard from "@/components/cards/MainCard";
 import { IProduct } from "@/models/product.model";
+import { getRecentlyViewedProducts } from "@/actions/recommendations.actions";
 
 
 interface AccountCardProps {
@@ -32,7 +33,7 @@ const accountSections: AccountCardProps[] = [
         icon: <MapPinIcon />,
         title: 'Your Addresses',
         description: 'Edit addresses for orders and gifts',
-        href: '#'
+        href: ROUTES.addresses
     },
     {
         icon: <CreditCardIcon />,
@@ -50,91 +51,27 @@ const accountSections: AccountCardProps[] = [
         icon: <UserCircleIcon />,
         title: 'Your Profiles',
         description: 'Manage your public profile and settings',
-        href: '#'
+        href: ROUTES.profile("")
     },
 ];
 
-interface BrowsingHistoryItem {
-    id: number;
-    name: string;
-     thumbnail: {
-        url: string;
-        preview?:string;
-        public_id?:string
-    };
-    basePrice: number;
-    rating: number;
-    reviewCount: number;
-}
 
-const browsingHistoryItems: BrowsingHistoryItem[] = [
-    {
-        id: 1,
-        name: 'Echo Dot (5th Gen, 2022 release) | Smart speaker with Alexa',
-        thumbnail: {
-          url: "https://m.media-amazon.com/images/I/81O6ark9UvL._AC_UL320_.jpg"
-        } ,
-        basePrice: 49.99,
-        rating: 4.5,
-        reviewCount: 13876,
-    },
-    {
-        id: 2,
-        name: 'Keurig K-Mini Coffee Maker, Single Serve K-Cup Pod Coffee Brewer',
-        thumbnail: {
-            url: "https://m.media-amazon.com/images/I/51SmxbR4QWL._AC_UL320_.jpg"
-        },
-        basePrice: 79.99,
-        rating: 4,
-        reviewCount: 89341,
-    },
-    {
-        id: 3,
-        name: 'Amazon Basics Lightweight Super Soft Easy Care Microfiber Bed Sheet Set',
-        thumbnail: {
-            url: 'https://m.media-amazon.com/images/I/71Lp7UpChCL._AC_UL320_.jpg'
-        },
-        basePrice: 19.99,
-        rating: 5,
-        reviewCount: 412531,
-    },
-    {
-        id: 4,
-        name: 'Anker Portable Charger, 313 Power Bank (PowerCore Slim 10K)',
-        thumbnail: {url: 'https://m.media-amazon.com/images/I/71QjmBAjE7L._AC_UL320_.jpg'},
-        basePrice: 21.99,
-        rating: 4.5,
-        reviewCount: 65432,
-    },
-    {
-        id: 5,
-        name: 'Logitech MX Master 3S - Wireless Performance Mouse with Ultra-Fast Scrolling',
-        thumbnail: {url: "https://m.media-amazon.com/images/I/71oiOtOHqDL._AC_UL320_.jpg"} ,
-        basePrice: 99.99,
-        rating: 5,
-        reviewCount: 9876,
-    },
-     {
-        id: 6,
-        name: 'SAMSUNG 32" Odyssey G32A FHD 1ms 165Hz Gaming Monitor',
-        thumbnail: {url: 'https://m.media-amazon.com/images/I/41NX3N+JpxL._AC_UL320_.jpg'} ,
-        basePrice: 249.99,
-        rating: 4,
-        reviewCount: 1245,
-    },
-];
 
 
 const AccountCard: React.FC<AccountCardProps> = ({ icon, title, description, href }) => (
-    <a href={href} className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-        <div className="flex-shrink-0 text-gray-600 w-10 h-10">
+    <Link className="flex max-sm:items-center max-sm:justify-between p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm" href={href}>
+<div  className="flex items-center ">
+        <div className="shrink-0 text-gray-600 w-10 h-10">
             {icon}
         </div>
         <div className="ml-4">
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
             <p className="text-sm text-gray-600">{description}</p>
         </div>
-    </a>
+    </div>
+      <ChevronRight size={17} className="sm:hidden font-medium text-gray-700" />
+    </Link>
+    
 );
 
 
@@ -143,12 +80,12 @@ const AccountCard: React.FC<AccountCardProps> = ({ icon, title, description, hre
 
 
 
-const page = () => {
-     
+const page = async() => {
+     const res = await getRecentlyViewedProducts()
     return (
         <div className="bg-white">
             <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
-                <h1 className="text-3xl font-normal mb-6">Your Account</h1>
+                <h1 className="text-xl font-semibold mb-5">Your Account</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {accountSections.map((section, index) => (
                         <AccountCard key={index} {...section} />
@@ -166,15 +103,48 @@ const page = () => {
                    
                     {/* <FilterSidebar /> */}
                          <div className="flex  overflow-x-auto space-x-6 pb-4">
-                         {browsingHistoryItems.map(item => (
-                            <MainCard key={item.id} product={{} as IProduct} />
+                         {res.data?.items.browsingHistory.map((item,index) => (
+                             <Link
+        key={item.product._id}
+        href={`/product/${item.product._id}`}
+        className="shrink-0 snap-start w-[140px]"
+      >
+        <div className="flex flex-col gap-2">
+          
+        
+        
+          <div className="h-[160px] w-full bg-gray-50 rounded-md flex items-center justify-center">
+            <img
+              src={item.product.thumbnail.url}
+              alt={item.product.name}
+              className="h-full object-contain"
+              loading="lazy"
+            />
+          </div>
+
+         
+          <p className="text-sm text-gray-800 line-clamp-2 leading-snug">
+            {item.product.name}
+          </p>
+
+       
+          {item.product.basePrice && (
+            <span className="text-sm font-semibold text-black">
+              ${item.product.basePrice}
+            </span>
+          )}
+
+          
+          <span className="text-xs text-gray-500">
+            Viewed recently
+          </span>
+        </div>
+      </Link>
                         ))}
                     </div>
                   
                  
-                     <div className="text-right mt-2">
-                        <Link href="#" className="text-sm text-blue-600 hover:underline">Turn Browsing History on/off</Link>
-                    </div>
+                    
                 </div>
 
             </div>

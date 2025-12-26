@@ -12,11 +12,15 @@ import { useDispatch, useSelector } from "react-redux";
 
 import Rating from "../shared/Rating";
 import AmazonPrice from "../shared/AmazonPrice";
+import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
+import { calculateDiscount } from "@/lib/utils";
+import CODBadge from "../shared/CODBadge";
 
 
 
 type Props = {
   product: IProduct;
+  userId:string
 };
 
 /**
@@ -27,7 +31,7 @@ type Props = {
  * - footer area (price / actions) fixed height so cards align
  * - variant selector shown but limited height — scrolls if many options
  */
-const MainCard: React.FC<Props> = ({ product }) => {
+const MainCard: React.FC<Props> = ({ product, userId }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -48,7 +52,7 @@ const MainCard: React.FC<Props> = ({ product }) => {
   useEffect(() => {
     setChosenVariant(defaultVariant);
   }, [defaultVariant]);
-
+console.log(typeof product.listPrice, "LIST PRICE TYPE")
   const handleAddToCart = async () => {
     try {
       setLoading(true);
@@ -78,6 +82,11 @@ const MainCard: React.FC<Props> = ({ product }) => {
       };
 
       await dispatch(addItemAsync(payload) as any);
+      await updateUserInterestsEngine({
+  userId,
+  tags: product.tags,
+  weight: 10,
+})
       router.refresh?.();
     } catch (err) {
       console.error("Add to cart failed:", err);
@@ -96,6 +105,7 @@ const MainCard: React.FC<Props> = ({ product }) => {
   })();
 
   const hasVariants = Array.isArray(product?.variants) && product.variants.length > 0;
+const PURCHASE_SIGNAL = "500+ bought this week";
 
   return (
     <article
@@ -146,13 +156,23 @@ const MainCard: React.FC<Props> = ({ product }) => {
           </Link>
         </h3>
         <p className="text-xs text-gray-500 mb-1 font-normal ">Sold by: <span className="font-medium text-[hsl(178,100%,34%)] ">{product.brand}</span></p>
-        {/* rating & reviews */}
-        {/* <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-          <div className="flex items-center">{renderStars(4.2)}</div>
-          <div className="ml-1">{(25).toLocaleString()}</div>
-        </div> */}
+        
         <Rating rating={4.2}  />
+        {product.weeklySales > 0 && (
+<div className="mt-1 mb-2 flex items-center gap-1 text-xs text-green-700 font-medium">
+  <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-600" />
+  {PURCHASE_SIGNAL}
+</div>
+        )}
+        {/* <CODBadge /> */}
 
+
+ {/* Limited stock */}
+{/* <div className="mt-1 mb-2  text-xs text-gray-600 font-medium">
+  
+  400+ viewed in past month
+</div> */}
+   
         {/* Variant selector (limit height so card doesn't grow) */}
         {/* {hasVariants && (
           <div className="mb-3" style={{ maxHeight: 90, overflow: "auto" }}>
@@ -173,9 +193,19 @@ const MainCard: React.FC<Props> = ({ product }) => {
       <div className="p-3 border-t border-gray-100 bg-white flex items-center justify-between" style={{ minHeight: 68 }}>
         <div className="flex flex-col">
           {/* <span className="text-lg font-bold text-red-700">${priceForDisplay}</span> */}
-          <AmazonPrice price={Number(priceForDisplay)} className="font-bold text-lg text-red-700" />
-          <span className="text-[10px] text-gray-500">List: <span className="line-through">${(Number(product.basePrice ?? 0) + 50).toFixed(2)}</span></span>
+          <div className="flex gap-1.5 items-center">
+            {true && (
+<span className="text-base  font-normal text-red-700">
+     -{calculateDiscount(product.basePrice + 50,product.basePrice)}%
+  </span>
+            )} 
+             <AmazonPrice price={Number(priceForDisplay)} className="font-bold text-lg text-black" />
+             
+          </div>
+          
+          <span className="text-[10px] text-gray-500">List: <span className="line-through">${Number(product.basePrice + 70) }</span></span>
         </div>
+
 
         <div className="flex flex-col items-end gap-2">
           {/* <Button

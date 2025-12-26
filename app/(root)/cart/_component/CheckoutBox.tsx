@@ -3,9 +3,10 @@
 import React, { useMemo, useState } from "react";
 import Features from "./Features";
 import { Button } from "@/components/ui/button";
-import { IUser } from "@/types/actionTypes";
+
 import { useRouter } from "next/navigation";
 import AmazonPrice from "@/components/shared/AmazonPrice";
+import { IUser } from "@/models/user.model";
 
 type Props = {
   isMobile?: boolean;
@@ -149,31 +150,31 @@ export const CheckoutBox: React.FC<Props> = ({ isMobile = false, data, user }) =
         {/* Fixed CTA bar at bottom */}
         <div className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-gray-200 shadow-lg">
           <div className="max-w-3xl mx-auto px-3 py-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <div>
                 <p className="text-xs text-gray-500">Total</p>
                 <p className="font-semibold text-lg">{formattedSubtotal}</p>
                 <p className="text-xs text-gray-500">{qty} item{qty > 1 ? "s" : ""}</p>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex-1 ml-3">
               <Button
                type='button'
                 onClick={handleProceed}
                 disabled={proceedDisabled}
-                className={`w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-md py-3 px-4 font-semibold transition
+                className={`w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full py-3 px-4 font-semibold transition
                   ${proceedDisabled ? "bg-gray-200 text-gray-600 cursor-not-allowed" : "bg-[#FFD814] hover:bg-[#F7CA00] text-black"}
                 `}
                 aria-disabled={proceedDisabled}
               >
-                Proceed to checkout
+                Proceed to checkout ({qty} items)
               </Button>
             </div>
           </div>
 
           {/* expandable mini summary */}
-          <div
+          {/* <div
             className={`max-w-3xl mx-auto px-3 overflow-hidden transition-all duration-200 ${mobileSummaryOpen ? "max-h-56 py-3" : "max-h-0"}`}
             aria-hidden={!mobileSummaryOpen}
           >
@@ -183,12 +184,15 @@ export const CheckoutBox: React.FC<Props> = ({ isMobile = false, data, user }) =
                   <span>Subtotal</span>
                   <span>{formattedSubtotal}</span>
                 </div>
-                {/* provide a few items preview */}
+                
                 <div className="pt-2 border-t border-gray-100">
                   {items.slice(0, 3).map((it, idx) => (
                     <div key={idx} className="flex items-center gap-3 py-2">
                       <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
-                        <img src={String(it.productId?.thumbnail?.url ?? "") || undefined} alt={it.productId?.name ?? "item"} className="w-full h-full object-contain" />
+                        <img src={String(it.variant && (it.variant as any).images?.[0]?.url) ||
+    it?.productId.thumbnail?.url ||
+    it?.productId.images?.[0]?.url ||
+    "" || undefined} alt={it.productId?.name ?? "item"} className="w-full h-full object-contain" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">{it.productId?.name ?? "Product"}</div>
@@ -201,7 +205,7 @@ export const CheckoutBox: React.FC<Props> = ({ isMobile = false, data, user }) =
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* spacer to ensure page content isn't hidden by fixed CTA */}

@@ -5,6 +5,8 @@ import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
 import { getAuthenticatedUserCart } from "@/actions/cart.actions";
 import { auth } from "@/auth";
+import MobileFooter from "@/components/shared/MobileFooter";
+import WhatsAppSupport from "@/components/shared/WhatsappSupport";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,9 +33,11 @@ export default async function RootLayout({
   return (
     
         <main className="min-h-screen w-full">
-           <Header qty={result.data?.qty} data={result.data?.userCart} />
+           <Header qty={result.data?.qty} session={session} isAuthenticated={session?.user !== null} />
   {children}
+   <WhatsAppSupport />
   <Footer />
+  <MobileFooter />
        
         </main>
       

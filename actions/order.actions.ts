@@ -4,15 +4,15 @@ import connectDB from "@/database/db";
 import { action } from "@/lib/handlers/action";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors";
-import Address from "@/models/address.model";
+
 import { Cart } from "@/models/cart.model";
-import Order, { IOrder, IOrderAddress, IOrderDoc, IOrderItem, OrderStatus, PaymentMethod } from "@/models/order.model";
+import Order, { IOrder, IOrderDoc, IOrderItem, OrderStatus, PaymentMethod } from "@/models/order.model";
 import { IVariant, Product } from "@/models/product.model";
 
 import { revalidatePath } from "next/cache";
 import { ROUTES } from "@/constants/routes";
 import { clearUserCart } from "./cart.actions";
-import { CancelOrderSchema } from "@/lib/zod";
+import { CancelOrderSchema, GetOrderDetailsSchema } from "@/lib/zod";
 
 type CreateOrderItem = {
   productId: string | { _id?: string; id?: string } | any;
@@ -47,6 +47,7 @@ type CreateOrderParams = {
   shippingCost?: number;
   tax?: number;
   notes?: string | null;
+  checkoutId: string;
 };
 
 /* -----------------------------
@@ -54,22 +55,19 @@ type CreateOrderParams = {
    -----------------------------*/
 export async function createOrderAction(
   params: CreateOrderParams
-): Promise<{ success: boolean; data?: { order: any }; error?: any }> {
+): Promise<ActionResponse<{order: IOrder}>> {
   // 1) auth + basic validation using your action helper
   const validated = await action({ params, authorize: true });
-  if (validated instanceof Error) return handleError(validated) as any;
+  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
-  if (!session?.user?.id) return handleError(new UnAuthorizedError("Not authenticated")) as any;
+  if (!session?.user?.id) throw new UnAuthorizedError("Not authenticated")
 
   const p = validated.params as CreateOrderParams;
 
-  if (!Array.isArray(p.items) || p.items.length === 0) {
-    return handleError(new Error("Order must contain at least one item")) as any;
-  }
-  if (!p.shippingAddress || !p.shippingAddress.name || !p.shippingAddress.addressLine1 || !p.shippingAddress.city) {
-    return handleError(new Error("Shipping address is required")) as ErrorResponse
-  }
+  if (!Array.isArray(p.items) || p.items.length === 0)  throw new Error("Order must contain at least one item")
+  
+  if (!p.shippingAddress || !p.shippingAddress.name || !p.shippingAddress.addressLine1 || !p.shippingAddress.city) throw new Error("shipping address is required")
 
   const shippingCost = Number(p.shippingCost ?? 0);
   const tax = Number(p.tax ?? 0);
@@ -254,7 +252,16 @@ export async function createOrderAction(
       console.log(orderItems, "orderItems")
 
       // Create order (inside the same transaction)
-      createdOrder = await (Order as any).createForUser(session.user.id, orderPayload);
+      createdOrder  = await Order.create(
+  [
+    {
+      ...orderPayload,
+      checkoutId: p.checkoutId,
+    },
+  ],
+  { session: mongoSession }
+).then(res => res[0]);
+
       if (!createdOrder) throw new Error("Order creation failed");
 
       // Clear user's cart atomically inside same transaction (if using Cart collection)
@@ -272,6 +279,15 @@ export async function createOrderAction(
         // ignore revalidation failures
       }
     }); // end transaction
+    if(createdOrder) {
+await Product.updateMany(
+
+  // @ts-ignore
+  { _id: { $in:  createdOrder.items.map((i: IOrderItem) => i.productId) }},
+  { $inc: { weeklySales: 1 } })
+    }
+      
+
 
     mongoSession.endSession();
 
@@ -281,9 +297,9 @@ export async function createOrderAction(
       success: true,
       data: { order: JSON.parse(JSON.stringify(createdOrder)) },
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error("createOrderAction error:", err);
-    return handleError(err) as any;
+    return handleError(err) as ErrorResponse
   }
 }
 type GetOrdersParams = {
@@ -322,7 +338,50 @@ export async function getUserOrdersAction(
      return handleError(err) as ErrorResponse
   }
 }
+interface GetOrderDetailsParams {
+  orderId: string
+}
+export async function getOrderDetails(
+  params: GetOrderDetailsParams
+): Promise<ActionResponse<{ order: IOrder }>> {
 
+  const validatedResult = await action({
+    params,
+    schema: GetOrderDetailsSchema,
+    authorize: true
+  });
+
+  if (validatedResult instanceof Error) {
+    return handleError(validatedResult) as ErrorResponse;
+  }
+
+  const { orderId } = validatedResult.params!;
+  const session = validatedResult.session;
+
+  try {
+    await connectDB();
+
+    const order = await Order.findById(orderId)
+      .populate({
+        path: "items.productId",
+        select: "name images basePrice _id"
+      })
+
+    if (!order) throw new NotFoundError("Order");
+
+    if (order.userId.toString() !== session?.user.id) {
+      throw new UnAuthorizedError("Unauthorized action!");
+    }
+
+    return {
+      success: true,
+      data: { order: JSON.parse(JSON.stringify(order))}
+    };
+
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
 
 /**
  * Cancel an order
@@ -427,10 +486,9 @@ export async function cancelOrderAction(params: { orderId?: string; reason?: str
     if (!updatedOrder) return handleError(new Error("Failed to cancel order")) as ErrorResponse;
 
     // best-effort revalidation
-    try {
+    
       revalidatePath(ROUTES.myorders);
-      revalidatePath("/orders");
-    } catch (e) {}
+   
 
     return {
       success: true,

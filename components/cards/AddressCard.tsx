@@ -112,7 +112,7 @@ export default function AddressCard() {
 
   // Normal display
   return (
-    <div className="border border-gray-300 bg-white rounded-lg p-4 ">
+    <div className="border border-gray-300 bg-white rounded-lg p-4 max-sm:w-[97%] max-sm:mx-auto ">
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex gap-2 items-center">

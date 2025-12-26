@@ -13,21 +13,25 @@ import { CreateProductParams, GetSingleProductParams } from "@/types/actionTypes
 import { revalidatePath } from "next/cache"
 import Review from "@/models/review.model";
 import { auth } from "@/auth";
+import User, { IUser } from "@/models/user.model";
 export async function CreateProductAction(params:CreateProductParams): Promise<ActionResponse> {
    const validatedResult = await action({ params, schema: productSchema, authorize: true })
    if(validatedResult instanceof Error) {
        return handleError(validatedResult) as ErrorResponse
    }
-   const { name, description, category, brand, basePrice,
-       status, stock, imageUrl, images, variants, attributes, isFeatured, tags, } = validatedResult.params!
+   const { name, description, category, brand, basePrice, isTrendy, isBestSeller,
+       status, stock, imageUrl, images, listPrice, variants, attributes, isFeatured, tags, } = validatedResult.params!
    try {
       await connectDB()
       const newProduct = await Product.create({
          name,
          brand,
+         isTrendy,
+         isBestSeller,
          description,
          category,
          basePrice,
+         listPrice,
          status,
          isFeatured,
          tags,
@@ -183,7 +187,7 @@ export async function getAllProducts(
         .skip(skip)
         .limit(perPage)
         .select(projection)
-        .lean()
+        
         .exec();
     }
 
@@ -546,6 +550,153 @@ export async function hardDeleteProduct(
 
   } catch (error) {
     return handleError(error) as ErrorResponse;
+  }
+}
+interface GetFrequentlyBoughtTogetherParams {
+  productId:string
+}
+export async function getFrequentlyBoughtTogether(params:GetFrequentlyBoughtTogetherParams):Promise<ActionResponse<{products: IProduct[]}>> {
+  const { productId } = params;
+  try {
+    if(!productId) throw new Error("Product ID is required")
+    await connectDB()
+    const product = await Product.findById(productId) as IProduct;
+    if(!product) throw new NotFoundError("Product")
+   const products = await Product.find({
+    category: product.category,
+    _id: { $ne: productId },
+  })
+    .sort({ weeklySales: -1 })
+    return {
+      success: true,
+      data: {products : JSON.parse(JSON.stringify(products))}
+    }
+  } catch (error) {
+     return handleError(error) as ErrorResponse;
+  }
+ 
+}
+
+interface getRecommendedForUserParams {
+  userId: string;
+  limit?: number;
+}
+
+
+export async function getRecommendedForUser(
+  userId: string | undefined,
+  limit = 12
+): Promise<ActionResponse<{products: IProduct[]}>> {
+  try {
+     await connectDB();
+     if(!userId) return {
+       success: false,
+     }
+  const user = await User.findById(userId) as IUser
+  if (!user) throw new NotFoundError("User")
+
+  // --- Build interest map ---
+  const interestMap = new Map<string, number>();
+  for (const interest of user.interests ?? []) {
+    interestMap.set(interest.tag.toLowerCase(), interest.score);
+  }
+
+  // --- Recently viewed product IDs ---
+  const viewedProductIds = (user.browsingHistory ?? [])
+    .slice(-20)
+    .map(h => h.product.toString());
+
+  const products = await Product.find({
+    status: "ACTIVE",
+    isDeleted: { $ne: true },
+  });
+
+  const scored = products.map(product => {
+    let score = 0;
+
+    // 🎯 Interest → tag match
+    for (const tag of product.tags ?? []) {
+      const interestScore = interestMap.get(tag.toLowerCase());
+      if (interestScore) {
+        score += interestScore * 0.4;
+      }
+    }
+
+    // 👀 Browsing proximity
+    if (viewedProductIds.includes(product._id.toString())) {
+      score += 25;
+    }
+
+    // 🔥 Popularity (weeklySales)
+    score += Math.min(product.weeklySales ?? 0, 100) * 0.25;
+
+    // 🕒 Recency boost
+    const daysOld =
+      (Date.now() - new Date(product.createdAt).getTime()) / 86_400_000;
+    score += Math.max(0, 20 - daysOld);
+
+    return { product, score };
+  });
+
+  const recommendedProducts = scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(s => s.product);
+    return {
+      success: true,
+      data: {products: JSON.parse(JSON.stringify(recommendedProducts))}
+    }
+  } catch (error) {
+     return handleError(error) as ErrorResponse
+  }
+ 
+}
+
+
+
+
+export async function getInspiredByViewed(
+  userId: string,
+  limit = 10
+): Promise<ActionResponse<{products:IProduct[]}>> {
+  try {
+    await connectDB();
+
+  const user = await User.findById(userId)
+    .populate({
+      path: "browsingHistory.product",
+      select: "tags _id",
+    }) as IUser
+    
+
+  if (!user) throw new NotFoundError("User")
+    if(user.browsingHistory.length === 0) throw new Error("Your browsing history is empty")
+
+  const viewedProductIds = new Set<string>();
+  const viewedTags = new Set<string>();
+
+  for (const entry of user.browsingHistory) {
+    if (entry.product) {
+      viewedProductIds.add((entry.product as any)._id.toString());
+      (entry.product as any).tags?.forEach((tag:any) =>
+        viewedTags.add(tag.toLowerCase())
+      );
+    }
+  }
+
+   const products = await Product.find({
+    status: "ACTIVE",
+    isDeleted: { $ne: true },
+    tags: { $in: Array.from(viewedTags) },
+    _id: { $nin: Array.from(viewedProductIds) },
+  })
+  .limit(limit)
+  return {
+    success: true,
+    data: {products: JSON.parse(JSON.stringify(products))}
+  }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
   }
 }
 

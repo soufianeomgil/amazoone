@@ -11,6 +11,7 @@ import User, { IUser } from "@/models/user.model";
 import { ToggleWishlistParams } from "@/types/actionTypes";
 import bcrypt from "bcryptjs";
 import z from "zod";
+import { IAddress } from "@/models/address.model";
 export async function getCurrentUser(): Promise<ActionResponse<{user: IUser | null}>>{
   const currentUser = await auth()
  if(!currentUser?.user)  return {
@@ -82,6 +83,7 @@ export async function toggleAddToWishlist(params: ToggleWishlistParams): Promise
 interface EditProfileParams {
   name:string;
   email: string;
+  profilePic?: string;
   gender: 'male' | "female"
   phone:string;
   password?:string
@@ -102,7 +104,7 @@ export async function editUserProfile(
   const session = validatedResult.session;
   if (!session?.user?.id) throw new UnAuthorizedError("");
 
-  const { name, email, password, phone, gender } = validatedResult.params!;
+  const { name, email, password, phone, gender, profilePic } = validatedResult.params!;
 
   try {
     await connectDB();
@@ -122,6 +124,10 @@ export async function editUserProfile(
     /* -------------------- BASIC PROFILE UPDATES -------------------- */
     if (name && name !== user.fullName) {
       user.fullName = name;
+    }
+
+    if(profilePic && profilePic !== user.profilePictureUrl) {
+       user.profilePictureUrl = profilePic;
     }
 
     if (phone !== undefined && phone !== user.phoneNumber) {
@@ -213,3 +219,109 @@ export async function updateUserInterests(
   }
 }
 
+export async function getAdminUsersOverview(): Promise<
+  ActionResponse<{
+    users: {
+      _id: string
+      fullName: string
+      email: string
+      isVerified: boolean
+      createdAt: Date
+      totalSpent: number
+      ordersCount: number
+      defaultAddress: IAddress | null
+    }[]
+  }>
+> {
+  try {
+    await connectDB()
+
+    const users = await User.aggregate([
+      // 1️⃣ Join orders by userId (CORRECT)
+      {
+        $lookup: {
+          from: "orders",
+          localField: "_id",
+          foreignField: "userId",
+          as: "orders",
+        },
+      },
+
+      // 2️⃣ Join addresses
+      {
+        $lookup: {
+          from: "addresses",
+          localField: "addresses",
+          foreignField: "_id",
+          as: "addresses",
+        },
+      },
+
+      // 3️⃣ Filter paid / delivered orders (REAL revenue)
+      {
+        $addFields: {
+          paidOrders: {
+            $filter: {
+              input: "$orders",
+              as: "order",
+              cond: {
+                $in: ["$$order.status", ["PAID", "DELIVERED"]],
+              },
+            },
+          },
+        },
+      },
+
+      // 4️⃣ Compute metrics
+      {
+        $addFields: {
+          ordersCount: { $size: "$paidOrders" },
+          totalSpent: {
+            $sum: "$paidOrders.total",
+          },
+          defaultAddress: {
+            $first: {
+              $filter: {
+                input: "$addresses",
+                as: "addr",
+                cond: { $eq: ["$$addr.isDefault", true] },
+              },
+            },
+          },
+        },
+      },
+
+      // 5️⃣ Shape admin response
+      {
+        $project: {
+          fullName: 1,
+          email: 1,
+          isVerified: 1,
+          createdAt: 1,
+          ordersCount: 1,
+          totalSpent: { $ifNull: ["$totalSpent", 0] },
+          defaultAddress: {
+            name: 1,
+            city: 1,
+            addressLine1: 1,
+            phone: 1,
+          },
+        },
+      },
+
+      // 6️⃣ Sort by value
+      {
+        $sort: { totalSpent: -1 },
+      },
+    ])
+
+    return {
+      success: true,
+      data: {
+        users: JSON.parse(JSON.stringify(users)),
+      },
+    }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
+  }
+}

@@ -15,6 +15,7 @@ export const ROUTES = {
     mywishlist: "/account/wishlist",
     myBrowsingHistory: "/browsing-history",
     editAddress: (id:string) => `/account/addresses/edit/${id}`,
+    profile: (id:string) => `/profile/${id}`,
     addAddress: "/account/addresses/add",
     addresses: "/account/addresses"
        

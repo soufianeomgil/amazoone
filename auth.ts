@@ -1,21 +1,24 @@
 import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import GitHub from "next-auth/providers/github";
+
 import Google from "next-auth/providers/google";
 
 import { api } from "./lib/api";
-// TODO: append isAdmin property when user logs in using google,
+
 
 import { LoginValidationSchema } from "./lib/zod";
-import { IUser } from "./types/actionTypes";
+
 import { IAccount } from "./models/account.model";
+import { IUser } from "./models/user.model";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
  
   providers: [
-    GitHub,
-    Google,
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET
+    }),
     Credentials({
       async authorize(credentials) {
         const validatedFields = LoginValidationSchema.safeParse(credentials);

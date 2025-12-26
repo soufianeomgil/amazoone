@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
-
+import React, { useMemo, useRef, useState, useEffect } from "react";
+import { nanoid } from "nanoid";
 import { ChevronDown, ChevronUp, CreditCard, Lock as LockIcon } from "lucide-react";
 import NiceCheckbox from "@/components/ui/NiceCheckbox";
 import AddressCard from "@/components/cards/AddressCard";
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { createOrderAction } from "@/actions/order.actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
+import { SpinnerIcon } from "@/components/shared/icons";
 
 
 
@@ -20,15 +22,16 @@ type CartItemShape = NonNullable<ICart["items"]>[number];
 type Props = {
   cartItems: ICart; // single cart document with items: ICartItem[]
   onQuantityChange?: (id: string | number, qty: number) => void;
+  userId:string;
   onDelete?: (id: string | number) => void;
   onToggleGift?: (id: string | number, next: boolean) => void;
-  onPlaceOrder?: (paymentMethod: string) => void;
+  
 };
 
 const currency = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 
-const CheckoutClient: React.FC<Props> = ({ cartItems, onQuantityChange, onDelete, onToggleGift, onPlaceOrder }) => {
+const CheckoutClient: React.FC<Props> = ({ cartItems,userId, onQuantityChange, onDelete, onToggleGift }) => {
   const dispatch = useDispatch();
    const [open,setOpen] = useState(false)
   // read payment method from redux store (defensive)
@@ -50,7 +53,7 @@ const CheckoutClient: React.FC<Props> = ({ cartItems, onQuantityChange, onDelete
     // not populated (ObjectId string) => no product metadata available
     return null;
   };
-
+const checkoutId = useRef(nanoid());
   const getName = (item: CartItemShape) => {
     const product = getProduct(item);
     if (product) return product.name ?? product.title ?? "Product";
@@ -143,13 +146,21 @@ const payload = {
   shippingCost: 15,
 };
 
-         const {error,success,data} = await createOrderAction(payload)
+         const {error,success,data} = await createOrderAction({
+  ...payload,
+  checkoutId: checkoutId.current,
+});
          if(error) {
             toast.error(error.message)
             return
          }else if(success) {
             dispatch(clearCart())
             toast.success('order has been placed successfuly')
+            await updateUserInterestsEngine({
+  userId,
+  tags: cartItems.items.map((item) => (item.productId as any).tags),
+  weight: 25,
+})
             router.push(`/success/order-summary/${data?.order?.id}`)  
             return
          }
@@ -321,10 +332,11 @@ const payload = {
               </div>
 
               <Button
+               disabled={pending}
                 className="w-full bg-yellow-400 cursor-pointer hover:bg-yellow-500 text-gray-800 font-bold py-2 px-4 rounded-lg mt-4 shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-200 flex items-center justify-center gap-2"
                 onClick={placeOrder}
               >
-                <span>Place your order</span>
+                <span> {pending ? <SpinnerIcon /> : "Place your order"}</span>
               </Button>
 
               <div className="text-xs text-gray-500 mt-4 flex items-start">
@@ -356,8 +368,10 @@ const payload = {
               </div>
             </button>
 
-            <Button onClick={placeOrder} className="flex-1 ml-2 cursor-pointer inline-flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-3 px-4 rounded-lg shadow">
-              Place your order
+            <Button onClick={placeOrder}
+              disabled={pending}
+             className="flex-1 ml-2 cursor-pointer inline-flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-3 px-4 rounded-lg shadow">
+               {pending ? <SpinnerIcon /> : "Place your order"}
             </Button>
           </div>
 

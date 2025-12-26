@@ -23,7 +23,7 @@ const Checkout= async() => {
         <h1 className="sm:text-2xl text-base font-semibold text-gray-800">Paiement</h1>
       </div>
        
-     <CheckoutClient cartItems={result.data?.userCart as ICart} />
+     <CheckoutClient  userId={session.user.id} cartItems={result.data?.userCart as ICart} />
     </div>
   );
 };

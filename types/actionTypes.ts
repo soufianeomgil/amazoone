@@ -39,28 +39,7 @@ export interface ShippingDetails {
   };
   isEligibleForPrime: boolean;
 }
-// USE THIS FOR ADDING A REVIEW AS A TYPE INTERFACE;
-// export interface Review {
-//   userId: string;
-//   rating: 1 | 2 | 3 | 4 | 5;
-//   title: string;
-//   commentBody: string;
-//   images?: string[];
-//   isVerifiedPurchase: boolean;
-//   createdAt: Date;
-// }
-// export interface ImageState {
-//           url?: string | undefined,
-//           public_id?: string | undefined,
-//           preview?: string | undefined,
-// }
-// export interface ProductVariant {
-//     sku: string; // Stock Keeping Unit for this specific variant
-//     priceModifier: number | string | undefined; // Amount to add/subtract from the base price
-//     stock: number;
-//     attributes: ProductAttribute[];
-//     images?: ImageState[]; 
-// }
+
 
 export interface IProduct {
   title: string;
@@ -86,24 +65,6 @@ export interface IProduct {
   technicalSpecifications: ProductAttribute[];
 }
  
-
-
-// export interface CreateProductParams {
-//   name: string;
-//   description: string;
-//   brand: string;
-//   category: string;
-//   status: "ACTIVE" | "DRAFT" | "INACTIVE" | "OUT OF STOCK";
-//   basePrice: number | string;
-//   stock?: number | string | undefined;
-//   imageUrl: ImageState; // Main display image
-//   images: ImageState[]; 
-//   tags: string[];
-//   isFeatured: boolean;
-//   variants: ProductVariant[];
-//   attributes: ProductAttribute[]
-
-// }
 export interface GetSingleProductParams  {
   productId: string;
 }
@@ -132,6 +93,9 @@ export interface ProductVariant {
 export interface CreateProductParams {
   name: string;
   description: string;
+  isTrendy:boolean;
+  isBestSeller: boolean;
+  listPrice:number | string;
   brand: string;
   category: string;
   status: "ACTIVE" | "DRAFT" | "INACTIVE" | "OUT OF STOCK";
@@ -165,35 +129,10 @@ interface PaymentMethod {
   details: CreditCardInfo; // Could be a union type for different payment methods
   isDefault: boolean;
 }
-export interface IUser {
-   _id: string;
-  // --- Core Account Information ---
-  fullName: string;
-  email: string;
-  isVerified: boolean;
-  phoneNumber?: string;
-  hashedPassword: string; // Stored as a hash, never plaintext
-  gender: "male" | "female",
-  isAdmin: boolean;
-  // --- Profile & Personalization ---
-  profilePictureUrl?: string;
 
-  
-  // --- Related Data Collections (Relationships) ---
-  addresses: Schema.Types.ObjectId[];
-  paymentMethods: PaymentMethod[];
-  orderHistory: Schema.Types.ObjectId[]; // Array of order IDs
-  browsingHistory: Schema.Types.ObjectId[]; // Array of product IDs
-  wishLists: Schema.Types.ObjectId[]; // Array of wish list IDs
-  
-
-  lastLogin: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
 export interface AuthCredentials {
   email: string;
-  gender: "male" | "female";
+  gender: "male" | "female"
   fullName: string;
  
   password: string;
@@ -227,4 +166,39 @@ export interface  AddAddressParams  {
 }
 export interface EditAddressParams extends AddAddressParams {
   id: string;
+}
+
+
+export interface SaleData {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface ProductData {
+  category: string;
+  value: number;
+}
+
+export interface Order {
+  id: string;
+  customer: string;
+  product: string;
+  amount: number;
+  status: 'Delivered' | 'Pending' | 'Shipped' | 'Cancelled';
+  date: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'model';
+  text: string;
+  isThinking?: boolean;
+}
+
+export interface KpiData {
+  label: string;
+  value: string;
+  change: string;
+  isPositive: boolean;
+  icon: string;
 }

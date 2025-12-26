@@ -1,16 +1,15 @@
 "use server"
 import connectDB from "@/database/db"
-import User from "@/models/user.model"
+import User, { IUser } from "@/models/user.model"
 import bcrypt from "bcryptjs"
-// TODO: cart functionality;
-// TODO: allocate money + 600 that you already have for fasi (2000 + 600 = 2600dh) that half your debt;
+
 import handleError from "@/lib/handlers/error"
 import mongoose from "mongoose"
 import { ForbiddenError } from "@/lib/http-errors"
 import { revalidatePath } from "next/cache"
 import { signIn } from "@/auth"
 import { action } from "@/lib/handlers/action"
-import { AuthCredentials, IUser } from "@/types/actionTypes"
+import { AuthCredentials } from "@/types/actionTypes"
 import { LoginValidationSchema, SignUpValidationSchema } from "@/lib/zod"
 import Account from "@/models/account.model"
 import Token from "@/models/token.model"

@@ -8,7 +8,15 @@ All colors MUST be HSL.
 */
 
 
-
+@layer utilities {
+   .input_styles {
+    @apply w-full rounded-xl border border-gray-300 bg-gray-50
+                          px-4 py-3 text-sm text-gray-900
+                          placeholder:text-gray-700
+                          focus:bg-white focus:border-orange-400
+                          focus:ring-2 focus:ring-orange-200 outline-none
+  }
+}
 
 body  {
   height: 100% ;
@@ -33,7 +41,12 @@ body  {
 .dark .mdxeditor-toolbar button svg {
   color: #858ead !important;
 }
-
+.bg-blue-primary {
+ background-color:#00afaa;
+}
+.bg-yellow-primary {
+  background-color: #FFD814;
+}
 .dark .mdxeditor-toolbar button:hover svg {
   color: #000 !important;
 }
@@ -207,22 +220,7 @@ pre[class*="language-"] {
 .token.variable {
   color: #d6e7ff;
 }
-/* global.css or inside a module */
-/* .loader-cart {
-  border: 2px solid #fff;
-  border-top: 2px solid transparent;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  animation: spin 0.5s linear infinite;
-}
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-} */
- 
  
 ._toolbarRoot_uazmk_160  {
    background-color: black!important;

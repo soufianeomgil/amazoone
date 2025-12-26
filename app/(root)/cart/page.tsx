@@ -29,10 +29,11 @@ const page = async () => {
   const hasSavedItems = Array.isArray(data?.items) && data.items.length > 0;
 
   return (
-    <div className="max-w-7xl overflow-hidden mx-auto p-4">
+    <div className="w-full bg-inherit">
+ <div className="max-w-7xl overflow-hidden mx-auto sm:p-4">
       {hasCartItems ? (
         <>
-          <h1 className="text-2xl mb-7 font-semibold">Shopping Cart</h1>
+          <h1 className="text-2xl max-sm:p-5 mb-7 font-semibold">Shopping Cart</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-x-6">
             {/* Left/main column */}
@@ -50,9 +51,9 @@ const page = async () => {
                   <hr className="my-3" />
 
                   <div className="space-y-4">
-                    {result?.data?.userCart.items.map((item: any) => (
+                    {result?.data?.userCart.items.map((item: any,index) => (
                       <CartItemComponent
-                        key={String(item._id ?? `${item.productId}:${item.variantId ?? ""}`)}
+                        key={index}
                         userId={res.data?.user?._id ?? null}
                         item={item}
                       />
@@ -62,17 +63,18 @@ const page = async () => {
 
                 {/* Saved-for-later area */}
                 {hasSavedItems && (
- <section className="bg-white p-4 rounded-md shadow-sm">
-                  <h3 className="sm:text-xl text-lg font-bold pb-3">Your Items</h3>
+ <section className="bg-white  sm:p-4 shadow-sm">
+                  {/* <h3 className="sm:text-xl text-lg font-bold pb-3">Your Items</h3> */}
 
                   <div className="flex flex-col gap-3 mt-1">
-                    <div className="text-blue-700 font-bold sm:text-lg text-base">
+                    <div className="text-gray-900 font-bold px-4 pt-2
+                 sm:text-lg text-base">
                       Saved for later ({data?.items?.length} items)
                     </div>
 
-                    <div className="border border-gray-200 p-3 rounded">
+                    <div className="sm:border border-gray-200 sm:p-3 rounded">
                       {hasSavedItems ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1  p-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                           {/* MoveToCartBtn component expects data prop (client component) */}
                           <MoveToCartBtn data={data} />
                         </div>
@@ -93,8 +95,9 @@ const page = async () => {
             </div>
 
             {/* Right/checkout column */}
-            <aside className="lg:col-span-1 max-lg:mt-3">
-              <div className="sticky top-24 space-y-4">
+            <aside className="lg:col-span-1 max-lg:mt-3 ">
+              {/* sticky top-24 */}
+              <div className=" space-y-4">
                 {/* Desktop */}
                 <div className="hidden lg:block">
                   <CheckoutBox user={res.data?.user ?? null} 
@@ -137,7 +140,7 @@ const page = async () => {
             </p>
           </div>
 
-          <div className="bg-white p-4 rounded-md shadow-sm">
+          <div className="bg-white sm:p-4 rounded-md shadow-sm">
             <h3 className="sm:text-xl text-lg font-bold pb-3">Saved for later ({data.items.length})</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <MoveToCartBtn data={data} />
@@ -148,7 +151,10 @@ const page = async () => {
         // Nothing in cart and nothing saved
         <EmptyCart message="Your cart is empty — explore our products and add something you like!" />
       )}
+      {/* <SoldWith title="Frequently bought with items in your cart" /> */}
     </div>
+    </div>
+   
   );
 };
 

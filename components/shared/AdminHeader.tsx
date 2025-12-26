@@ -88,7 +88,7 @@ const AdminHeader: React.FC = () => {
             </div>
 
             {/* Bottom Navigation (Desktop) */}
-            <nav className="hidden lg:flex items-center bg-[#37475A] text-white text-sm font-semibold space-x-2 px-4 py-1">
+            {/* <nav className="hidden lg:flex items-center bg-[#37475A] text-white text-sm font-semibold space-x-2 px-4 py-1">
                 {navItems.map((item,index) => {
                     const isActive = pathname.includes(item.name);
                     return (
@@ -99,7 +99,7 @@ const AdminHeader: React.FC = () => {
                 })}
                
                
-            </nav>
+            </nav> */}
             
             {/* Mobile Navigation */}
             {isMobileMenuOpen && (

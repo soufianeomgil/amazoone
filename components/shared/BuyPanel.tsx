@@ -16,6 +16,7 @@ import { IProduct, IVariant } from "@/models/product.model";
 import { ISavedList } from "@/models/savedList.model";
 import { LocationIcon } from "./icons";
 import AmazonPrice from "./AmazonPrice";
+import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
 
 type LocalCartItem = {
   _id: string;
@@ -29,7 +30,7 @@ type LocalCartItem = {
   sku?: string;
 };
 
-const BuyPanel = ({ product, data }: { product: IProduct; data: ISavedList[] }) => {
+const BuyPanel = ({ product, data,userId }: { product: IProduct; userId: string; data: ISavedList[] }) => {
   const variants = product?.variants ?? [];
   const selectedVariantIndex = useSelector(
     (state: RootState) => state.product.selectedVariant[product?._id as string]
@@ -78,13 +79,18 @@ const BuyPanel = ({ product, data }: { product: IProduct; data: ISavedList[] }) 
         },
         ...prev,
       ]);
-
+       await updateUserInterestsEngine({
+  userId: userId,
+  tags: product.tags,
+  weight: 10,
+})
       setOpen(true);
       router.refresh?.();
     } finally {
       setLoading(false);
     }
   };
+  const [dollars, cents] = product.basePrice.toFixed(2).split(".");
 /// We apologize but this account has not met the minimum eligibility requirements to write a review. If you would like to learn more about our eligibility requirements, please see our community guidelines.
   return (
     <>
@@ -93,40 +99,45 @@ const BuyPanel = ({ product, data }: { product: IProduct; data: ISavedList[] }) 
         <div className=" rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden">
           
           {/* PRICE */}
-          <div className="p-5 border-b flex items-center gap-4.5 border-gray-100 bg-gradient-to-br from-gray-50 to-white">
-            {/* <p className="text-3xl font-bold text-[hsl(178,100%,34%)]">
-              ${product.basePrice}
-            </p> */}
+          <div className="p-5 border-b flex items-center gap-x-4 border-gray-100 bg-gradient-to-br from-gray-50 to-white">
+           
             <div>
- <AmazonPrice price={29.99} />
+  <span className={`inline-flex items-start font-bold text-gray-900`}>
+      <span className="text-[12px] text-gray-700 font-medium mr-0.5 mt-1 ">$</span>
+      <span className={`text-3xl text-black font-bold`}>{dollars} </span>
+      <span className="text-[10px] mt-1 text-gray-700 font-medium">{cents}</span>
+    </span>
             </div>
            
-  <div>
- <AmazonPrice price={32.95} className="line-through text-2xl! text-gray-500! font-bold!" />
-
+   <div>
+  <span className={`inline-flex items-start line-through font-bold text-gray-900`}>
+      <span className="text-[8px] text-gray-500 font-medium mr-0.5 mt-1 ">$</span>
+      <span className={`text-xl text-gray-500 font-bold`}>{Number(dollars) + 50} </span>
+      <span className="text-[8px] mt-1 text-gray-500 font-medium">{cents}</span>
+    </span>
             </div>
 
 
-            {/* <div className="flex items-center gap-2 mt-2">
-              <span className="line-through text-sm text-gray-400">£58.00</span>
-              <span className="text-xs font-semibold bg-red-600 text-white px-2 py-0.5 rounded">
-                -19%
-              </span>
-            </div> */}
+           
           </div>
-              <div className="flex  py-2.5 gap-2 items-start px-5">
+             <h3 className="text-sm px-5 pt-2 text-gray-800">Delivery <span className="text-black font-bold"> Friday</span>, <span className="text-black font-bold">January 2</span></h3>
+              <div className="flex py-2.5 gap-2 items-start px-5">
                 <LocationIcon />
                   <p className="text-xs text-blue-600 font-medium"> Deliver to HMAMOU - Meknes <br /> 50000‌</p>
               </div>
        
           {/* STOCK */}
           <div className="px-5 py-2 border-b border-gray-100 flex items-center gap-2 text-sm">
-            <CheckCircle className="w-5 h-5 text-green-600" />
+            {/* <CheckCircle className="w-5 h-5 text-green-600" />
             <span className="font-medium text-green-700">
               In stock — ready to ship
-            </span>
+            </span> */}
+            <p className="font-bold animate-pulse text-sm text-red-700">
+                  Only 2 left in stock - order soon.
+                </p>
           </div>
 
+               
           {/* DELIVERY */}
          
 

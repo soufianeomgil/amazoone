@@ -1,27 +1,5 @@
 "use client";
-import {
-  EmailIcon,
-  FacebookIcon,
-  FacebookMessengerIcon,
- 
 
-  InstapaperIcon,
- 
-  LinkedinIcon,
-
- 
-  PinterestIcon,
-
- 
-  TelegramIcon,
-  ThreadsIcon,
-
-  WeiboIcon,
-  WhatsappIcon,
-
-  XIcon,
- 
-} from "react-share";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { ChevronLeft, ChevronRight, Heart, Share } from "lucide-react";
@@ -73,7 +51,7 @@ const ProductImage = ({ product }: { product: IProduct }) => {
               <button
                 key={i}
                 onClick={() => setActive(i)}
-                className={`w-16 h-16 border rounded-md bg-white flex items-center justify-center
+                className={`w-16 h-16 border rounded-md bg-gray-50 flex items-center justify-center
                   ${i === active ? "border-orange-500" : "border-gray-200 hover:border-gray-400"}`}
               >
                 <img
@@ -86,7 +64,7 @@ const ProductImage = ({ product }: { product: IProduct }) => {
           </div>
 
           {/* 🟧 Main image */}
-          <div className="relative flex-1 border border-gray-200 rounded-md bg-white">
+          <div className="relative flex-1 border border-gray-200 rounded-md bg-gray-100">
             {gallery[active]?.url ? (
               <img
                 src={gallery[active].url}

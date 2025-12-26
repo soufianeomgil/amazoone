@@ -144,9 +144,13 @@ export const ImageObject = z.object({
   public_id: z.string().optional(),
   preview: z.string().optional(),
 })
-
+export const GetOrderDetailsSchema = z.object({
+  orderId: z.string().min(1, "Order ID is required")
+})
 export const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  isTrendy: z.boolean().default(false),
+  isBestSeller: z.boolean().default(false),
   description: z.string().min(10, "Description must be at least 10 characters"),
   brand: z.string().min(1, "Brand is required"),
   category: z.string().min(1, "Category is required"),
@@ -157,7 +161,13 @@ export const productSchema = z.object({
       const n = typeof v === "string" ? Number(v) : v;
       return !Number.isNaN(n) && n >= 0;
     }, { message: "Base price must be a non-negative number" }),
-
+  listPrice: z
+    .union([z.string(), z.number()])
+    .refine((v) => {
+      const n = typeof v === "string" ? Number(v) : v;
+      return !Number.isNaN(n) && n >= 0;
+    }, { message: "Base price must be a non-negative number" }),
+ 
   stock: z
     .union([z.string(), z.number()])
     .optional()
@@ -211,7 +221,7 @@ export const SignInWithOAuthSchema = z.object({
 export const SignUpValidationSchema = z.object({
   gender: z.enum(["male", "female"], { message: "gender Type is not valid!" }),
  
-  fullName: z.string().min(1, { message: "lastName is required!" }),
+  fullName: z.string().min(1, { message: "fullName is required!" }),
  
   email: z.string().email({ message: "please provide a valid email address!" }),
   password: z.string()
@@ -401,6 +411,7 @@ const VariantSnapshotSchema = z.object({
 });
 export const EditProfileSchema = z.object({
   fullName: z.string().min(1, {message: "fullName is required"}),
+  profilePic: z.url({message: "Please provide a valid URL"}).optional(),
    phone: z
     .string()
     .min(1, { message: "Phone number is required" })
@@ -421,7 +432,7 @@ export const EditUserProfileSchema = z.object({
     .string()
     .min(2, "Name must be at least 2 characters")
     .max(60, "Name is too long"),
-
+  profilePic: z.url().optional(),
   email: z
     .string()
     .email("Invalid email address"),

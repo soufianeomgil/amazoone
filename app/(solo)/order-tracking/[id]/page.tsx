@@ -1,22 +1,25 @@
+import { getOrderDetails } from "@/actions/order.actions";
+import AmazonPrice from "@/components/shared/AmazonPrice";
+import { buildOrderTimeline } from "@/lib/utils";
+import { IOrder } from "@/models/order.model";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
-const STATUS_ORDER = [
-  { key: "pending", label: "En attente de confirmation", time: "vendredi 21 novembre 2025 22:41", active: true, color: "#00BFA6" },
-  { key: "confirmed", label: "Confirmée", time: "vendredi 21 novembre 2025 22:41", active: true, color: "#00BFA6" },
-  { key: "preparing", label: "En préparation", time: "", active: false },
-  { key: "shipping", label: "En cours de livraison", time: "", active: false },
-  { key: "delivered", label: "Livrée", time: "", active: false },
-  { key: "cancelled", label: "Annulée", time: "vendredi 21 novembre 2025 22:43", active: true, color: "#00BFA6" },
-];
 
- const TrackingPage = ({params}:  {params: Promise<{id:string}>}) => {
+
+ const TrackingPage = async({params}:  {params: Promise<{id:string}>}) => {
+  const id = (await params).id
+  const res = await getOrderDetails({orderId: id})
+  if(!res.success) return notFound()
+  const STATUS_ORDER = buildOrderTimeline(res.data?.order as IOrder);
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Top bar */}
       <div className="bg-teal-900 text-white">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-4">
-            <div className="text-2xl font-extrabold tracking-tight">marjanemall</div>
+            <Link href="/" className="text-2xl font-extrabold tracking-tight">Amazon</Link>
           </div>
           <div className="text-sm text-right">
             <div className="font-semibold">Une question ?</div>
@@ -35,16 +38,21 @@ const STATUS_ORDER = [
           <div className="lg:col-span-1 flex flex-col items-center">
             <div className="w-full max-w-2xl">
               <div className="bg-white p-6 ">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-20 h-20 rounded-md bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200">
+                {res.data?.order.items.map((i,index)=> (
+ <div key={index} className="flex items-start gap-4 mb-4">
+                  <div className="w-[100px] h-[100px] rounded-md bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200">
                     {/* product image */}
-                    <img src={"https://m.media-amazon.com/images/I/81kfaXIpnRL._AC_UL320_.jpg"} alt="product" className="w-full h-full object-contain" />
+                    <img src={i.thumbnail ?? "https://m.media-amazon.com/images/I/81kfaXIpnRL._AC_UL320_.jpg"} alt={i.name} className="w-full h-full object-contain" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm text-gray-700">Commande N° : <span className="font-bold">0026407281</span></div>
-                    <div className="text-sm text-gray-600 mt-2">Ecran PC - XIAOMI - A22i - 21,45" - FHD - Dalle VA - 75Hz</div>
+                    <div className="text-sm flex items-center gap-1.5 text-gray-700">Order Total : <AmazonPrice price={res.data?.order.total as number} /></div>
+                    <div className="text-sm text-gray-600 mt-2">
+                       {i.name}
+                    </div>
                   </div>
                 </div>
+                ))}
+               
 
                 <div className="mt-6">
                   <h3 className="text-md font-semibold text-gray-800 mb-4">Status de la commande :</h3>
@@ -92,10 +100,12 @@ const STATUS_ORDER = [
       </main>
 
       <footer className="bg-teal-900 text-white py-6 mt-10">
-        <div className="max-w-6xl mx-auto px-6 text-center">© 2025 - marjanemall</div>
+        <div className="max-w-6xl mx-auto px-6 text-center">© 2025 - Amazon</div>
       </footer>
     </div>
   );
 };
 
 export default TrackingPage
+
+

@@ -205,14 +205,7 @@ const ProductReviews = ({productId,product}:  {product:IProduct,productId:string
       ))}
     </p>
   )}
-
-  {/* COMMENT */}
-  <p className="text-sm text-gray-700 leading-relaxed mb-3">
-    {review.comment}
-  </p>
-
-  {/* MEDIA */}
-  {review.media?.length > 0 && (
+{review.media?.length > 0 && (
     <div className="flex gap-2 mb-3">
       {review.media.map((m, i) => (
         <img
@@ -224,6 +217,13 @@ const ProductReviews = ({productId,product}:  {product:IProduct,productId:string
       ))}
     </div>
   )}
+  {/* COMMENT */}
+  <p className="text-sm text-gray-700 leading-relaxed mb-3">
+    {review.comment}
+  </p>
+
+  {/* MEDIA */}
+  
 
   {/* ACTIONS */}
   <div className="flex items-center gap-4 text-sm text-gray-600">

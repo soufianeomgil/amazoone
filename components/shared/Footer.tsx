@@ -119,7 +119,7 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="text-white">
+    <footer className="text-white max-lg:hidden">
       <div
         className="bg-[#37475A] hover:bg-[#485769] cursor-pointer"
         onClick={scrollToTop}

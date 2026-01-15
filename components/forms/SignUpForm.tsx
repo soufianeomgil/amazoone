@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,6 +20,8 @@ import { Input } from "@/components/ui/input";
 
 import { SignUpValidationSchema } from "@/lib/zod";
 import { signUpWithCredentials } from "@/actions/auth.actions";
+import AuthFormBtns from "./AuthFormBtns";
+import Image from "next/image";
 
 type SignUpValues = z.infer<typeof SignUpValidationSchema>;
 
@@ -41,7 +42,7 @@ export default function SignUpForm() {
       gender: undefined,
       password: "",
       passwordCheck: "",
-    } as any,
+    },
   });
 
   const isSubmitting = form.formState.isSubmitting || loading;
@@ -72,7 +73,7 @@ export default function SignUpForm() {
     <div className="min-h-screen bg-white flex flex-col items-center pt-10 pb-16 px-4">
       {/* Top logo */}
       <Link href="/" className="mb-6">
-        <img
+        <Image height={32} width={32}
           src="https://pngimg.com/uploads/amazon/amazon_PNG25.png"
           alt="Amazon"
           className="h-8 invert"
@@ -261,7 +262,13 @@ export default function SignUpForm() {
             </p>
           </div>
         </div>
+ <div className="flex items-center justify-center w-full max-w-sm gap-2 mt-7 mb-2">
+        <div className="flex-1 h-px bg-gray-500" />
+        <span className="text-xs text-black">or</span>
+        <div className="flex-1 h-px bg-gray-500" />
+      </div>
 
+      <AuthFormBtns />
         {/* footer */}
         <div className="mt-6 text-center text-xs text-gray-500">
           <p>© 1996–2024, Amazon.com, Inc. or its affiliates</p>

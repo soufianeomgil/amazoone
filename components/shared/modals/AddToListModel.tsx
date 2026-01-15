@@ -5,18 +5,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import Rating from "../Rating";
-import { IProduct } from "@/models/product.model";
+
 import { ISavedItem } from "@/models/savedList.model";
 
 
-
-type SavedList = {
-  id: string;
-  name: string;
-  isPrivate: boolean;
-  count: number;
-  previewImages: string[]; // small grid of images
-};
 
 interface AddToListModalProps {
   open: boolean;
@@ -33,36 +25,7 @@ interface AddToListModalProps {
  */
 const AddToListModal: React.FC<AddToListModalProps> = ({ open, item, listName,setOpen}) => {
   // mock lists if none provided by API
-  const initialLists: SavedList[] = [
-    {
-      id: "1",
-      name: "luxury bags",
-      isPrivate: false,
-      count: 12,
-      previewImages: [
-        "https://m.media-amazon.com/images/I/61vJtANn4CL._AC_UY90_.jpg",
-        "https://m.media-amazon.com/images/I/71jG+e7roXL._AC_UY90_.jpg",
-        "https://m.media-amazon.com/images/I/61SQz8S+fEL._AC_UY90_.jpg",
-      ],
-    },
-    {
-      id: "2",
-      name: "underwears",
-      isPrivate: true,
-      count: 3,
-      previewImages: [
-        "https://m.media-amazon.com/images/I/81ym3QUd3KL._AC_UY90_.jpg",
-        "https://m.media-amazon.com/images/I/91BdMBWd2bL._AC_UY90_.jpg",
-      ],
-    },
-    {
-      id: "3",
-      name: "gift ideas",
-      isPrivate: false,
-      count: 5,
-      previewImages: [],
-    },
-  ];
+ 
 
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -94,6 +57,16 @@ const AddToListModal: React.FC<AddToListModalProps> = ({ open, item, listName,se
     document.addEventListener("focusin", onFocus);
     return () => document.removeEventListener("focusin", onFocus);
   }, [open]);
+useEffect(() => {
+  if (open) {
+    document.body.style.overflow = "hidden"
+  } else {
+    document.body.style.overflow = ""
+  }
+  return () => {
+    document.body.style.overflow = ""
+  }
+}, [open])
 
   if (!open) return null;
 
@@ -108,7 +81,7 @@ const AddToListModal: React.FC<AddToListModalProps> = ({ open, item, listName,se
       {/* overlay */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-        onClick={close}
+        onClick={()=> setOpen(false)}
         aria-hidden
       />
 
@@ -118,9 +91,9 @@ const AddToListModal: React.FC<AddToListModalProps> = ({ open, item, listName,se
         role="dialog"
         aria-modal="true"
         aria-label="Add to List"
-        className="relative my-10 w-[95%] mx-auto max-w-[900px] "
+        className="relative my-10 w-[95%] h-[95%] mx-auto max-w-[900px] "
       >
-        <div className="bg-white rounded-lg shadow-2xl overflow-hidden border border-gray-200">
+        <div className="bg-white rounded-lg shadow-2xl  border border-gray-200">
           {/* header */}
           <div className="flex items-start bg-[#f3f3f3] justify-between px-5 py-4 border-b border-gray-300 shadow">
             <div>
@@ -130,7 +103,7 @@ const AddToListModal: React.FC<AddToListModalProps> = ({ open, item, listName,se
             <div className="flex items-center gap-3">
               <button
                 ref={firstFocusableRef}
-                onClick={close}
+                onClick={()=> setOpen(false)}
                 aria-label="Close"
                 className="p-2 rounded hover:bg-gray-50 text-gray-500"
                 title="Close"
@@ -142,29 +115,31 @@ const AddToListModal: React.FC<AddToListModalProps> = ({ open, item, listName,se
               </button>
             </div>
           </div>
-
-          {/* product preview */}
-          <div className="px-5 pt-5 flex flex-col pb-4 border-b border-gray-200">
+<div className="flex-1 overflow-y-auto overscroll-contain">
+   <div className="px-5 pt-5 flex flex-col pb-4 border-b border-gray-200">
              <h3 className="font-bold text-black sm:text-xl text-lg max-lg:mb-3 ">1 item added to <span className="text-blue-600">
                {listName}</span></h3>
              <div className="flex items-center justify-between gap-4 flex-col lg:flex-row  lg:gap-7">
    <div className="flex items-center flex-1 gap-x-4">
               <div>
                 <img className="w-[200px] object-contain" 
-                src={item?.variant?.images[0].url}
-                 alt={item?.productId.name}  />
+                src={item?.variant?.images?.[0]?.url ?? ''}
+                 alt={(item?.productId as any).name}  />
               </div>
               <div >
                   <Link href={`/product/${item?.productId._id}`} className="text-blue-600 text-sm font-medium hover:underline hover:text-blue-950 ">
-                      {item?.productId.name}
+                      {(item?.productId as any).name}
                   </Link>
               </div>
             </div>
             <div className="border w-[250px] gap-4 rounded-lg p-3 flex flex-col border-gray-300">
-                <Button className="border border-gray-700 rounded-full text-gray-900 text-xs font-medium capitalize ">
-                    View your List
+                <Button asChild className="border border-gray-700 rounded-full text-gray-900 text-xs font-medium capitalize ">
+                  <Link href="/account/wishlist/list">
+                   View your List
+                  </Link>
+                   
                 </Button>
-                  <Button className="px-4 py-2 rounded-full bg-[#ffa622] hover:bg-[#e68800] text-black text-xs font-medium">
+                  <Button onClick={()=> setOpen(false)} className="px-4 py-2 rounded-full bg-[#ffa622] hover:bg-[#e68800] text-black text-xs font-medium">
                     Continue shopping
                 </Button>
             </div>
@@ -199,6 +174,9 @@ const AddToListModal: React.FC<AddToListModalProps> = ({ open, item, listName,se
               </div>
           ))}
           </div>
+</div>
+          {/* product preview */}
+         
         
         
         </div>

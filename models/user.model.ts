@@ -61,9 +61,9 @@ export interface IUser {
   // --- Core Account Information ---
   fullName: string;
   email: string;
+  profileCompleted: boolean;
   isVerified: boolean;
   phoneNumber?: string;
-  hashedPassword: string; // Stored as a hash, never plaintext
   gender: "male" | "female",
   isAdmin: boolean;
   // --- Profile & Personalization ---
@@ -128,14 +128,16 @@ const UserSchema = new Schema<IUser>({
   }
 ],
 
-  hashedPassword: {
-    type : String,
-    default: null
-  },
+ 
    isVerified: {
      type: Boolean,
      default: false
    },
+   profileCompleted: {
+  type: Boolean,
+  default: false
+},
+
    isAdmin: {
        type: Boolean,
      default: false

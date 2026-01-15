@@ -2,8 +2,10 @@ import React from "react";
 import {
   ChevronDownIcon,
   ExternalLinkIcon,
+  
 } from "lucide-react";
 import { getTopSellingProducts } from "@/actions/admin.actions";
+import Image from "next/image";
 
 /* ----------------------------------
    PAGE
@@ -99,9 +101,11 @@ const AdminAnalytics = async () => {
                   </td>
 
                   <td className="px-4 py-3 flex items-center gap-3">
-                    <img
+                    <Image
                       src={p.thumbnail as string}
                       alt={p.name}
+                      width={9}
+                      height={9}
                       className="w-9 h-9 rounded object-cover border"
                     />
                     <span className="font-medium text-gray-900">

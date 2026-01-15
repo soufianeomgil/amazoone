@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import qs from 'query-string'
+import { IProduct } from "@/models/product.model"
+import { subDays } from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -177,3 +179,51 @@ export const buildOrderTimeline = (order: any): TimelineItem[] => {
     },
   ];
 };
+
+export type ConversionBadge =
+  | { type: "FAST_SELLING"; label: string }
+  | { type: "SOCIAL_PROOF"; label: string }
+  | { type: "LOWEST_PRICE"; label: string };
+
+export function getConversionBadge(
+  product: IProduct
+): ConversionBadge | null {
+  // 1️⃣ Fast selling
+  if (product.stock >= 5 ) {
+    return {
+      type: "FAST_SELLING",
+      label: "Selling out fast",
+    };
+  }
+
+  // 2️⃣ Social proof
+  // >=
+  if (product.weeklySales < 50) {
+    return {
+      type: "SOCIAL_PROOF",
+      label: `+${product.weeklySales} sold recently`,
+    };
+  }
+
+  // 3️⃣ Lowest price in 7 days
+  if (product.priceHistory?.length) {
+    const sevenDaysAgo = subDays(new Date(), 7);
+
+    const last7Days = product.priceHistory.filter(
+      p => p.date >= sevenDaysAgo
+    );
+
+    if (last7Days.length) {
+      const lowest = Math.min(...last7Days.map(p => p.price));
+
+      if (product.basePrice <= lowest) {
+        return {
+          type: "LOWEST_PRICE",
+          label: "Lowest price in 7 days",
+        };
+      }
+    }
+  }
+
+  return null;
+}

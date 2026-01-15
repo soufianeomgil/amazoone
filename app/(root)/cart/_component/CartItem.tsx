@@ -10,6 +10,8 @@ import { DeleteIcon } from "lucide-react";
 import QuantitySelector from "@/components/shared/QTY";
 import { addToSaveForLater } from "@/actions/saveForLater.actions";
 import AmazonPrice from "@/components/shared/AmazonPrice";
+import { SpinnerIcon } from "@/components/shared/icons";
+import Image from "next/image";
 
 
 interface Props {
@@ -143,15 +145,23 @@ const handleAddToSaveForLater = async () => {
 };
 
   return (
-    <article className="w-full  border-b border-gray-200 py-4">
-      {/* ===================== MOBILE LAYOUT ===================== */}
+   <article className={`relative border-b border-gray-100 py-4 ${pending ? "opacity-70 pointer-events-none" : ""}`}>
+{pending && (
+    <div className="absolute inset-0 z-10 flex items-center justify-center ">
+        <SpinnerIcon />
+    </div>
+  )}
+      
+      {/* ===================== bg-white/70 backdrop-blur-sm rounded-mdMOBILE LAYOUT ===================== */}
       <div className="flex sm:hidden gap-3">
         {/* IMAGE */}
         <div className="w-24 h-24 flex items-center justify-center bg-white border border-gray-300 rounded-md">
-          <img
+          <Image
+          width={96}
+          height={96}
             src={imageUrl}
             alt={product?.name}
-            className="w-full h-full object-contain"
+            className=" object-contain"
           />
         </div>
 
@@ -184,9 +194,11 @@ const handleAddToSaveForLater = async () => {
         {/* IMAGE */}
         <div className="flex items-center justify-center">
           <div className="w-24 h-24 bg-white border border-gray-300 rounded-md flex items-center justify-center">
-            <img
+            <Image 
+            width={96}
+            height={96}
               src={imageUrl}
-              className="w-full h-full object-contain"
+              className=" object-contain"
               alt="product"
             />
           </div>
@@ -210,26 +222,25 @@ const handleAddToSaveForLater = async () => {
         </div>
 
         {/* PRICE & QUANTITY */}
-        <div className="text-right flex flex-col items-end gap-2">
-          {/* <p className="text-lg font-bold text-gray-900">
-            ${unitPrice.toFixed(2)}
-          </p> */}
-          <AmazonPrice price={unitPrice} className="text-lg font-bold text-gray-900 " />
+        <div className="text-right flex flex-col items-end gap-2 ">
+  
 
-          {/* Quantity Selector */}
-          <QuantitySelector
-            value={item.quantity}
-            max={variant?.stock ?? product.stock ?? 10}
-            onChange={handleUpdateQuantity}
-            size="sm"
-          />
-        </div>
+  <AmazonPrice price={unitPrice} className="text-lg font-bold text-gray-900" />
+
+  <QuantitySelector
+    value={item.quantity}
+    max={variant?.stock ?? product.stock ?? 10}
+    onChange={handleUpdateQuantity}
+    size="sm"
+    disabled={pending}
+  />
+</div>
       </div>
 
       {/* ===================== ACTIONS (SHARED) ===================== */}
       <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-2">
         <button className="text-sm hover:underline" onClick={()=> handleRemoveItem(product?._id,variant?._id)}>
-          <img src="/trashe.png" className="cursor-pointer w-5 h-5 object-contain " alt="trash icon" />
+          <Image width={20} height={20} src="/trashe.png" className="cursor-pointer w-5 h-5 object-contain " alt="trash icon" />
         </button>
 
         <button

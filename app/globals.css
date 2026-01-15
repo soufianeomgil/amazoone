@@ -47,6 +47,30 @@ body  {
 .bg-yellow-primary {
   background-color: #FFD814;
 }
+@keyframes badge-loop {
+  /* Item 1 */
+  0%   { transform: translateY(0); }
+  20%  { transform: translateY(0); }       /* pause */
+  30%  { transform: translateY(-24px); }   /* slide */
+  50%  { transform: translateY(-24px); }   /* pause */
+
+  /* Item 2 */
+  60%  { transform: translateY(-48px); }   /* slide */
+  80%  { transform: translateY(-48px); }   /* pause */
+
+  /* Item 3 → loop seamlessly */
+  90%  { transform: translateY(-72px); }
+  100% { transform: translateY(-72px); }
+}
+
+.animate-badge-loop {
+  animation: badge-loop 10s ease-in-out infinite;
+}
+
+
+
+
+
 .dark .mdxeditor-toolbar button:hover svg {
   color: #000 !important;
 }

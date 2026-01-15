@@ -1,4 +1,5 @@
 import { ArrowRightLeft, ChevronRight, CreditCard, Package } from "lucide-react";
+import Image from "next/image";
 
 export const ModePaiment = ({ isMobile }: { isMobile: boolean }) => (
   <div className="bg-gray-100 rounded-md w-full flex flex-col pt-2">
@@ -8,7 +9,7 @@ export const ModePaiment = ({ isMobile }: { isMobile: boolean }) => (
         <CreditCard />
         <div className="flex flex-col">
           <p className="font-bold text-sm text-black">Paiement par carte bancaire</p>
-          <img className="object-contain w-[125px]" src="/cards.png" alt="paiment card" />
+          <Image width={125} height={125} className="object-contain w-[125px]" src="/cards.png" alt="paiment card" />
         </div>
       </div>
 

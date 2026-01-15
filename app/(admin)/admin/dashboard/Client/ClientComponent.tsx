@@ -3,6 +3,7 @@ import Sidebar from '@/components/shared/SideBar';
 import React, { useState } from 'react';
 import Dashboard from '../page';
 import AIChat from '@/components/shared/AiChat';
+import Image from 'next/image';
 
 
 const Client = () => {
@@ -46,7 +47,7 @@ const Client = () => {
             </div>
             <div className="flex items-center relative cursor-pointer group">
                <div className="w-10 h-10 bg-gray-700 rounded-full border-2 border-orange-400 overflow-hidden">
-                 <img src="https://picsum.photos/seed/user123/100/100" alt="Avatar" />
+                 <Image width={100} height={100} src="https://picsum.photos/seed/user123/100/100" alt="Avatar" />
                </div>
                <div className="absolute top-10 right-0 w-48 bg-white text-gray-800 shadow-xl rounded-md border mt-2 hidden group-hover:block p-2">
                  <ul className="text-sm">

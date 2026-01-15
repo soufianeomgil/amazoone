@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { SearchIcon, CaretDownIcon, DotsVerticalIcon,ChevronLeftIcon, ChevronRightIcon} from "@/components/shared/icons"
 import { ChevronDownIcon, ChevronUpIcon, EyeIcon, PrinterIcon } from 'lucide-react';
+import Image from 'next/image';
 
 type OrderStatus = 'Pending' | 'Shipped' | 'Delivered' | 'Canceled';
 
@@ -209,7 +210,7 @@ const AdminOrders: React.FC<AdminOrdersProps> = ({ onSelectOrder }) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <img className="h-8 w-8 rounded-full" src={order.customerAvatar} alt={order.customerName} />
+                                            <Image width={32} height={32} className="h-8 w-8 rounded-full" src={order.customerAvatar} alt={order.customerName} />
                                             <div className="ml-3 text-sm font-medium text-gray-900">{order.customerName}</div>
                                         </div>
                                     </td>
@@ -236,7 +237,7 @@ const AdminOrders: React.FC<AdminOrdersProps> = ({ onSelectOrder }) => {
                         <div key={order.orderId} className="bg-white border rounded-lg p-4" onClick={() => onSelectOrder(order)}>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
-                                    <img className="h-10 w-10 rounded-full" src={order.customerAvatar} alt={order.customerName} />
+                                    <Image width={40} height={40} className="h-10 w-10 rounded-full" src={order.customerAvatar} alt={order.customerName} />
                                     <div className="ml-3">
                                         <p className="text-sm font-bold text-gray-900">{order.customerName}</p>
                                         <p className="text-xs font-medium text-blue-600">{order.orderId}</p>

@@ -124,8 +124,8 @@ SavedListSchema.methods.hasItem = function (productId: ObjectId | string, varian
     // if caller didn't pass variantId, treat any variant as a match (existing behavior)
     if (variantId == null) return true;
     // compare variantId (explicit) OR snapshot variant._id or variant.sku if present
-    if (it.variantId && String(it.variantId) === String(variantId)) return true;
-    if (it.variant && ((it.variant as any)._id && String((it.variant as any)._id) === String(variantId))) return true;
+    if (it.variant?._id && String(it.variant._id) === String(variantId)) return true;
+    if (it.variant && (it.variant._id && String(it.variant._id) === String(variantId))) return true;
     if (it.variant && (it.variant as any).sku && String((it.variant as any).sku) === String(variantId)) return true;
     return false;
   });
@@ -178,7 +178,7 @@ SavedListSchema.methods.removeItem = async function (this: ISavedListDoc, produc
     // if called without variantId, remove all matching product items
     if (variantId == null) return false;
     // remove only if variantId matches (either explicit or snapshot)
-    if (it.variantId && String(it.variantId) === String(variantId)) return false;
+    if (it.variant && String(it.variant._id) === String(variantId)) return false;
     if (it.variant && ((it.variant as any)._id && String((it.variant as any)._id) === String(variantId))) return false;
     if (it.variant && (it.variant as any).sku && String((it.variant as any).sku) === String(variantId)) return false;
     // otherwise keep

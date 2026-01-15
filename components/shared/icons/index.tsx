@@ -125,6 +125,9 @@ export const MapPinIcon: React.FC = () => (
     </svg>
 );
 
+export const BrowsingHistoryIcon  = ()=> (
+    <img className=' ' src="/brows.png" alt="icon" />
+)
 export const CreditCardIcon: React.FC = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-full w-full" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />

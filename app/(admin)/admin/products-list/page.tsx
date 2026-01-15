@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getAllProducts } from '@/actions/product.actions';
 import EditDeleteBtn from './_components/ClientBtns/EditDeleteBtn';
 import { getAdminUsersOverview } from '@/actions/user.actions';
+import Image from 'next/image';
 
 type ProductStatus = 'Active' | 'Draft' | 'Out of Stock';
 
@@ -13,7 +14,7 @@ type ProductStatus = 'Active' | 'Draft' | 'Out of Stock';
 
 
 const AdminProducts = async () => {
-   const result = await getAllProducts({})
+   const result = await getAllProducts()
    const response = await getAdminUsersOverview()
    console.log(response, "USERS FOR ADMIN PREVIEW")
     const getStatusClass = (status: ProductStatus) => {
@@ -87,7 +88,7 @@ const AdminProducts = async () => {
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
                                             <div className="shrink-0 h-10 w-10">
-                                                <img className="h-10 w-10 rounded-md object-contain" src={product.thumbnail.url} alt={product.name} />
+                                                <Image width={40} height={40} className="h-10 w-10 rounded-md object-contain" src={product.thumbnail.url || ''} alt={product.name} />
                                             </div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{product.name}</div>

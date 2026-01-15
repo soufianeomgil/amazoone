@@ -1,5 +1,5 @@
 
-import { BoxIcon, LockIcon, MapPinIcon, CreditCardIcon, GiftIcon, StarIcon, ChevronRightIcon } from "@/components/shared/icons"
+import { BoxIcon, LockIcon, MapPinIcon, CreditCardIcon, GiftIcon, StarIcon, ChevronRightIcon, BrowsingHistoryIcon } from "@/components/shared/icons"
 import { ROUTES } from '@/constants/routes';
 import { ChevronRight, FilterIcon, Heart, UserCircleIcon, XIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -7,6 +7,7 @@ import FilterSidebar from '@/components/shared/FilterSidebar';
 import MainCard from "@/components/cards/MainCard";
 import { IProduct } from "@/models/product.model";
 import { getRecentlyViewedProducts } from "@/actions/recommendations.actions";
+import { auth } from "@/auth";
 
 
 interface AccountCardProps {
@@ -15,6 +16,7 @@ interface AccountCardProps {
     description: string;
     href: string;
 }
+
 
 const accountSections: AccountCardProps[] = [
     {
@@ -27,7 +29,7 @@ const accountSections: AccountCardProps[] = [
         icon: <LockIcon />,
         title: 'Login & security',
         description: 'Edit login, name, and mobile number',
-        href: '#'
+        href: `/profile/manage`
     },
     {
         icon: <MapPinIcon />,
@@ -36,10 +38,10 @@ const accountSections: AccountCardProps[] = [
         href: ROUTES.addresses
     },
     {
-        icon: <CreditCardIcon />,
-        title: 'Payment options',
-        description: 'Edit or add payment methods',
-        href: '#'
+        icon: <BrowsingHistoryIcon />,
+        title: 'Browsing History',
+        description: 'View, manage your Browsing History Items',
+        href: ROUTES.myBrowsingHistory
     },
     {
         icon: <Heart />,
@@ -105,7 +107,7 @@ const page = async() => {
                          <div className="flex  overflow-x-auto space-x-6 pb-4">
                          {res.data?.items.browsingHistory.map((item,index) => (
                              <Link
-        key={item.product._id}
+        key={index}
         href={`/product/${item.product._id}`}
         className="shrink-0 snap-start w-[140px]"
       >

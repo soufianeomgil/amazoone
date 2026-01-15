@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner";
 import { initServer } from "@/lib/init";
+import ConfirmModal from "@/components/shared/modals/ConfirmModal";
 
 
 const roboto  = Roboto({
@@ -40,6 +41,10 @@ export default async function RootLayout({
       <body
         className={`${roboto.className} ${poppins.className} antialiased`}
       >
+        <script
+  src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
+  async
+/>
         <StoreProvider>
      <SessionProvider session={session}>
         <main className="min-h-screen w-full">
@@ -47,8 +52,9 @@ export default async function RootLayout({
             <SyncCart />
            {children}
             <Toaster richColors position="top-center" />
+            <ConfirmModal />
         </main>
-       
+         
       </SessionProvider>
       </StoreProvider>
       </body>

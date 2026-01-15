@@ -7,6 +7,7 @@ import { useSession, signOut } from "next-auth/react";
 import { clearCart } from "@/lib/store/cartSlice";
 import { LogOut } from "lucide-react";
 import { useDispatch } from "react-redux";
+import Image from "next/image";
 
 
 const RightSidebar = () => {
@@ -43,10 +44,24 @@ const RightSidebar = () => {
            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
         {/* TITLE */}
-        <div className="px-5 py-4 border-b border-gray-200">
-          <h2 className="text-[20px] font-semibold text-gray-800 tracking-tight">
-            Your Account
+        <div className="px-5 flex items-center space-x-2 py-4 border-b border-gray-200">
+                  <Image
+                          src={session.data?.user.image || "/profile.png"}
+                          alt="Profile picture"
+                          width={55}
+                          height={55}
+                          className="w-[55px] h-[55px] 
+                          rounded-full object-cover border border-gray-200"
+                        />
+          <div className="flex flex-col">
+            <h2 className="text-[20px] font-semibold text-gray-900 tracking-tight">
+            Hala !
           </h2>
+           <p className="text-xs font-medium text-gray-700">
+             {session.data?.user.email}
+           </p>
+          </div>
+         
         </div>
 
         {/* LIST ITEMS */}
@@ -75,7 +90,7 @@ const RightSidebar = () => {
 
                     ${
                       isActive
-                        ? "bg-gradient-to-r from-[#FFEDD5] to-[#FFF8F0] text-[#C05621]"
+                        ? "bg-linear-to-r from-[#FFEDD5] to-[#FFF8F0] text-[#C05621]"
                         : "bg-white text-gray-700 group-hover:bg-gray-50"
                     }
                   `}

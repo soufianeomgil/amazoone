@@ -1,9 +1,6 @@
 "use client";
 
-// handle language part
-// handle address header open modal click
-// finish the profile page
-// handle image profile pic;
+
 
 import { z } from "zod";
 import { useForm, type Resolver } from "react-hook-form";
@@ -38,6 +35,7 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { Spinner } from "@/components/ui/spinner";
 import React from "react";
+import Image from "next/image";
 
 
 
@@ -106,7 +104,7 @@ const AddAddressForm = () => {
       <div className="container mx-auto  max-w-[560px] ">
        
         <h1 className="text-2xl flex items-center gap-1 md:text-3xl font-bold text-gray-800 mb-6">
-           <img src="/location.png" alt="location icon" className="w-[22px] object-contain " />  <span>Add a new address</span>
+           <Image width={22} height={22} src="/location.png" alt="location icon" className="w-[22px] object-contain " />  <span>Add a new address</span>
         </h1>
 
         <Form {...form}>
@@ -359,3 +357,199 @@ const AddAddressForm = () => {
 }
 
 export default AddAddressForm
+
+// "use client";
+
+// import React, { useEffect, useRef, useState } from "react";
+// import { useForm } from "react-hook-form";
+// import { z } from "zod";
+// import { zodResolver } from "@hookform/resolvers/zod";
+
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormLabel,
+//   FormMessage,
+// } from "@/components/ui/form";
+// import { Input } from "@/components/ui/input";
+// import { Checkbox } from "@/components/ui/checkbox";
+// import { Button } from "@/components/ui/button";
+// import { Spinner } from "@/components/ui/spinner";
+// import { toast } from "sonner";
+// import { useRouter } from "next/navigation";
+// import { ROUTES } from "@/constants/routes";
+
+// import addAddressAction from "@/actions/address.actions";
+// import { AddAddressSchema } from "@/lib/zod";
+
+// type FormValues = z.infer<typeof AddAddressSchema>;
+
+// export default function AddAddressForm() {
+//   const router = useRouter();
+//   const autocompleteRef = useRef<HTMLInputElement>(null);
+
+//   const [placeData, setPlaceData] = useState<{
+//     formattedAddress: string;
+//     lat: number;
+//     lng: number;
+//     city?: string;
+//     region?: string;
+//     country?: string;
+//     zipCode?: string;
+//   } | null>(null);
+
+//   const form = useForm<FormValues>({
+//     resolver: zodResolver(AddAddressSchema),
+//     defaultValues: {
+//       phone: "",
+//       isDefault: false,
+//     },
+//   });
+
+//   /* ---------------- GOOGLE MAPS ---------------- */
+//   useEffect(() => {
+//     const initAutocomplete = async () => {
+//       if (!autocompleteRef.current) return;
+
+//       // New Google Maps API (no Loader)
+//       const { Autocomplete } = (await google.maps.importLibrary(
+//         "places"
+//       )) as google.maps.PlacesLibrary;
+
+//       const autocomplete = new Autocomplete(autocompleteRef.current!, {
+//         fields: ["address_components", "geometry", "formatted_address"],
+//       });
+
+//       autocomplete.addListener("place_changed", () => {
+//         const place = autocomplete.getPlace();
+//         if (!place.geometry || !place.geometry.location) return;
+
+//         const components = place.address_components || [];
+
+//         const getComponent = (type: string) =>
+//           components.find((c) => c.types.includes(type))?.long_name;
+
+//         setPlaceData({
+//           formattedAddress: place.formatted_address!,
+//           lat: place.geometry.location.lat(),
+//           lng: place.geometry.location.lng(),
+//           city: getComponent("locality"),
+//           region: getComponent("administrative_area_level_1"),
+//           country: getComponent("country"),
+//           zipCode: getComponent("postal_code"),
+//         });
+//       });
+//     };
+
+//     initAutocomplete();
+//   }, []);
+
+//   /* ---------------- SUBMIT ---------------- */
+//   const onSubmit = async (values: FormValues) => {
+//     if (!placeData) {
+//       toast.error("Please select an address from the map");
+//       return;
+//     }
+
+//     const payload = {
+//       phone: values.phone,
+//       isDefault: values.isDefault as boolean,
+
+//       formattedAddress: placeData.formattedAddress,
+//       city: placeData.city,
+//       region: placeData.region,
+//       country: placeData.country,
+//       zipCode: placeData.zipCode,
+
+//       location: {
+//         lat: placeData.lat,
+//         lng: placeData.lng,
+//       },
+//     };
+
+//     const res = await addAddressAction(payload);
+
+//     if (res?.error) {
+//       toast.error(res.error.message);
+//       return;
+//     }
+
+//     toast.success("Address added successfully");
+//     router.push(ROUTES.addresses);
+//   };
+
+//   /* ---------------- UI ---------------- */
+//   return (
+//     <div className="bg-white">
+//       <div className="container mx-auto max-w-[520px]">
+//         <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+//           📍 Add a new address
+//         </h1>
+
+//         <Form {...form}>
+//           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+//             {/* Google Maps Address */}
+//             <div>
+//               <label className="text-sm font-medium">Address</label>
+//               <Input
+//                 ref={autocompleteRef}
+//                 placeholder="Search your address"
+//                 className="mt-1"
+//               />
+//               {placeData && (
+//                 <p className="text-xs text-gray-500 mt-1">
+//                   {placeData.formattedAddress}
+//                 </p>
+//               )}
+//             </div>
+
+//             {/* Phone */}
+//             <FormField
+//               control={form.control}
+//               name="phone"
+//               render={({ field }) => (
+//                 <FormItem>
+//                   <FormLabel>Phone number</FormLabel>
+//                   <FormControl>
+//                     <Input placeholder="+212 6 12 34 56 78" {...field} />
+//                   </FormControl>
+//                   <FormMessage />
+//                 </FormItem>
+//               )}
+//             />
+
+//             {/* Default */}
+//             <FormField
+//               control={form.control}
+//               name="isDefault"
+//               render={({ field }) => (
+//                 <FormItem className="flex items-center gap-3">
+//                   <FormControl>
+//                     <Checkbox
+//                       checked={field.value}
+//                       onCheckedChange={(v) => field.onChange(!!v)}
+//                     />
+//                   </FormControl>
+//                   <FormLabel className="text-sm">
+//                     Make this my default address
+//                   </FormLabel>
+//                 </FormItem>
+//               )}
+//             />
+
+//             {/* Submit */}
+//             <Button
+//               type="submit"
+//               disabled={form.formState.isSubmitting}
+//               className="w-full bg-yellow-400 hover:bg-yellow-500 text-black"
+//             >
+//               {form.formState.isSubmitting ? <Spinner /> : "Save address"}
+//             </Button>
+//           </form>
+//         </Form>
+//       </div>
+//     </div>
+//   );
+// }

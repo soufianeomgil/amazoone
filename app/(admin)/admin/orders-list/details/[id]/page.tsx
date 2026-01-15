@@ -4,6 +4,7 @@ import React from 'react';
 import { ChevronLeftIcon, CreditCardIcon } from "@/components/shared/icons"
 import { PackageIcon, PrinterIcon } from 'lucide-react';
 import { Order } from '../../page';
+import Image from 'next/image';
 
 interface AdminOrderDetailProps {
     order: Order;
@@ -61,7 +62,7 @@ const AdminOrderDetail: React.FC<AdminOrderDetailProps> = ({ order, onBack }) =>
                         <ul className="divide-y divide-gray-200">
                             {order.items.map(item => (
                                 <li key={item.sku} className="py-4 flex items-center">
-                                    <img src={item.image} alt={item.name} className="h-16 w-16 object-contain rounded-md mr-4" />
+                                    <Image src={item.image} alt={item.name} className="h-16 w-16 object-contain rounded-md mr-4" />
                                     <div className="grow">
                                         <p className="font-semibold text-gray-800">{item.name}</p>
                                         <p className="text-sm text-gray-500">SKU: {item.sku}</p>
@@ -105,7 +106,7 @@ const AdminOrderDetail: React.FC<AdminOrderDetailProps> = ({ order, onBack }) =>
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <h2 className="text-lg font-bold text-gray-800 mb-4">Customer</h2>
                         <div className="flex items-center">
-                            <img src={order.customerAvatar} alt={order.customerName} className="h-12 w-12 rounded-full mr-4"/>
+                            <Image width={48} height={48} src={order.customerAvatar} alt={order.customerName} className="h-12 w-12 rounded-full mr-4"/>
                             <div>
                                 <p className="font-semibold text-gray-900">{order.customerName}</p>
                                 <p className="text-sm text-gray-500">{order.customerEmail}</p>

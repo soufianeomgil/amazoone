@@ -28,7 +28,11 @@ export interface IVariant {
 export interface IProduct {
   _id: string;
   createdAt: Date;
-
+  dailySales: number;
+  priceHistory: {
+  price: number
+  date: Date
+}[]
   updatedAt: Date;
   name: string;
   description: string;
@@ -98,6 +102,17 @@ const ProductSchema = new Schema<IProduct>({
   listPrice: {type: Number, min: 0, required: true},
   // 
   weeklySales: {
+  type: Number,
+  default: 0,
+  index: true,
+},
+priceHistory: [
+  {
+    date: {type: Date, default:null},
+    price: {type: Number, default: 0}
+  }
+],
+ dailySales: {
   type: Number,
   default: 0,
   index: true,

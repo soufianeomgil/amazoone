@@ -45,11 +45,12 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { productSchema } from "@/lib/zod";
 import { CldUploadWidget } from "next-cloudinary";
 import { cn } from "@/lib/utils";
-import { CreateProductAction } from "@/actions/product.actions";
+import { CreateProductAction, seedProducts } from "@/actions/product.actions";
 import { ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 import Editor from "../editor/Editor";
 import { MDXEditorMethods } from "@mdxeditor/editor";
+import Image from "next/image";
 
 // --- Types ---
 // interface ImageState {
@@ -96,18 +97,7 @@ interface IProductFormState {
   attributes: Attribute[];
 }
 
-/* ------------------------- Component ------------------------- */
-// const ImageObject = z.object({
-//   file: (() => {
-//     if (typeof File !== "undefined") {
-//       return z.instanceof(File).optional().nullable();
-//     }
-//     return z.any().optional().nullable();
-//   })(),
-//   preview: z.string().optional(),
-//   url: z.string().optional(),
-//   alt: z.string().optional(),
-// });
+
 
 const CreateProduct: React.FC = () => {
   const [product, setProduct] = useState<IProductFormState>({
@@ -588,7 +578,24 @@ const ToggleCard = ({
     </div>
   );
 };
-
+const [pending,setPending] = useState(false)
+const handleSeedData = async()=>  {
+  setPending(true)
+   try {
+    const {error, success} = await seedProducts()
+    if(error) {
+       toast.error(error.message)
+       return
+    }else if(success) {
+       toast.success('Success')
+       return
+    }
+   } catch (error) {
+     console.log(error)
+   }finally {
+     setPending(false)
+   }
+}
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Header */}
@@ -975,7 +982,7 @@ const ToggleCard = ({
         className="w-full h-32 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50"
       >
         {image.preview ? (
-          <img src={image.preview} className="h-full object-contain" />
+          <Image alt="Image Preview" fill src={image.preview} className="h-full object-contain" />
         ) : (
           <div className="flex flex-col items-center">
             <ImageIcon className="w-6 h-6 text-gray-400" />
@@ -1277,6 +1284,15 @@ const ToggleCard = ({
                 className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-3"
               >
                 <Save className="w-5 h-5 mr-2" /> {isSubmitting ? "Loading..." : "Create Product"}
+              </Button>
+               <Button
+                onClick={handleSeedData}
+                disabled={pending}
+                type="button"
+                size="lg"
+                className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-3"
+              >
+                <Save className="w-5 h-5 mr-2" /> {pending ? "Loading..." : "seed data"}
               </Button>
             </div>
           </form>

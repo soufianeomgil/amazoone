@@ -7,6 +7,9 @@ import { ROUTES } from '@/constants/routes';
 import { ChevronRightIcon, PlusIcon, StarIcon } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
+import EmptyOrder from '../order-history/_components/EmptyOrder';
+import { auth } from '@/auth';
+import Image from 'next/image';
 
 interface BrowsingHistoryItem {
     id: number;
@@ -87,7 +90,7 @@ const renderStars = (rating: number) => {
 const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, price, rating, reviewCount }) => (
     <div className="flex-shrink-0 w-48 text-left">
         <Link href="#">
-            <img src={imageUrl} alt={name} className="w-full h-40 object-contain mb-2" />
+            <Image width={160} height={160} src={imageUrl} alt={name} className="w-full h-40 object-contain mb-2" />
         </Link>
         <Link href="#" className="text-sm text-blue-600 hover:text-orange-700 hover:underline line-clamp-4">{name}</Link>
         <div className="flex items-center mt-1">
@@ -100,27 +103,33 @@ const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, pr
         </button>
     </div>
 );
-    const result = await getUserAddresses()
+const session = await auth()
+    const result = await getUserAddresses({userId: session?.user.id as string})
+     console.log(result, "ADDRESS RESULT")
     return (
         <div className="min-h-screen w-full bg-gray-50 lg:px-10 lg:py-8">
              <div className=" flex lg:flex-row flex-col  gap-5">
               <ProfileItems />
               <RightSidebar />
                <div className="flex-1 p-4 w-full lg:px-3">
-                 
-            <h1 className="text-2xl flex items-center gap-1 md:text-3xl font-bold text-gray-800 mb-6">
-           <img src="/location.png" alt="location icon" className="w-[22px] object-contain " />  <span>Your Addresses</span>
+                 {result.data?.addresses?.length! > 0 && (
+ <h1 className="text-2xl flex items-center gap-1 md:text-3xl font-bold text-gray-800 mb-6">
+           <Image width={22} height={22} src="/location.png" alt="location icon" className="w-[22px] object-contain " />  <span>Your Addresses</span>
         </h1>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-               
-                <Link href={ROUTES.addAddress} className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center h-full min-h-[200px] hover:bg-gray-50 cursor-pointer">
+                 )}
+           
+       {result.data?.addresses?.length! > 0 ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                    <Link href={ROUTES.addAddress} className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center h-full min-h-[200px] hover:bg-gray-50 cursor-pointer">
                     <PlusIcon className="h-10 w-10 text-gray-400" />
                     <span className="mt-2 text-xl font-medium text-gray-700">Add Address</span>
                 </Link>
+                
+                
 
                
-                {result.data?.addresses.map((address) => (
+                { result.data?.addresses.map((address) => (
                     <div key={address._id} className="border border-gray-300 rounded-lg p-5 flex flex-col">
                         {address.isDefault && (
                             <div className="border-b border-gray-200 pb-2 mb-3">
@@ -128,7 +137,7 @@ const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, pr
                             </div>
                         )}
                       <div className="grow space-y-1 text-sm text-gray-700">
-  <p className="font-semibold text-base text-gray-900">{address.name}</p>
+  {/* <p className="font-semibold text-base text-gray-900">{address.name}</p> */}
 
   <p className="leading-tight">{address.addressLine1}</p>
 
@@ -159,6 +168,18 @@ const BrowsingHistoryCard: React.FC<BrowsingHistoryItem> = ({ name, imageUrl, pr
                     </div>
                 ))}
             </div>
+       ): (
+         <EmptyOrder 
+                     name='No saved addresses' 
+                     desc='Add an address to get your orders delivered straight to your doorstep.'
+                     alt="No address state"
+                     srcUrl='/no_address.svg'
+                     url="/account/addresses/add"
+                     btnText="add new address"
+                     
+                     />
+       )}
+          
       
              
                </div>

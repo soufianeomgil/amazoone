@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { SearchIcon, CaretDownIcon,  ChevronLeftIcon, ChevronRightIcon, DotsVerticalIcon} from "@/components/shared/icons"
 import { ChevronDownIcon, ChevronUpIcon, ExternalLinkIcon, FilterIcon, PencilIcon } from 'lucide-react';
+import Image from 'next/image';
 
 interface Customer {
   id: string;
@@ -84,7 +85,7 @@ const AdminCustomers: React.FC = () => {
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
                 {/* Filters and Search */}
                 <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
-                    <div className="flex-grow">
+                    <div className="grow">
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <SearchIcon />
@@ -130,7 +131,7 @@ const AdminCustomers: React.FC = () => {
                                     <td className="p-4"><input type="checkbox" className="h-4 w-4 text-blue-600 border-gray-300 rounded" /></td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <img className="h-10 w-10 rounded-full" src={customer.avatar} alt={customer.name} />
+                                            <Image width={40} height={40} className="h-10 w-10 rounded-full" src={customer.avatar} alt={customer.name} />
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{customer.name}</div>
                                                 <div className="text-sm text-gray-500">{customer.email}</div>
@@ -159,7 +160,7 @@ const AdminCustomers: React.FC = () => {
                         <div key={customer.id} className="bg-white border rounded-lg p-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
-                                    <img className="h-10 w-10 rounded-full" src={customer.avatar} alt={customer.name} />
+                                    <Image width={40} height={40} className="h-10 w-10 rounded-full" src={customer.avatar} alt={customer.name} />
                                     <div className="ml-3">
                                         <p className="text-sm font-medium text-gray-900">{customer.name}</p>
                                         <p className="text-xs text-gray-500">{customer.email}</p>

@@ -18,6 +18,7 @@ import { syncWithUser } from "@/lib/store/cartSlice";
 import { useDispatch } from "react-redux";
 import { useSession } from "next-auth/react";
 import AuthFormBtns from "@/components/forms/AuthFormBtns";
+import Image from "next/image";
 
 type LoginFormValues = z.infer<typeof LoginValidationSchema>;
 
@@ -84,7 +85,9 @@ export default function LoginForm() {
     <div className="min-h-screen bg-white flex flex-col items-center pt-10 pb-16 px-4">
       {/* Logo */}
       <Link href="/" className="mb-6">
-        <img
+        <Image 
+         width={32}
+         height={32}
           src="https://pngimg.com/uploads/amazon/amazon_PNG25.png"
           alt="Amazon Logo"
           className="h-8 invert"
@@ -173,7 +176,7 @@ export default function LoginForm() {
             </form>
 
             <div className="mt-4 text-sm">
-              <Link href="#" className="text-blue-600 hover:underline">
+              <Link href="/forget-password" className="text-blue-600 hover:underline">
                 Forgot your password?
               </Link>
             </div>

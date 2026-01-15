@@ -9,11 +9,13 @@ import handleError from "@/lib/handlers/error"
 import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors"
 import { DeleteProductSchema, GetSingleProductSchema, productSchema} from "@/lib/zod"
 import { IProduct, Product } from "@/models/product.model"
-import { CreateProductParams, GetSingleProductParams } from "@/types/actionTypes"
+import { CreateProductParams, GetAllProductsParams, GetSingleProductParams } from "@/types/actionTypes"
 import { revalidatePath } from "next/cache"
 import Review from "@/models/review.model";
 import { auth } from "@/auth";
 import User, { IUser } from "@/models/user.model";
+import { faker } from "@faker-js/faker";
+import { cache } from "@/lib/cache";
 export async function CreateProductAction(params:CreateProductParams): Promise<ActionResponse> {
    const validatedResult = await action({ params, schema: productSchema, authorize: true })
    if(validatedResult instanceof Error) {
@@ -52,37 +54,21 @@ export async function CreateProductAction(params:CreateProductParams): Promise<A
        return handleError(error) as ErrorResponse
    }
 }
-// talk to chatgpt about that comeback football competitin mindset 
-type GetAllProductsParams = {
-  q?: string;
-  category?: string;
-  brands?: string | string[];
-  tags?: string | string[];
-  priceMin?: number | string;
-  priceMax?: number | string;
-  inStockOnly?: boolean | string;
-  sort?: "relevance" | "newest" | "price_asc" | "price_desc";
-  page?: number | string;
-  perPage?: number | string;
-};
 
-export async function getAllProducts(
-  params: GetAllProductsParams = {}
-): Promise<
-  ActionResponse<{
+
+export const getAllProducts: ()=> Promise<ActionResponse<{
     products: IProduct[];
     page: number;
     perPage: number;
     total: number;
     totalPages: number;
-  }>
-> {
+  }>> = cache( async( params: GetAllProductsParams = {}) =>{
   try {
     await connectDB();
 
     const MAX_PER_PAGE = 10;
     const page = Math.max(1, Number(params.page ?? 1));
-    let perPage = Math.max(1, Number(params.perPage ?? 20));
+    let perPage = Math.max(1, Number(params.perPage ?? 30));
     perPage = Math.min(perPage, MAX_PER_PAGE);
     const skip = (page - 1) * perPage;
 
@@ -234,20 +220,8 @@ export async function getAllProducts(
     console.error("getAllProducts error:", err);
     return handleError(err) as ErrorResponse;
   }
-}
-// export async function getAllProducts(): Promise<ActionResponse<{products: IProduct[]}>> {
-//    try {
-//        await connectDB()
-//        const products = await Product.find({})
-//        return {
-//          success: true,
-//          data: {products: JSON.parse(JSON.stringify(products))}
-//        }
-//    } catch (error) {  
-//        return handleError(error) as ErrorResponse
-//    }
-// }
-// accept an optional params object for filters/pagination
+}, ["/", "getAllProducts"], {revalidate: 60 * 60 * 24})
+
 
 
 export async function getSignleProduct(params:GetSingleProductParams): Promise<ActionResponse<{product: IProduct}>>  {
@@ -473,7 +447,7 @@ export async function startHardDeleteCron() {
   });
 }
 
-export async function getDeletedProducts(): Promise<ActionResponse<{products:IProduct[]}>> {
+export const getDeletedProducts: ()=> Promise<ActionResponse<{products:IProduct[]}>> = cache( async()=> {
   const session = await auth()
   if(!session) throw new UnAuthorizedError("")
     if(session && !session.user.isAdmin) throw new UnAuthorizedError("admin access only")
@@ -491,7 +465,7 @@ export async function getDeletedProducts(): Promise<ActionResponse<{products:IPr
      return handleError(error) as ErrorResponse
   }
   
-}
+}, ["/admin/productsList/deletedProducts", "getDeletedProducts"], {revalidate: 60 * 60 * 24})
 
 export async function hardDeleteProduct(
   params: DeleteProductParams
@@ -655,6 +629,10 @@ export async function getRecommendedForUser(
 
 
 
+
+
+
+
 export async function getInspiredByViewed(
   userId: string,
   limit = 10
@@ -699,4 +677,108 @@ export async function getInspiredByViewed(
     return handleError(error) as ErrorResponse
   }
 }
+
+const COLORS = ["Black", "Brown", "Beige", "White", "Camel"];
+const SIZES = ["S", "M", "L"];
+
+function randomImage(id: string) {
+  return {
+    url: `https://picsum.photos/seed/${id}/600/600`,
+    preview: `https://picsum.photos/seed/${id}/80/80`,
+    public_id: id,
+  };
+}
+export async function seedProducts(): Promise<ActionResponse> {
+  try {
+    await connectDB()
+    const products = [];
+    for (let i = 0; i < 100; i++) {
+  const basePrice = faker.number.int({ min: 199, max: 699 });
+  const listPrice = basePrice + faker.number.int({ min: 30, max: 120 });
+
+  const variants = COLORS.flatMap((color) =>
+    SIZES.map((size) => ({
+      sku: faker.string.alphanumeric(10).toUpperCase(),
+      priceModifier: size === "L" ? 40 : size === "M" ? 20 : 0,
+      stock: faker.number.int({ min: 5, max: 40 }),
+      attributes: [
+        { name: "Color", value: color },
+        { name: "Size", value: size },
+      ],
+      images: [randomImage(`variant-${i}-${color}-${size}`)],
+    }))
+  );
+
+  const createdAt = faker.date.past({ years: 1 });
+
+  products.push({
+    name: `${faker.commerce.productAdjective()} ${faker.commerce.productMaterial()} Bag`,
+    description: faker.commerce.productDescription(),
+    brand: faker.company.name(),
+    category: "Women > Bags",
+    status: "ACTIVE",
+
+    basePrice,
+    listPrice,
+
+    weeklySales: faker.number.int({ min: 0, max: 120 }),
+    dailySales: faker.number.int({ min: 0, max: 30 }),
+
+    priceHistory: [
+      {
+        price: listPrice,
+        date: faker.date.recent({ days: 180 }),
+      },
+      {
+        price: basePrice,
+        date: faker.date.recent({ days: 30 }),
+      },
+    ],
+
+    thumbnail: randomImage(`thumb-${i}`),
+    images: [
+      randomImage(`img-${i}-1`),
+      randomImage(`img-${i}-2`),
+      randomImage(`img-${i}-3`),
+    ],
+
+    rating: faker.number.float({ min: 3.5, max: 5, fractionDigits: 1 }),
+    reviewCount: faker.number.int({ min: 0, max: 500 }),
+
+    variants,
+
+    attributes: [
+      { name: "Material", value: faker.helpers.arrayElement(["PU Leather", "Genuine Leather", "Canvas"]) },
+      { name: "Closure", value: faker.helpers.arrayElement(["Zipper", "Magnetic", "Button"]) },
+    ],
+
+    tags: faker.helpers.uniqueArray(
+      () => faker.commerce.productAdjective().toLowerCase(),
+      4
+    ),
+
+    isFeatured: faker.datatype.boolean({ probability: 0.15 }),
+    isBestSeller: faker.datatype.boolean({ probability: 0.2 }),
+    isTrendy: faker.datatype.boolean({ probability: 0.25 }),
+
+    stock: 0, // unused because variants exist
+    isDeleted: false,
+    deletedAt: null,
+
+    createdAt,
+    updatedAt: faker.date.between({ from: createdAt, to: new Date() }),
+  });
+}
+ await Product.insertMany(products);
+ return {
+    success: true
+ }
+  } catch (error) {
+     return handleError(error) as ErrorResponse
+  }
+}
+
+
+
+
 

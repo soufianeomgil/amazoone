@@ -125,8 +125,8 @@ export async function POST(request: Request) {
           email,
           isVerified: true, // OAuth users are verified
           profilePictureUrl: image,
+          profileCompleted: false ,   // 👈 FORCE COMPLETION
           hashedPassword: null, // OAuth
-          gender: null,
           orderHistory: [],
           wishLists: [],
           addresses: [],

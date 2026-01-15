@@ -14,6 +14,8 @@ import { IOrderItem } from "@/models/order.model";
 
 import CancelOrderUI from "@/components/shared/clientBtns/CancelOrderBtn";
 import OrderDetailsSidebar from "@/components/shared/OrderDetailsDrawer";
+import EmptyOrder from "./_components/EmptyOrder";
+import Image from "next/image";
 
 type Order = {
   id: string;
@@ -119,7 +121,8 @@ export default function OrderHistoryClient() {
 
       <div className="flex-1 w-full lg:px-3">
         {/* Header */}
-        <div className="px-3 mb-6">
+        {orders.length > 0 && (
+<div className="px-3 mb-6">
           <h2 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
             <ShoppingBag /> Vos commandes
           </h2>
@@ -127,9 +130,12 @@ export default function OrderHistoryClient() {
             Consultez, suivez et gérez vos commandes
           </p>
         </div>
+        )}
+        
 
         {/* Orders */}
-        <div className="space-y-4 px-2">
+        {orders.length > 0 ? (
+ <div className="space-y-4 px-2">
           {orders.map((order) => (
             <div key={order.id} className="rounded-lg border border-gray-200 bg-white">
               {/* Order header */}
@@ -185,7 +191,9 @@ export default function OrderHistoryClient() {
                   key={idx}
                   className="p-3 flex gap-3 border-t border-gray-200 items-start"
                 >
-                  <img
+                  <Image 
+                   width={100} 
+                   height={100}
                     className="w-[100px] h-[100px] border border-gray-300 object-contain"
                     src={x.variant?.images?.[0]?.url || x.thumbnail || ""}
                     alt={x.name}
@@ -243,6 +251,18 @@ export default function OrderHistoryClient() {
             <p className="text-center text-sm text-red-500">{error}</p>
           )}
         </div>
+        ): (
+           <EmptyOrder 
+            name="You have no previous orders"
+            desc="We have thousands of items available across our wide range of sellers. Start ordering today!"
+            alt="No Order state"
+            srcUrl="/no_orders.svg"
+            url="/"
+             btnText="continue shopping"
+                    
+            />
+        )}
+       
 
         <Gimini />
       </div>

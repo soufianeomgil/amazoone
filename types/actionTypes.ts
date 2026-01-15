@@ -1,5 +1,6 @@
 import { IAddress } from "@/models/address.model";
-import { OrderStatus } from "@/models/order.model";
+import { OrderStatus, PaymentMethod as OrderPaymentMethod } from "@/models/order.model";
+import { IVariant } from "@/models/product.model";
 
 import { ObjectId, Schema } from "mongoose";
 
@@ -164,6 +165,51 @@ export interface  AddAddressParams  {
      isDefault: boolean;
      DeliveryInstructions?:string;
 }
+type CreateOrderItem = {
+  productId: string | { _id?: string; id?: string } | any;
+  quantity: number;
+  variantId?: string | null;
+  variant?: IVariant | null;
+  meta?: Record<string, any>;
+};
+export interface CreateOrderParams {
+  items: CreateOrderItem[];
+  shippingAddress: {
+    name: string;
+    phone?: string | null;
+    addressLine1: string;
+    addressLine2?: string | null;
+    city: string;
+    state?: string | null;
+    postalCode?: string | null;
+    
+    instructions?: string | null;
+  };
+  billingAddress?: any | null;
+  payment?: {
+    method?: keyof typeof OrderPaymentMethod | string;
+    provider?: string | null;
+    transactionId?: string | null;
+    cardLast4?: string | null;
+    cardBrand?: string | null;
+  } | null;
+  currency?: string;
+  shippingCost?: number;
+  tax?: number;
+  notes?: string | null;
+  checkoutId: string;
+};
+// export interface AddAddressParams {
+//   phone: string,
+//     formattedAddress:string,
+//     city?:string,
+//     region?:string,
+//     country?:string,
+//     zipCode?:string,
+//     location:{lat: number,lng: number},
+//     isDefault : boolean,
+// }
+
 export interface EditAddressParams extends AddAddressParams {
   id: string;
 }
@@ -202,3 +248,16 @@ export interface KpiData {
   isPositive: boolean;
   icon: string;
 }
+
+export interface GetAllProductsParams  {
+  q?: string;
+  category?: string;
+  brands?: string | string[];
+  tags?: string | string[];
+  priceMin?: number | string;
+  priceMax?: number | string;
+  inStockOnly?: boolean | string;
+  sort?: "relevance" | "newest" | "price_asc" | "price_desc";
+  page?: number | string;
+  perPage?: number | string;
+};

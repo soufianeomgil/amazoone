@@ -218,17 +218,112 @@ export const SignInWithOAuthSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
   }),
 });
-export const SignUpValidationSchema = z.object({
-  gender: z.enum(["male", "female"], { message: "gender Type is not valid!" }),
- 
-  fullName: z.string().min(1, { message: "fullName is required!" }),
- 
-  email: z.string().email({ message: "please provide a valid email address!" }),
-  password: z.string()
-    .min(8, "Password must be at least 8 characters long")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, 
-      "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"),
-});
+export const completeProfileSchema = z.object({
+  fullName: z
+    .string()
+    .min(3, "Full name must be at least 3 characters").max(35),
+  phoneNumber: z
+    .string()
+    .regex(/^6\d{8}$/, "Invalid Moroccan phone number"),
+  gender: z.enum(["male", "female"]),
+})
+
+export type CompleteProfileInput = z.infer<
+  typeof completeProfileSchema
+>
+
+
+export const SignUpValidationSchema = z
+  .object({
+    gender: z.enum(["male", "female"], {
+      message: "gender Type is not valid!",
+    }),
+
+    fullName: z.string().min(1, {
+      message: "fullName is required!",
+    }),
+
+    email: z.string().email({
+      message: "please provide a valid email address!",
+    }),
+
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+        "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
+      ),
+
+    passwordCheck: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.passwordCheck) {
+      ctx.addIssue({
+        path: ["passwordCheck"],
+        message: "Passwords do not match",
+        code: z.ZodIssueCode.custom,
+      });
+    }
+  });
+
+
+export const ResetPasswordSchema = z.object({
+   password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+        "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
+      ),
+
+    passwordCheck: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.passwordCheck) {
+      ctx.addIssue({
+        path: ["passwordCheck"],
+        message: "Passwords do not match",
+        code: z.ZodIssueCode.custom,
+      });
+    }
+  });
+
+
+export const ForgotPasswordSchema = z
+  .object({
+    identifier: z.string().min(1, "Email or phone number is required"),
+  })
+  .superRefine((data, ctx) => {
+    const value = data.identifier.trim();
+
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    const isPhone = /^\+?[1-9]\d{7,14}$/.test(value);
+
+    if (!isEmail && !isPhone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter a valid email or phone number",
+        path: ["identifier"],
+      });
+    }
+  })
+  .transform((data) => {
+    const value = data.identifier.trim();
+    const isEmail = value.includes("@");
+
+    return {
+      type: isEmail ? "email" : "phone",
+      value,
+    };
+  });
+
+
+
+export const EditWishlistSchema = z.object({
+  name: z.string().min(1, "wishlist name is required"),
+  id: z.string().min(1, 'list ID is required')
+})
 export const UsersSchema = z.object({
   
 
@@ -362,6 +457,23 @@ export const AddAddressSchema = z.object({
     .optional()
     .transform((v) => (typeof v === "string" ? v.trim() : v)),
 });
+
+// export const AddAddressSchema = z.object({
+//   phone: z.string().min(6),
+//   isDefault: z.boolean().optional(),
+
+//   formattedAddress: z.string().min(5),
+
+//   city: z.string().optional(),
+//   region: z.string().optional(),
+//   country: z.string().optional(),
+//   zipCode: z.string().optional(),
+
+//   location: z.object({
+//     lat: z.number(),
+//     lng: z.number(),
+//   }),
+// });
 export const MoveToCartSchema = z.object({
  id: z.string().min(1, { message: "saved item Id is required" }),
 })

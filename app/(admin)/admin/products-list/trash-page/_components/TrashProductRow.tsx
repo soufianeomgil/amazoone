@@ -3,6 +3,7 @@
 import { hardDeleteProduct, restoreProduct } from "@/actions/product.actions";
 import { IProduct } from "@/models/product.model";
 import { formatDistanceToNowStrict } from "date-fns";
+import Image from "next/image";
 import { toast } from "sonner";
 
 export default function TrashProductRow({ product }: {product: IProduct}) {
@@ -49,8 +50,9 @@ export default function TrashProductRow({ product }: {product: IProduct}) {
   return (
     <div key={product._id} className="flex items-center justify-between p-4 border-b bg-gray-50">
       <div className="flex items-center gap-4">
-        <img
-          src={product.images?.[0]?.url}
+        <Image
+         width={64} height={64}
+          src={product.images?.[0]?.url || ''}
           className="w-16 h-16 rounded object-cover"
           alt={product.name ?? ""}
         />

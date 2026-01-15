@@ -3,6 +3,7 @@ import { moveSavedItemToCart, removeFromSaveForLater } from '@/actions/saveForLa
 import CardItem from '@/app/(root)/cart/_component/CardItem'
 import { Button } from '@/components/ui/button'
 import { ISaveForLaterDoc } from '@/models/saveForLater.model'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import React from 'react'
@@ -47,7 +48,7 @@ export const MoveToCartBtn = ({data}: {data: props}) => {
 <div className='sm:flex  hidden flex-col border border-gray-300 p-2.5 gap-2.5' >
 
                                         <div className='w-full  flex items-center justify-center '>
-                                             <img  className='w-[200px] object-contain h-[200px] ' src={item?.variant?.images?.[0]?.url} alt="product name" />
+                                             <Image width={200} height={200}  className='w-[200px] object-contain h-[200px] ' src={item?.variant?.images?.[0]?.url || ""} alt="product name" />
                                         </div>
                                         <article>
                                              <Link href={`/product/${(item.productId as any)._id}`} className='line-clamp-2 hover:text-blue-600 hover:underline text-gray-800 text-sm font-medium '>

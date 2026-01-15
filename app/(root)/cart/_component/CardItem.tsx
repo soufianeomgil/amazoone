@@ -2,6 +2,7 @@ import AmazonPrice from '@/components/shared/AmazonPrice'
 import { Button } from '@/components/ui/button'
 import { ISaveForLaterDoc } from '@/models/saveForLater.model';
 import { CheckCircle } from 'lucide-react'
+import Image from 'next/image';
 import React from 'react'
 
 const CardItem = ({item, handleMoveToCart, handleRemove}: {item: ISaveForLaterDoc,handleMoveToCart: ()=> void,handleRemove:()=> void}) => {
@@ -9,7 +10,7 @@ const CardItem = ({item, handleMoveToCart, handleRemove}: {item: ISaveForLaterDo
     <div  className='bg-gray-50 px-3 py-3 sm:hidden flex flex-col rounded-lg'>
          <div className='flex items-start gap-2'>
           {/* //@ */}
-             <img className="w-[150px] object-contain "
+             <Image width={150} height={150} className="w-[150px] object-contain"
               // @ts-ignore
               src={item?.variant?.images[0].url ?? "https://res.cloudinary.com/djadlnbfq/image/upload/v1766358063/cxiqi6dfkyznpza0aktc.webp"} alt="" />
              <div className="flex py-2 flex-col space-y-0.5">

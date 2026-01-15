@@ -4,6 +4,7 @@ import Link from "next/link";
 import EditAddressForm from "../../../_components/EditAddressForm";
 import { getAddressDetails } from "@/actions/address.actions";
 import { IAddress } from "@/models/address.model";
+import Image from "next/image";
 
 const page = async({params}: {params: Promise<{id:string}>}) => {
   
@@ -22,8 +23,8 @@ const page = async({params}: {params: Promise<{id:string}>}) => {
       
 
      <h1 className="text-2xl flex items-center gap-1 md:text-3xl font-bold text-gray-800 mb-6">
-         <img src="/location.png" alt="location icon" className="w-[22px] object-contain " />  <span>Edit address</span>
-        </h1>
+         <Image width={22} height={22} src="/location.png" alt="location icon" className="w-[22px] object-contain " />  <span>Edit address</span>
+      </h1>
 
   <EditAddressForm address={result.data?.address || {} as IAddress} />
     </div>

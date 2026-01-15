@@ -1,9 +1,12 @@
 "use client"
 
 import { MessageCircle} from "lucide-react"
+import { usePathname } from "next/navigation"
 import { WhatsappIcon } from "react-share"
 
 export default function WhatsAppSupport() {
+  const pathname = usePathname()
+  if(pathname.includes('complete-profile')) return null
   const phoneNumber = "+212715120495" // ⚠️ replace with your WhatsApp number
   const message = encodeURIComponent(
     "السلام عليكم، بغيت نعرف معلومات على واحد المنتج 🙏"

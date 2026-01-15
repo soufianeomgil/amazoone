@@ -1,5 +1,7 @@
-import { IUser } from '@/types/actionTypes'
+
+import { IUser } from '@/models/user.model'
 import { X } from 'lucide-react'
+import Image from 'next/image'
 import React from 'react'
 
 const EditProfileModel = ({open,setOpen,user}: {open:boolean, user: IUser ,setOpen: (v:boolean)=> void}) => {
@@ -23,7 +25,7 @@ const EditProfileModel = ({open,setOpen,user}: {open:boolean, user: IUser ,setOp
                  
 
                     <div className='flex flex-col items-center justify-center space-y-2.5 border-b border-gray-200 pb-3 w-full'>
-                       <img className='w-[70px] h-[70px] rounded-full object-contain ' src={user.profilePictureUrl ?? "https://yt3.ggpht.com/MH9TWKPxjVZNjfGbZGLa9D71D-LVpTOPJbkh_abunMIfS6Mzqeh7M4c19eQdcp5i9dTQvIodUA=s48-c-k-c0x00ffffff-no-rj"} alt="" />
+                       <Image width={70} height={70} className='w-[70px] h-[70px] rounded-full object-contain ' src={user.profilePictureUrl ?? "https://yt3.ggpht.com/MH9TWKPxjVZNjfGbZGLa9D71D-LVpTOPJbkh_abunMIfS6Mzqeh7M4c19eQdcp5i9dTQvIodUA=s48-c-k-c0x00ffffff-no-rj"} alt="" />
                        <button type="button" className='text-blue-700 font-medium text-sm cursor-pointer'>Change profile photo</button>
                     </div>
                 

@@ -10,6 +10,7 @@ import Link from "next/link"
 import { Button } from "../ui/button"
 import { Facebook, Instagram, Youtube } from "lucide-react"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
   
   export default function MobileFooter() {
     const pathname = usePathname()
@@ -106,19 +107,19 @@ import { usePathname } from "next/navigation"
            
             <div className='grid max-sm:grid-cols-2 grid-cols-4 gap-7'>
                 <div className='flex items-center gap-1'>
-                  <img className='w-10 object-contain' src="https://www.marjanemall.ma/images/auth-white.png" alt="" />
+                  <Image width={40} height={40} className='w-10 object-contain' src="https://www.marjanemall.ma/images/auth-white.png" alt="" />
                     <p className='text-[13px] text-white font-medium'>Produits 100% <br /> authentiques</p>
                 </div>
                 <div className='flex items-center gap-1'>
-                  <img  className='w-10 object-contain' src="https://www.marjanemall.ma/images/morocco-white.png" alt="" />
+                  <Image width={40} height={40}  className='w-10 object-contain' src="https://www.marjanemall.ma/images/morocco-white.png" alt="" />
                     <p className='text-[13px] text-white font-medium'>Livraison partout <br /> au Maroc</p>
                 </div>
                 <div className='flex items-center gap-1'>
-                  <img  className='w-10 object-contain' src="https://www.marjanemall.ma/images/return-white.png" alt="" />
+                  <Image  width={40} height={40} className='w-10 object-contain' src="https://www.marjanemall.ma/images/return-white.png" alt="" />
                     <p className='text-[13px] text-white font-medium'>Satisfait ou <br /> remboursé</p>
                 </div>
                 <div className='flex items-center gap-1'>
-                  <img  className='w-10 object-contain' src="https://www.marjanemall.ma/images/globe-white.png" alt="" />
+                  <Image width={40} height={40} className='w-10 object-contain' src="https://www.marjanemall.ma/images/globe-white.png" alt="" />
                     <p className='text-[13px] text-white font-medium'>Offre nationale et <br /> internationale</p>
                 </div>
             </div>
@@ -126,7 +127,7 @@ import { usePathname } from "next/navigation"
             <h4 className='text-white font-bold text-[17px] mb-3 border-gray-300  '>
                Modes de paiement
             </h4>
-              <img className='w-[350px] object-contain' src="https://www.marjanemall.ma/media/footer/paiement_x2_1.png" alt="" />
+              <Image width={350} height={350} className='w-[350px] object-contain' src="https://www.marjanemall.ma/media/footer/paiement_x2_1.png" alt="" />
             </div>
             </div>
             <div className="flex items-center py-3 justify-between">

@@ -4,6 +4,7 @@ import React from "react";
 import { CldUploadWidget } from "next-cloudinary";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 type UploadResult = {
   url: string;
@@ -32,8 +33,8 @@ export const FileUploadCloudinary: React.FC<FileUploadProps> = ({
   return (
     <div className={cn("relative group", className)}>
       {preview ? (
-        <div className="relative w-full h-32 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 hover:border-blue-300 transition-all duration-300">
-          <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+        <div className="relative w-full h-32 rounded-xl overflow-hidden bg-linear-to-br from-gray-50 to-gray-100 border-2 border-gray-200 hover:border-blue-300 transition-all duration-300">
+          <Image fill src={preview} alt="Preview" className="w-full h-full object-cover" />
           {onRemove && (
             <button
               type="button"

@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { ChevronLeft, ChevronRight, Heart, Share } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import Image from "next/image";
 import { RootState } from "@/lib/store";
 import { IProduct } from "@/models/product.model";
 import ShareTrigger from "@/app/(root)/product/[id]/_components/ShareTrigger";
 
 const ProductImage = ({ product }: { product: IProduct }) => {
-    const shareUrl = "https://yourstore.com/product/123";
+  const shareUrl = "https://yourstore.com/product/123";
   const title = "Check out this product on Our Store";
   const selectedIndex = useSelector(
     (state: RootState) =>
@@ -45,19 +46,22 @@ const ProductImage = ({ product }: { product: IProduct }) => {
       {/* 🔒 Sticky container */}
       <div className="sticky top-6 self-start">
         <div className="flex gap-4">
-          {/* 🟦 Thumbnails (desktop like Amazon) */}
           <div className="hidden lg:flex flex-col gap-2">
             {gallery.map((img, i) => (
               <button
                 key={i}
                 onClick={() => setActive(i)}
-                className={`w-16 h-16 border rounded-md bg-gray-50 flex items-center justify-center
-                  ${i === active ? "border-orange-500" : "border-gray-200 hover:border-gray-400"}`}
+                className={`relative w-16 h-16 border rounded-md bg-gray-50 flex items-center justify-center ${
+                  i === active
+                    ? "border-orange-500"
+                    : "border-gray-200 hover:border-gray-400"
+                }`}
               >
-                <img
+                <Image
                   src={img.url}
-                  alt=""
-                  className="w-full h-full object-contain"
+                  alt={product.name}
+                  fill
+                  className="object-contain"
                 />
               </button>
             ))}
@@ -66,7 +70,9 @@ const ProductImage = ({ product }: { product: IProduct }) => {
           {/* 🟧 Main image */}
           <div className="relative flex-1 border border-gray-200 rounded-md bg-gray-100">
             {gallery[active]?.url ? (
-              <img
+              <Image
+                height={420}
+                width={420}
                 src={gallery[active].url}
                 alt={product.name}
                 className="w-full h-[420px] object-contain"
@@ -98,37 +104,30 @@ const ProductImage = ({ product }: { product: IProduct }) => {
         </div>
 
         {/* 🔵 Mobile dots */}
-       <div className="flex items-center mt-3 px-4 justify-between">
-      <div style={{visibility: "hidden"}}>
-         Placeholder
-      </div>
- {gallery.length > 1 && (
-          <div className="flex justify-center gap-2  lg:hidden">
-            {gallery.map((_, i) => (
-              <span
-                key={i}
-                className={`h-2 w-2 rounded-full ${
-                  i === active ? "bg-orange-500" : "bg-gray-300"
-                }`}
-              />
-            ))}
+        <div className="flex items-center mt-3 px-4 justify-between">
+          <div style={{ visibility: "hidden" }}>Placeholder</div>
+
+          {gallery.length > 1 && (
+            <div className="flex justify-center gap-2 lg:hidden">
+              {gallery.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-2 w-2 rounded-full ${
+                    i === active ? "bg-orange-500" : "bg-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="flex sm:hidden items-center gap-2.5">
+            <div className="flex rounded-full bg-gray-100 w-[45px] h-[45px] items-center justify-center">
+              <Heart color="black" />
+            </div>
+
+            <ShareTrigger title={title} url={shareUrl} />
           </div>
-      
-        )}
-        <div className="flex sm:hidden items-center gap-2 5">
-        <div className="flex    rounded-full bg-gray-100 w-[45px] h-[45px] items-center justify-center  ">
-           <Heart color="black" />
         </div>
-        {/* <div className="flex    rounded-full bg-gray-100 w-[45px] h-[45px] items-center justify-center  ">
-           <Share color="black" />
-        </div> */}
-        <ShareTrigger title={title} url={shareUrl} />
-        </div>
-        
-       </div>
-       
-       
-        
       </div>
     </div>
   );

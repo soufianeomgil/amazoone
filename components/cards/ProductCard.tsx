@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import Rating from "../shared/Rating";
 import AmazonPrice from "../shared/AmazonPrice";
+import Image from "next/image";
 
 const ProductCard = ({
   product,
@@ -26,7 +27,7 @@ const ProductCard = ({
         )} */}
 
         {/* Product Image */}
-        <img
+        <Image fill
           src={"/pla.png"}
           alt={product.name}
           className="w-full h-40 object-contain transition-transform duration-300 group-hover:scale-105"

@@ -1,5 +1,6 @@
 // app/api/address/default/route.ts
 import { getDefaultUserAddressAction } from "@/actions/address.actions";
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -8,9 +9,10 @@ import type { NextRequest } from "next/server";
 
 
 export async function GET(req: NextRequest) {
+const session = await auth()
   try {
     // Call the server action (it will authorize the session internally).
-    const res = await getDefaultUserAddressAction();
+    const res = await getDefaultUserAddressAction({userId: session?.user.id as string});
 
     // If the action returned an error-style response, forward it
     if (!res || !("success" in res) || res.success === false) {

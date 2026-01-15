@@ -61,12 +61,12 @@ const Header = ({qty,session,isAuthenticated}: {
                     {/* Left Side */}
                     <div className="flex items-center space-x-2">
                        <div className="flex items-center gap-2">
-                        <button onClick={handleMenuToggle} className="sm:hidden font-bold  p-1 border border-transparent hover:border-white rounded-sm">
+                        <button onClick={handleMenuToggle} className=" font-bold  p-1 border border-transparent hover:border-white rounded-sm">
                         <MenuIcon />
                         {/* <span>All</span> */}
                     </button>
                       <Link href="/" className="p-1 border border-transparent hover:border-white rounded-sm">
-                            <img
+                            <Image
                              src="https://assets.aboutamazon.com/2e/d7/ac71f1f344c39f8949f48fc89e71/amazon-logo-squid-ink-smile-orange.png"
                              alt="Amazon Logo" 
                              width={96} height={40}
@@ -117,7 +117,7 @@ const Header = ({qty,session,isAuthenticated}: {
                                 {session ? (
  <div className='flex p-4 border-gray-200 border-b bg-gray-100 items-center justify-between'>
                                                <div className="flex items-start gap-2">
-                                                  <img className='rounded-full object-contain w-10 h-10 ' src={session?.user.image ?? "https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-5.png"} alt="avatar" />
+                                                  <Image width={40} height={40} className='rounded-full object-contain w-10 h-10 ' src={session?.user.image ?? "https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-5.png"} alt="avatar" />
                                                   <div className="flex space-y-0.5 flex-col">
                                                        <p className='text-black font-medium text-sm'>
                                                          {session?.user.name}
@@ -200,7 +200,7 @@ const Header = ({qty,session,isAuthenticated}: {
                 </div>
 
                 {/* Bottom Navigation */}
-                <div className="flex items-center max-sm:hidden bg-[#232F3E] text-white text-sm space-x-3 md:space-x-4 px-2 md:px-4 py-2 overflow-x-auto whitespace-nowrap">
+                {/* <div className="flex items-center max-sm:hidden bg-[#232F3E] text-white text-sm space-x-3 md:space-x-4 px-2 md:px-4 py-2 overflow-x-auto whitespace-nowrap">
                     <button onClick={handleMenuToggle} className="flex items-center font-bold space-x-1 p-1 border border-transparent hover:border-white rounded-sm">
                         <MenuIcon />
                         <span>All</span>
@@ -210,7 +210,7 @@ const Header = ({qty,session,isAuthenticated}: {
                     <a href="#" className="p-1 border border-transparent hover:border-white rounded-sm">Registry</a>
                     <a href="#" className="p-1 border border-transparent hover:border-white rounded-sm">Gift Cards</a>
                     <a href="#" className="p-1 border border-transparent hover:border-white rounded-sm">Sell</a>
-                </div>
+                </div> */}
                 <div className='bg-[#232f3e] relative sm:hidden w-full flex items-center justify-center  px-2 py-2'>
                      <p className='text-white text-[16px] font-medium'>🚚 Paiement à la livraison</p>
                 </div>

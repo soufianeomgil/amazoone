@@ -13,42 +13,9 @@ import { revalidatePath } from "next/cache";
 import { ROUTES } from "@/constants/routes";
 import { clearUserCart } from "./cart.actions";
 import { CancelOrderSchema, GetOrderDetailsSchema } from "@/lib/zod";
+import { cache } from "@/lib/cache";
+import { CreateOrderParams } from "@/types/actionTypes";
 
-type CreateOrderItem = {
-  productId: string | { _id?: string; id?: string } | any;
-  quantity: number;
-  variantId?: string | null;
-  variant?: IVariant | null;
-  meta?: Record<string, any>;
-};
-
-type CreateOrderParams = {
-  items: CreateOrderItem[];
-  shippingAddress: {
-    name: string;
-    phone?: string | null;
-    addressLine1: string;
-    addressLine2?: string | null;
-    city: string;
-    state?: string | null;
-    postalCode?: string | null;
-    
-    instructions?: string | null;
-  };
-  billingAddress?: any | null;
-  payment?: {
-    method?: keyof typeof PaymentMethod | string;
-    provider?: string | null;
-    transactionId?: string | null;
-    cardLast4?: string | null;
-    cardBrand?: string | null;
-  } | null;
-  currency?: string;
-  shippingCost?: number;
-  tax?: number;
-  notes?: string | null;
-  checkoutId: string;
-};
 
 /* -----------------------------
    Action
@@ -308,9 +275,8 @@ type GetOrdersParams = {
 };
 // TODO: FINISH FETCHING USER ORDERS WITH PAGINATION
 
-export async function getUserOrdersAction(
-  params: GetOrdersParams
-): Promise<ActionResponse<{ orders: IOrderDoc[]; isNext: boolean; ordersLength: number }>> {
+export const getUserOrdersAction: (params?: GetOrdersParams) =>
+   Promise<ActionResponse<{ orders: IOrderDoc[]; isNext: boolean; ordersLength: number }>> = cache(async (params?: GetOrdersParams) => {
   // 1) validate session / auth
   const validated = await action({ params, authorize: true });
   if (validated instanceof Error) throw validated;
@@ -337,7 +303,7 @@ export async function getUserOrdersAction(
   } catch (err) {
      return handleError(err) as ErrorResponse
   }
-}
+}, [ROUTES.myorders, "getUserOrdersAction"], {revalidate: 60 * 60 * 24})
 interface GetOrderDetailsParams {
   orderId: string
 }

@@ -11,8 +11,9 @@ export const ROUTES = {
         orderDetails: (orderId:string)=> `/admin/orders-list/details/${orderId}` ,
         dashboard: "/admin/dashboard",
     },
+
     myorders: "/account/order-history",
-    mywishlist: "/account/wishlist",
+    mywishlist: "/account/wishlist/list",
     myBrowsingHistory: "/browsing-history",
     editAddress: (id:string) => `/account/addresses/edit/${id}`,
     profile: (id:string) => `/profile/${id}`,

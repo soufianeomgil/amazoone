@@ -4,15 +4,17 @@ import connectDB from "@/database/db"
 import { action } from "@/lib/handlers/action"
 import handleError from "@/lib/handlers/error"
 import mongoose from "mongoose"
-import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors"
+import { ForbiddenError, NotFoundError, UnAuthorizedError } from "@/lib/http-errors"
 import { AddAddressSchema, EditAddressSchema, GetAddressDetailsSchema } from "@/lib/zod"
 import Address, {IAddress} from "@/models/address.model"
 
-import User from "@/models/user.model"
-import { AddAddressParams, EditAddressParams, GetAddressDetailsParams, IUser } from "@/types/actionTypes"
+import User, {IUser} from "@/models/user.model"
+import { AddAddressParams, EditAddressParams, GetAddressDetailsParams } from "@/types/actionTypes"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { ROUTES } from "@/constants/routes"
+import { cache } from "@/lib/cache"
+import { parseAppSegmentConfig } from "next/dist/build/segment-config/app/app-segment-config"
 
 export default async function addAddressAction(
   params: AddAddressParams
@@ -134,8 +136,8 @@ export default async function addAddressAction(
       await user.save({ session: mongoSession });
     });
 
-    mongoSession.endSession();
-
+      mongoSession.endSession();
+      revalidatePath(ROUTES.addresses)
     return {
       success: true,
     } 
@@ -146,16 +148,20 @@ export default async function addAddressAction(
 
 
 
-
-export async function getUserAddresses(): Promise<ActionResponse<{addresses: IAddress[]}>> {
-    const session = await auth()
-    if(!session) throw new UnAuthorizedError("")
+interface GetUserAddressesParams {
+  userId: string;
+}
+export const getUserAddresses: (params:GetUserAddressesParams) => Promise<ActionResponse<{ addresses: IAddress[] }>> = cache(async (params:GetUserAddressesParams) => {
+    const {userId} = params
+    if(!userId) return {
+       success: false
+    }
   try {
      await connectDB()
-     const user = await User.findById(session.user.id)
+     const user = await User.findById(userId)
      if(!user) throw new NotFoundError("User")
       const addresses = await Address.find({userId: user._id})
-    .sort({isDefault: -1 , createdAt: -1})
+     .sort({isDefault: -1 , createdAt: -1})
     return {
       success: true,
       data: {addresses: JSON.parse(JSON.stringify(addresses))}
@@ -163,7 +169,7 @@ export async function getUserAddresses(): Promise<ActionResponse<{addresses: IAd
   } catch (error) {
      return handleError(error) as ErrorResponse
   }
-}
+}, [ROUTES.addresses, "getUserAddresses"], {revalidate: 60 * 60 * 24})
 
 export async function getAddressDetails(params:GetAddressDetailsParams) : Promise<ActionResponse<{address: IAddress}>> {
    const validatedResult = await action({params,schema:GetAddressDetailsSchema,authorize:true})
@@ -283,7 +289,7 @@ export async function editAddressAction(params: EditAddressParams): Promise<Acti
     return handleError(error) as ErrorResponse;
   }
 }
-// server/actions/removeAddressAction.ts
+
 
 
 type RemoveAddressParams = {
@@ -506,6 +512,7 @@ export  async function setDefaultAddressAction(
 
     mongoSession.endSession();
     revalidatePath(ROUTES.addresses)
+    revalidatePath('/cart')
     revalidatePath("/checkout")
     return {
       success: true,
@@ -519,25 +526,23 @@ export  async function setDefaultAddressAction(
   }
 }
 
-
+interface GetUserDefaultAddressParams {
+  userId:string
+}
 // Response: { success: true, data: { address?: AddressObj | null } }
-export async function getDefaultUserAddressAction(): Promise<ActionResponse<{ address?: IAddress }>> {
+export const  getDefaultUserAddressAction :(params:GetUserDefaultAddressParams)=> Promise<ActionResponse<{ address?: IAddress }>> = cache (async(params:GetUserDefaultAddressParams) => {
   // 1) authorize + get session via shared action helper
-  const validated = await action({ authorize: true });
-
-  if (validated instanceof Error) {
-    // action helper already returns an Error when auth/validation fails
-    return handleError(validated) as ErrorResponse;
+  
+  const  { userId } = params;
+  if(!userId) return {
+      success: false
   }
-
-  const session = validated.session;
-
   try {
     // 2) DB connect
     await connectDB();
 
     // 3) load user and only addresses (lean for safe, plain JSON)
-     const userAddress = await Address.findOne({userId: session?.user.id, isDefault: true})
+     const userAddress = await Address.findOne({userId, isDefault: true})
     if(!userAddress) throw new NotFoundError("Address default")
 
     // 5) return
@@ -550,4 +555,4 @@ export async function getDefaultUserAddressAction(): Promise<ActionResponse<{ ad
   } catch (err) {
     return handleError(err) as ErrorResponse;
   }
-}
+}, ["GetDeafultUserAddress", "getDefaultUserAddressAction"], {revalidate: 60 * 60 * 24})

@@ -8,6 +8,7 @@ import { CheckCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AmazonPrice from "./AmazonPrice";
+import Image from "next/image";
 
 const Variant = ({ product }: { product: IProduct }) => {
   const dispatch = useDispatch();
@@ -145,7 +146,7 @@ const Variant = ({ product }: { product: IProduct }) => {
                 >
                   <div className="w-16 h-16 shrink-0 rounded overflow-hidden border border-gray-100 bg-white">
                     {img ? (
-                      <img src={img} alt={`${product.name} ${label}`} className="w-full h-full object-contain" />
+                      <Image width={64} height={64} src={img} alt={`${product.name} ${label}`} className="w-full h-full object-contain" />
                     ) : (
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">No image</div>
                     )}

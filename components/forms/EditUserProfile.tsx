@@ -22,6 +22,8 @@ import { toast } from "sonner"
 import { SpinnerIcon } from "../shared/icons"
 import { IUser } from "@/models/user.model"
 import { CldUploadWidget } from "next-cloudinary"
+import Image from "next/image"
+import { cn } from "@/lib/utils"
 
 
 
@@ -57,7 +59,7 @@ export function EditProfileForm({user}: {user:IUser}) {
        phone: values.phone,
        gender: values.gender,
        password: values.password ?? values.password,
-       profilePic: values.profilePic
+       profilePic: values.profilePic || "/avatar-placeholder.png"
      })
      if(error) {
        toast.error(error.message)
@@ -99,9 +101,11 @@ export function EditProfileForm({user}: {user:IUser}) {
               className="relative w-fit cursor-pointer group"
             >
               {/* Avatar */}
-              <img
+              <Image
                 src={field.value || user.profilePictureUrl || "/avatar-placeholder.png"}
                 alt="Profile picture"
+                width={70}
+                height={70}
                 className="sm:w-[100px] w-[70px] h-[70px] sm:h-[100px]
                 rounded-full object-cover border border-gray-200"
               />
@@ -152,7 +156,7 @@ export function EditProfileForm({user}: {user:IUser}) {
             <FormItem>
               <FormLabel className="text-sm font-medium text-gray-800">Email</FormLabel>
               <FormControl>
-                <Input disabled={loading} className={className} placeholder="John@gmail.com" {...field} />
+                <Input disabled={true} className={cn("cursor-none",className)} placeholder="John@gmail.com" {...field} />
               </FormControl>
               
               <FormMessage className="font-medium text-xs text-red-500" />

@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import { relatedProducts } from "../../product/[id]/_components/RelatedProducts";
 import Rating from "@/components/shared/Rating";
+import Image from "next/image";
 
 const SoldWith = ({title}: {title:string}) => {
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -44,7 +45,7 @@ const SoldWith = ({title}: {title:string}) => {
         {relatedProducts.map((product,index) => (
            <div className="flex flex-col" key={index}>
                 <div>
-                     <img src={product.thumbnail.url} alt={product.name} />
+                     <Image width={150} height={150} className="object-contain w-full" src={product.thumbnail.url||""} alt={product.name} />
                 </div>
                 <div className="flex flex-col space-y-0.5 text-left">
 <p className="text-blue-800 font-medium text-sm line-clamp-2 ">DREAM PAIRS Women's Square Open Toe Block Heels Two Strap Slip On High Heeled Slides Sandals</p>

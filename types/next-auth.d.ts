@@ -6,11 +6,13 @@ declare module "next-auth" {
     user: {
       id: string;
       isAdmin: boolean; // 👈 Add isAdmin here;
+      profileCompleted: boolean
     } & DefaultSession["user"];
   }
 
   interface User extends DefaultUser {
     id: string;
+    profileCompleted: boolean;
     isAdmin: boolean; // 👈 Add isAdmin here too
     
   }

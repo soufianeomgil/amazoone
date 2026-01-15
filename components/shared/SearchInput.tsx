@@ -8,6 +8,7 @@ import Link from "next/link"
 import { formatPrice } from "@/lib/utils"
 import { IProduct } from "@/models/product.model"
 import { CaretDownIcon, SpinnerIcon } from "./icons"
+import Image from "next/image"
 
 
 const SearchInput = () => {
@@ -145,8 +146,8 @@ useEffect(() => {
     >
       {/* Thumbnail */}
       <div className="w-16 h-16 flex items-center justify-center shrink-0 bg-gray-50 rounded-md overflow-hidden">
-        <img
-          src={item.thumbnail?.url}
+        <Image width={64} height={64}
+          src={item.thumbnail?.url || ""}
           alt={item.name}
           className="max-h-full max-w-full object-contain"
         />

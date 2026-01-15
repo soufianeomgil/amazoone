@@ -54,6 +54,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               email: existingUser.email,
               image: existingUser.profilePictureUrl,
               isAdmin: existingUser.isAdmin, 
+              profileCompleted: existingUser.profileCompleted
             };
           }
            
@@ -67,37 +68,78 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
    
     async session({ session,token }) {
     
-     session.user.id = token.sub as string;
-     session.user.isAdmin = token.isAdmin as boolean; // Attach isAdmin
+    session.user.id = token.sub as string;
+session.user.isAdmin = token.isAdmin as boolean;
+session.user.profileCompleted = token.profileCompleted as boolean;
+
       
       return session;
     
     
     },
-    async jwt({ token, account, user }) {
-      if (user) {
-        token.sub = user.id;
-        token.isAdmin = user.isAdmin; // 👈 Add this
-        // token.isVerified = user.isVerified
-      }
-      if (account) {
-        const { data: existingAccount, success } =
-          (await api.accounts.getByProvider(
-            account.type === "credentials"
-              ? token.email!
-              : account.providerAccountId
-          )) as ActionResponse<IAccount>;
+//     async jwt({ token, account, user }) {
+//       // if (user) {
+//       //   token.sub = user.id;
+//       //   token.isAdmin = user.isAdmin; // 👈 Add this
+//       //   // token.isVerified = user.isVerified
+//       // }
+//       if (user) {
+//   token.sub = user.id;
+//   token.isAdmin = user.isAdmin;
+//   token.profileCompleted = user.profileCompleted;
+// }
+
+//       if (account) {
+//         const { data: existingAccount, success } =
+//           (await api.accounts.getByProvider(
+//             account.type === "credentials"
+//               ? token.email!
+//               : account.providerAccountId
+//           )) as ActionResponse<IAccount>;
        
-        if (!success || !existingAccount) return token;
+//         if (!success || !existingAccount) return token;
 
-        const userId = existingAccount.userId;
+//         const userId = existingAccount.userId;
 
-        if (userId) token.sub = userId.toString();
+//         if (userId) token.sub = userId.toString();
         
-      }
+//       }
 
-      return token;
-    },
+//       return token;
+//     },
+    async jwt({ token, user, account }) {
+  // 1️⃣ Initial sign in (credentials OR oauth)
+  if (user) {
+    token.sub = user.id
+    token.isAdmin = user.isAdmin
+    token.profileCompleted = user.profileCompleted
+  }
+
+  // 2️⃣ OAuth sign-in → sync from DB
+  if (account && account.type !== "credentials") {
+    const { data: dbAccount } =
+      (await api.accounts.getByProvider(
+        account.providerAccountId
+      )) as ActionResponse<IAccount>
+
+    if (dbAccount?.userId) {
+      const { data: dbUser } =
+        (await api.users.getById(
+          dbAccount.userId.toString()
+        )) as ActionResponse<IUser>
+
+      if (dbUser) {
+        token.sub = dbUser._id
+        token.isAdmin = dbUser.isAdmin
+        token.name = dbUser.fullName
+        token.profileCompleted = dbUser.profileCompleted
+      }
+    }
+  }
+
+  return token
+},
+
     async signIn({ user, profile, account }) {
       if (account?.type === "credentials") return true;
       if (!account || !user) return false;

@@ -5,6 +5,7 @@ import { UserCircle2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ROUTES } from '@/constants/routes';
+import Image from 'next/image';
 
 const AdminHeader: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -44,7 +45,7 @@ const AdminHeader: React.FC = () => {
                 <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
                         <Link href="/">
-                         <img src="https://pngimg.com/uploads/amazon/amazon_PNG11.png"
+                         <Image height={28} width={96} src="https://pngimg.com/uploads/amazon/amazon_PNG11.png"
                           alt="Amazon Logo" className="h-7 w-24 object-contain " />
                         </Link>
                         

@@ -14,6 +14,7 @@ import Link from 'next/link';
 import React from 'react';
 import SoldWith from './cart/_component/SoldWith';
 import { auth } from '@/auth';
+import Image from 'next/image';
 // best sellers in school and work bags
 // bags under 50
 // best sellers in sport bags
@@ -83,25 +84,7 @@ interface CategoryCardProps {
     label:string
 }
 
-// const CategoryCard: React.FC<CategoryCardProps> = ({ title, images, link, slug }) => {
-//     const isSingleImage = images.length === 1;
-//     return (
-//         <div className="bg-white p-4 h-full gap-3 flex flex-col">
-//             <h2 className="text-xl font-bold mb-2">{title}</h2>
-//             <div className={`grow grid ${isSingleImage ? 'grid-cols-1' : 'grid-cols-2'} gap-7 mb-4`}>
-//                 {images.map((image, index) => (
-//                     <Link href="#" key={index} className="hover:underline">
-//                         <img src={image.src} alt={image.caption || title} className="w-full h-full object-contain" />
-//                         {image.caption && <Badge className="text-xs bg-gray-100 mt-1">{image.caption}</Badge>}
-//                     </Link>
-//                 ))}
-//             </div>
-//             <Link href={`/category/${slug}`} className="text-sm  text-blue-600 hover:text-orange-600 hover:underline">
-//                 {link}
-//             </Link>
-//         </div>
-//     );
-// };
+
 const CategoryCard = ({ title, images, link, slug, label }: CategoryCardProps) => {
   return (
     <div className="bg-white p-4 flex flex-col justify-between">
@@ -109,9 +92,11 @@ const CategoryCard = ({ title, images, link, slug, label }: CategoryCardProps) =
 
       <div className="grid grid-cols-2 gap-3">
         {images.slice(0, 4).map((img, i) => (
-          <img
+          <Image
             key={i}
             src={img.src}
+            width={112}
+            height={112}
             alt={title}
             className="h-28 w-full object-contain bg-gray-50 rounded"
           />
@@ -136,59 +121,7 @@ interface ProductCarouselProps {
     products: { src: string; alt: string }[];
 }
 
-const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products }) => {
-    return (
-     
-        <div className="bg-white p-4">
-            <h2 className="text-xl font-bold mb-2">{title}</h2>
-            <div className="
-    flex gap-4 overflow-x-auto pb-2
-    scroll-smooth snap-x snap-mandatory
-    [-webkit-overflow-scrolling:touch]
-  ">
-                {products.map((product, index) => (
-                       <Link
-        key={index}
-        href={`/product/${product.alt}`}
-        className="shrink-0 snap-start w-[140px]"
-      >
-        <div className="flex flex-col gap-2">
-          
-        
-        
-          <div className="h-40 w-full bg-gray-50 rounded-md flex items-center justify-center">
-            <img
-              src={product.src}
-              alt={""}
-              className="h-full object-contain"
-              loading="lazy"
-            />
-          </div>
 
-         
-          <p className="text-sm text-gray-800 line-clamp-2 leading-snug">
-            KKXIU Shoulder Bag for Women Small Purse Cute Clutch Hobo Handbag Trendy Crescent Bag
-          </p>
-
-       
-          {true && (
-            <span className="text-sm font-semibold text-black">
-              $120
-            </span>
-          )}
-
-          
-          <span className="text-xs text-gray-500">
-            Viewed recently
-          </span>
-        </div>
-      </Link>
-                ))}
-            </div>
-        </div>
-      
-    );
-};
 
 
 const Home = async () => {
@@ -196,9 +129,10 @@ const Home = async () => {
     const result = await getAllProducts()
     const res = await getRecentlyViewedProducts()
     const response = await getRecommendedForUser(session?.user.id)
-    console.log(response, "RESPONSE FOR RECOMMENDED PRODUCTS")
-    console.log(res, "recent viewed products")
-    console.log(result, "products")
+    // console.log(response, "RESPONSE FOR RECOMMENDED PRODUCTS")
+    // console.log(res, "recent viewed products")
+    // console.log(result, "products")
+    console.log(session, "session")
     return (
       <main>
           <Hero />
@@ -217,7 +151,7 @@ const Home = async () => {
                     ))}
                 </div>
               
-      {res.data?.items && (
+      {res.data?.items?.browsingHistory?.length! > 0 && (
          <div className="bg-white mt-6 p-4">
   <h2 className="text-lg font-bold mb-1">Inspired by what you viewed</h2>
 <p className="text-xs text-gray-500 mb-3">
@@ -241,10 +175,12 @@ const Home = async () => {
         
         
           <div className="h-[160px] w-full bg-gray-50 rounded-md flex items-center justify-center">
-            <img
-              src={item.product.thumbnail.url}
+            <Image 
+             width={100}
+             height={100}
+              src={item.product.thumbnail.url || ""}
               alt={item.product.name}
-              className="h-full object-contain"
+              className="object-contain"
               loading="lazy"
             />
           </div>

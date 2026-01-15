@@ -1,17 +1,21 @@
 "use server"
-
+import crypto from "crypto";
 import connectDB from "@/database/db";
 import { action } from "@/lib/handlers/action";
 import handleError from "@/lib/handlers/error"
 import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors";
-import { EditUserProfileSchema, ToggleWishlistSchema, UpdateUserInterestsParams, UpdateUserInterestsSchema } from "@/lib/zod";
+import { EditUserProfileSchema, ToggleWishlistSchema } from "@/lib/zod";
 import { auth } from "@/auth"
 import { Product } from "@/models/product.model";
 import User, { IUser } from "@/models/user.model";
 import { ToggleWishlistParams } from "@/types/actionTypes";
-import bcrypt from "bcryptjs";
+
 import z from "zod";
 import { IAddress } from "@/models/address.model";
+import Token from "@/models/token.model";
+import { sendVerificationEmail } from "@/lib/nodemailer";
+import { cache } from "@/lib/cache";
+import { ROUTES } from "@/constants/routes";
 export async function getCurrentUser(): Promise<ActionResponse<{user: IUser | null}>>{
   const currentUser = await auth()
  if(!currentUser?.user)  return {
@@ -139,10 +143,11 @@ export async function editUserProfile(
     }
 
     /* -------------------- PASSWORD UPDATE (OPTIONAL) -------------------- */
-    if (password) {
-      const hashed = await bcrypt.hash(password,12); // 🔐 your existing util
-      user.hashedPassword = hashed;
-    }
+    // TODO: COME BACK HERE AND TREAT PASSWORD CHANGE AS NOON DOES IN SEPARATED PAGE TAB
+    // if (password) {
+    //   const hashed = await bcrypt.hash(password,12); // 🔐 your existing util
+    //   user.hashedPassword = hashed;
+    // }
 
     await user.save();
 
@@ -219,8 +224,7 @@ export async function updateUserInterests(
   }
 }
 
-export async function getAdminUsersOverview(): Promise<
-  ActionResponse<{
+export const getAdminUsersOverview : ()=> Promise< ActionResponse<{
     users: {
       _id: string
       fullName: string
@@ -231,8 +235,8 @@ export async function getAdminUsersOverview(): Promise<
       ordersCount: number
       defaultAddress: IAddress | null
     }[]
-  }>
-> {
+  }>> = cache (async () =>
+ {
   try {
     await connectDB()
 
@@ -323,5 +327,41 @@ export async function getAdminUsersOverview(): Promise<
     }
   } catch (error) {
     return handleError(error) as ErrorResponse
+  }
+}, [ROUTES.admin.users, "getAdminUsersOverview"], {revalidate: 60 * 60 * 24})
+
+interface VerifyEmailParams {
+  email: string
+}
+const VerifyEmailSchema = z.object({
+  email: z.email("Please Provide a valid email address")
+})
+export async function VerifyEmail(params:VerifyEmailParams): Promise<ActionResponse>{
+  const validatedResult = await action({params,schema:VerifyEmailSchema,authorize:true})
+ 
+  if(validatedResult instanceof Error) {
+     return handleError(validatedResult) as ErrorResponse
+  }
+  const session = validatedResult.session;
+  try {
+    if(!session) throw new UnAuthorizedError("UnAuthorized to perform this action")
+      const {email} = validatedResult.params!;
+     await connectDB()
+     const token = crypto.randomBytes(32).toString("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+    await Token.create({
+       userId: session.user.id,
+       token: hashedToken,
+       expiresAt: 'after 10 min'
+    })
+     await sendVerificationEmail(email,token)
+    return {
+       success: true
+    }
+  } catch (error) {
+     return handleError(error) as ErrorResponse
   }
 }

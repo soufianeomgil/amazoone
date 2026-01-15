@@ -1,5 +1,5 @@
 import { KpiData, Order, ProductData, SaleData } from "@/types/actionTypes";
-import { BadgeDollarSign, BadgeInfo, Heart, MapPin, ShoppingCart, UserRound } from "lucide-react";
+import { BadgeDollarSign, BadgeInfo, Heart,BellRing, MapPin, ShoppingCart, UserRound } from "lucide-react";
 import { ROUTES } from "./routes";
 
 export const ProfileItems = [
@@ -32,11 +32,11 @@ export const ProfileItems = [
      pathname:  "/"
  },
  
- //  {
- //     name: "LogOut",
- //     icon: LogOut,
- //     pathname: ""
- //  },
+  {
+     name: "Security Settings",
+     icon: BellRing,
+     pathname: "/security-settings"
+  },
   
   
 ]

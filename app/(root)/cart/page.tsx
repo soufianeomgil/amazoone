@@ -8,8 +8,9 @@ import { MoveToCartBtn } from "@/components/shared/clientBtns/MoveToCartBtn";
 import Link from "next/link";
 import CheckoutBox from "./_component/CheckoutBox";
 import { Button } from "@/components/ui/button";
-import EmptyCart from "@/components/shared/Empty";
+
 import SoldWith from "./_component/SoldWith";
+import EmptyOrder from "../account/order-history/_components/EmptyOrder";
 
 const page = async () => {
   // Authorize & fetch resources in parallel
@@ -141,7 +142,7 @@ const page = async () => {
           </div>
 
           <div className="bg-white sm:p-4 rounded-md shadow-sm">
-            <h3 className="sm:text-xl text-lg font-bold pb-3">Saved for later ({data.items.length})</h3>
+            <h3 className="sm:text-xl p-3 text-lg font-bold pb-3">Saved for later ({data.items.length})</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <MoveToCartBtn data={data} />
             </div>
@@ -149,7 +150,17 @@ const page = async () => {
         </div>
       ) : (
         // Nothing in cart and nothing saved
-        <EmptyCart message="Your cart is empty — explore our products and add something you like!" />
+        <div className="py-10">
+             <EmptyOrder 
+          name="Your cart is empty"
+          desc="Looks like you haven't added any items to your cart yet."
+          btnText="Continue shopping"
+          alt="empty cart state"
+          url='/'
+          srcUrl="/empty_cartV.png"
+        />
+        </div>
+       
       )}
       {/* <SoldWith title="Frequently bought with items in your cart" /> */}
     </div>

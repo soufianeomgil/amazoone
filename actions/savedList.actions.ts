@@ -1,10 +1,11 @@
 "use server"
+import { ROUTES } from "@/constants/routes";
 import connectDB from "@/database/db";
 import { action } from "@/lib/handlers/action";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors";
-import { CreateListSchema } from "@/lib/zod";
-import { IVariant } from "@/models/product.model";
+import { CreateListSchema, EditWishlistSchema } from "@/lib/zod";
+import { IVariant, Product } from "@/models/product.model";
 import SavedList, { ISavedItem, ISavedList } from "@/models/savedList.model";
 // server/actions/createSavedListAction.ts
 import mongoose from "mongoose";
@@ -17,51 +18,80 @@ import { z } from "zod";
 
 type CreateListParams = z.infer<typeof CreateListSchema>;
 
-export  async function createSavedListAction(params: CreateListParams): Promise<ActionResponse<{list: ISavedList}>> {
-  const validated = await action({ params, schema: CreateListSchema, authorize: true });
-  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
+export async function createSavedListAction(
+  params: CreateListParams
+): Promise<ActionResponse<{ list: ISavedList }>> {
+  const validated = await action({
+    params,
+    schema: CreateListSchema,
+    authorize: true,
+  });
+
+  if (validated instanceof Error)
+    return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
-  if (!session?.user?.id) throw new UnAuthorizedError('')
+  if (!session?.user?.id) throw new UnAuthorizedError("");
 
   const { name, isPrivate, isDefault } = validated.params as CreateListParams;
 
   try {
     await connectDB();
 
-    // limit: avoid too many lists per user (example cap 20)
-    const existingCount = await SavedList.countDocuments({ userId: session.user.id, archived: { $ne: true } });
-    if (existingCount >= 20) throw new Error("Max saved lists reached")
+    // limit lists
+    const existingCount = await SavedList.countDocuments({
+      userId: session.user.id,
+      archived: { $ne: true },
+    });
+
+    if (existingCount >= 20) {
+      throw new Error("Max saved lists reached");
+    }
 
     const mongoSession = await mongoose.startSession();
-    let created: any = null;
+    let created: ISavedList | null = null;
 
     await mongoSession.withTransaction(async () => {
-      // if isDefault, unset other default lists
-      if (isDefault) {
-        await SavedList.updateMany({ userId: session.user.id, isDefault: true }, { $set: { isDefault: false } }, { session: mongoSession });
+      // 👇 determine final default value
+      const shouldBeDefault = existingCount === 0 || isDefault === true;
+
+      // If this list should be default → unset others
+      if (shouldBeDefault) {
+        await SavedList.updateMany(
+          { userId: session.user.id, isDefault: true },
+          { $set: { isDefault: false } },
+          { session: mongoSession }
+        );
       }
 
-      created = await SavedList.create(
-        [
-          {
-            userId: session.user.id,
-            name,
-            isPrivate,
-            isDefault,
-          },
-        ],
-        { session: mongoSession }
-      ).then((docs) => docs[0]);
+      created = (
+        await SavedList.create(
+          [
+            {
+              userId: session.user.id,
+              name,
+              isPrivate,
+              isDefault: shouldBeDefault,
+            },
+          ],
+          { session: mongoSession }
+        )
+      )[0];
     });
 
     mongoSession.endSession();
 
-    return { success: true, data: { list: JSON.parse(JSON.stringify(created))} }
+    revalidatePath(ROUTES.mywishlist);
+
+    return {
+      success: true,
+      data: { list: JSON.parse(JSON.stringify(created)) },
+    };
   } catch (err) {
     return handleError(err) as ErrorResponse;
   }
 }
+
 
 const ToggleItemSchema = z.object({
   listId: z.string().min(1),
@@ -193,7 +223,10 @@ export async function getSavedListsAction(params: GetListsParams): Promise<Actio
 
     const skip = Math.max(0, page - 1) * limit;
     const [lists, total] = await Promise.all([
-      SavedList.find(query).sort({ isDefault: -1, updatedAt: -1 }).skip(skip).limit(limit),
+      SavedList.find(query)
+      .populate({path: "items.productId", model: Product})
+      .sort({ isDefault: -1, updatedAt: -1 })
+      .skip(skip).limit(limit),
       SavedList.countDocuments(query),
     ]);
 
@@ -401,11 +434,9 @@ export async function addItemToListAction(params: ParamsProps): Promise<
     }) as ISavedItem | undefined;
 
     // revalidate client-side path
-    try {
-      revalidatePath("/profile/lists");
-    } catch (e) {
-      console.warn("revalidatePath failed", e);
-    }
+    
+      revalidatePath(ROUTES.mywishlist);
+   
 
     return {
       success: true,
@@ -420,4 +451,384 @@ export async function addItemToListAction(params: ParamsProps): Promise<
     return handleError(err) as ErrorResponse;
   }
 }
+interface EditWishlistParams {
+  id: string;
+  name: string;
+}
+
+export async function editWishlistAction(
+  params: EditWishlistParams
+): Promise<ActionResponse> {
+  const validatedResult = await action({
+    params,
+    schema: EditWishlistSchema,
+    authorize: true,
+  });
+
+  if (validatedResult instanceof Error) {
+    return handleError(validatedResult) as ErrorResponse;
+  }
+
+  const { id, name } = validatedResult.params!;
+  const session = validatedResult.session;
+
+  try {
+    if (!session) {
+      throw new UnAuthorizedError("User is not authorized");
+    }
+
+    await connectDB();
+
+    const updated = await SavedList.findOneAndUpdate(
+      { _id: id, userId: session.user.id },
+      { $set: { name: name.trim() } },
+      { new: true }
+    );
+
+    if (!updated) {
+      throw new NotFoundError("List not found or access denied");
+    }
+
+    return { success: true };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+interface EmptyWishlistParams  {
+  id: string;
+}
+const EmptyWishlistSchema = z.object({
+  id: z.string().min(1, "List ID is required")
+})
+export async function EmptyWishlistAction(params: EmptyWishlistParams): Promise<ActionResponse> {
+  const validated = await action({
+    params,
+    schema: EmptyWishlistSchema,
+    authorize: true,
+  })
+
+  if (validated instanceof Error) {
+    return handleError(validated) as ErrorResponse
+  }
+
+  const { id } = validated.params!
+  const session = validated.session
+
+  try {
+    if (!session) throw new UnAuthorizedError("Unauthorized")
+
+    await connectDB()
+
+    const updated = await SavedList.findOneAndUpdate(
+      {
+        _id: id,
+        userId: session.user.id,
+        "items.0": { $exists: true },
+      },
+      { $set: { items: [] } },
+      { new: true }
+    )
+
+    if (!updated) {
+      throw new NotFoundError("List not found or already empty")
+    }
+   revalidatePath("/account/wishlist/list")
+    return {
+      success: true,
+    }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
+  }
+}
+const DeleteWishlistSchema = z.object({
+   id: z.string().min(1, "wishlist ID is required")
+})
+
+export async function deleteWishlistAction(params: {
+  id: string;
+}): Promise<ActionResponse> {
+  const validated = await action({
+    params,
+    schema: DeleteWishlistSchema,
+    authorize: true,
+  });
+
+  if (validated instanceof Error) {
+    return handleError(validated) as ErrorResponse;
+  }
+
+  const { id } = validated.params!;
+  const session = validated.session;
+
+  try {
+    if (!session?.user?.id) {
+      throw new UnAuthorizedError("Unauthorized");
+    }
+
+    await connectDB();
+
+    const list = await SavedList.findById(id);
+
+    if (!list) {
+      throw new NotFoundError("Wishlist not found");
+    }
+
+    if (list.userId.toString() !== session.user.id) {
+      throw new UnAuthorizedError("You do not own this wishlist");
+    }
+
+    if (list.isDefault) {
+      throw new Error("Default wishlist cannot be deleted");
+    }
+
+    await SavedList.deleteOne({ _id: id });
+    revalidatePath(ROUTES.mywishlist)
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+
+
+ const SetDefaultWishlistSchema = z.object({
+  id: z.string().min(1, "Wishlist id is required"),
+});
+
+export type SetDefaultWishlistParams = z.infer<
+  typeof SetDefaultWishlistSchema
+>;
+
+
+export async function setDefaultWishlistAction(
+  params: { id: string }
+): Promise<ActionResponse> {
+  const validated = await action({
+    params,
+    schema: SetDefaultWishlistSchema,
+    authorize: true,
+  });
+
+  if (validated instanceof Error) {
+    return handleError(validated) as ErrorResponse;
+  }
+
+  const { id } = validated.params!;
+  const session = validated.session;
+
+  try {
+    if (!session?.user?.id) {
+      throw new UnAuthorizedError("Unauthorized");
+    }
+
+    await connectDB();
+
+    const dbSession = await mongoose.startSession();
+    dbSession.startTransaction();
+
+    try {
+      const list = await SavedList.findById(id).session(dbSession);
+
+      if (!list) {
+        throw new NotFoundError("Wishlist not found");
+      }
+
+      if (list.userId.toString() !== session.user.id) {
+        throw new UnAuthorizedError("You do not own this wishlist");
+      }
+
+      // If already default → idempotent success
+      if (list.isDefault) {
+        await dbSession.commitTransaction();
+        return { success: true };
+      }
+
+      // 1️⃣ Unset any existing default list for this user
+      await SavedList.updateMany(
+        {
+          userId: session.user.id,
+          isDefault: true,
+        },
+        { $set: { isDefault: false } },
+        { session: dbSession }
+      );
+
+      // 2️⃣ Set selected list as default
+      await SavedList.updateOne(
+        { _id: id },
+        { $set: { isDefault: true } },
+        { session: dbSession }
+      );
+
+      await dbSession.commitTransaction();
+      revalidatePath(ROUTES.mywishlist)
+      return { success: true };
+    } catch (err) {
+      await dbSession.abortTransaction();
+      throw err;
+    } finally {
+      dbSession.endSession();
+    }
+
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+
+
+const AddToDefaultListSchema = z.object({
+  productId: z.string().min(1),
+  variantId: z.string().nullable().optional(),
+  priceSnapshot: z.number().optional(),
+  thumbnail: z.string().optional(),
+  note: z.string().max(300).optional(),
+});
+
+type AddToDefaultListParams = z.infer<typeof AddToDefaultListSchema>;
+
+export async function addItemToDefaultListAction(
+  params: AddToDefaultListParams
+): Promise<ActionResponse<{ added: boolean }>> {
+  const validated = await action({
+    params,
+    schema: AddToDefaultListSchema,
+    authorize: true,
+  });
+
+  if (validated instanceof Error) {
+    return handleError(validated) as ErrorResponse;
+  }
+
+  const session = validated.session;
+  if (!session?.user?.id) throw new UnAuthorizedError("");
+
+  const {
+    productId,
+    variantId = null,
+    priceSnapshot,
+    thumbnail,
+    note,
+  } = validated.params!;
+
+  try {
+    await connectDB();
+
+    const mongoSession = await mongoose.startSession();
+    let added = false;
+
+    await mongoSession.withTransaction(async () => {
+      /** 1️⃣ Get default list */
+      let list = await SavedList.findOne({
+        userId: session.user.id,
+        isDefault: true,
+        archived: { $ne: true },
+      }).session(mongoSession);
+
+      /** 2️⃣ Auto-create default list */
+      if (!list) {
+        list = await SavedList.create(
+          [
+            {
+              userId: session.user.id,
+              name: "Wishlist",
+              isDefault: true,
+              isPrivate: true,
+            },
+          ],
+          { session: mongoSession }
+        ).then(docs => docs[0]);
+      }
+
+      /** 3️⃣ TOGGLE LOGIC */
+      const exists = list?.hasItem(productId, variantId);
+
+      if (exists) {
+        // 🔴 REMOVE
+        await list?.removeItem(productId, variantId);
+        added = false;
+      } else {
+        // 🟢 ADD
+        await list?.addItem({
+          productId,
+          variantId,
+          priceSnapshot,
+          thumbnail,
+          note,
+        });
+        added = true;
+      }
+    });
+
+    mongoSession.endSession();
+
+    revalidatePath(ROUTES.mywishlist);
+
+    return {
+      success: true,
+      data: { added },
+      message: added
+        ? "Item added to wishlist"
+        : "Item removed from wishlist",
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+export async function removeItemFromSavedListAction(
+  params: {
+    listId: string;
+    productId: string;
+    variantId?: string | null;
+  }
+): Promise<ActionResponse<{ removed: boolean }>> {
+  const validated = await action({
+    params,
+    schema: z.object({
+      listId: z.string(),
+      productId: z.string(),
+      variantId: z.string().nullable().optional(),
+    }),
+    authorize: true,
+  });
+
+  if (validated instanceof Error) {
+    return handleError(validated) as ErrorResponse;
+  }
+
+  const session = validated.session;
+  if (!session?.user?.id) throw new UnAuthorizedError("");
+
+  const { listId, productId, variantId = null } = validated.params!;
+
+  try {
+    await connectDB();
+
+    const list = await SavedList.findOne({
+      _id: listId,
+      userId: session.user.id,
+      archived: { $ne: true },
+    });
+
+    if (!list) throw new NotFoundError("List")
+
+    const before = list.items.length;
+    await list.removeItem(new mongoose.Types.ObjectId(productId),variantId)
+    const after = list.items.length;
+   
+    revalidatePath(ROUTES.mywishlist);
+
+    return {
+      success: true,
+      data: { removed: after < before },
+    };
+  } catch (err) {
+    return handleError(err) as ErrorResponse;
+  }
+}
+
 

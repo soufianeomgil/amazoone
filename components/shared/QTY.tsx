@@ -101,6 +101,7 @@ export const QuantitySelector: React.FC<Props> = ({
           ${sizeClasses.btn}
           rounded-lg 
           bg-gray-200 hover:bg-gray-300 
+          cursor-pointer
           text-gray-800 
           font-bold 
           transition
@@ -132,6 +133,7 @@ export const QuantitySelector: React.FC<Props> = ({
           rounded-lg 
           bg-gray-800 hover:bg-gray-900 
           text-white 
+          cursor-pointer
           font-bold 
           transition
           ${increaseDisabled ? "opacity-50 cursor-not-allowed" : ""}

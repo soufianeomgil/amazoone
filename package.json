@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "seed:products": "node --loader ts-node/esm -r tsconfig-paths/register scripts/seed-products.ts",
     "start": "next start",
     "build": "next build --turbopack"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@google/genai": "^1.28.0",
+    "@googlemaps/js-api-loader": "^2.0.2",
     "@hookform/resolvers": "^5.2.2",
     "@mdxeditor/editor": "^3.48.0",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -67,7 +70,8 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^13.0.0",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

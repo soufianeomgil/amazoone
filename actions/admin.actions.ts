@@ -571,5 +571,4 @@ export async function refreshCityCODRisk(): Promise<ActionResponse> {
   } catch (error) {
      return handleError(error) as ErrorResponse;
   }
-  
 }

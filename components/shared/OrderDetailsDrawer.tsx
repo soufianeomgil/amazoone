@@ -9,6 +9,7 @@ import { IOrder } from "@/models/order.model";
 import { Badge } from "../ui/badge";
 import { LocationIcon } from "./icons";
 import { useDispatch } from "react-redux";
+import Image from "next/image";
 
 type ImageObject = { url?: string; preview?: string; public_id?: string };
 
@@ -120,8 +121,9 @@ export default function OrderDetailsSidebar({
             
  <div  className="flex gap-3 items-start">
                   <div className="w-20 h-20 bg-gray-50 rounded-md flex items-center justify-center overflow-hidden border">
-                    <img
-                    // @ts-ignore
+                    <Image 
+                    fill
+                    // @ts ignore
                       src={"https://cdnprd.marjanemall.ma/cn0picture0products0mm/AABAE89116_img1.jpg"} 
                         alt={"aê"}
                       className="object-contain w-full h-full"

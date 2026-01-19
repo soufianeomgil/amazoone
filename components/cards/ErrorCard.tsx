@@ -6,4 +6,4 @@ const ErrorCard = () => {
   )
 }
 
-export default ErrorCard;
+export default ErrorCard

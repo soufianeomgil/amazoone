@@ -38,10 +38,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         
 
-          
-           // email verification,
-           //if (!existingUser.isVerified) throw new Error("Email is not verified. Please verify your email.");
-
           const isValidPassword = await bcrypt.compare(
             password,
             existingAccount.password!
@@ -77,36 +73,7 @@ session.user.profileCompleted = token.profileCompleted as boolean;
     
     
     },
-//     async jwt({ token, account, user }) {
-//       // if (user) {
-//       //   token.sub = user.id;
-//       //   token.isAdmin = user.isAdmin; // 👈 Add this
-//       //   // token.isVerified = user.isVerified
-//       // }
-//       if (user) {
-//   token.sub = user.id;
-//   token.isAdmin = user.isAdmin;
-//   token.profileCompleted = user.profileCompleted;
-// }
 
-//       if (account) {
-//         const { data: existingAccount, success } =
-//           (await api.accounts.getByProvider(
-//             account.type === "credentials"
-//               ? token.email!
-//               : account.providerAccountId
-//           )) as ActionResponse<IAccount>;
-       
-//         if (!success || !existingAccount) return token;
-
-//         const userId = existingAccount.userId;
-
-//         if (userId) token.sub = userId.toString();
-        
-//       }
-
-//       return token;
-//     },
     async jwt({ token, user, account }) {
   // 1️⃣ Initial sign in (credentials OR oauth)
   if (user) {

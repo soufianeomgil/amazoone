@@ -22,11 +22,13 @@ import { SignUpValidationSchema } from "@/lib/zod";
 import { signUpWithCredentials } from "@/actions/auth.actions";
 import AuthFormBtns from "./AuthFormBtns";
 import Image from "next/image";
+import OptModal from "../shared/modals/OptModal";
 
 type SignUpValues = z.infer<typeof SignUpValidationSchema>;
 
 export default function SignUpForm() {
   const router = useRouter();
+  const [openOpt,setOpenOpt] = useState(false)
   const searchParams = useSearchParams();
   const isShipping = searchParams?.get?.("shipping");
   const redirect = isShipping ? "/checkout/shipping" : "/";
@@ -41,23 +43,26 @@ export default function SignUpForm() {
       email: "",
       gender: undefined,
       password: "",
+      phoneNumber: "",
       passwordCheck: "",
     },
   });
-
+ const [destination,setDestination] = useState("")
   const isSubmitting = form.formState.isSubmitting || loading;
 
   async function onSubmit(values: SignUpValues) {
     setError(undefined);
     setLoading(true);
     try {
-      const { success, message, error } = await signUpWithCredentials(values);
+      const { success, message, error, data } = await signUpWithCredentials(values);
       setLoading(false);
 
       if (success) {
         form.reset();
         // mimic Amazon: after signup they often redirect to home or to verify step
-        router.push(redirect);
+        //router.push(redirect);
+        setDestination(data?.destination as string)
+        setOpenOpt(true)
         return;
       }
 
@@ -73,10 +78,10 @@ export default function SignUpForm() {
     <div className="min-h-screen bg-white flex flex-col items-center pt-10 pb-16 px-4">
       {/* Top logo */}
       <Link href="/" className="mb-6">
-        <Image height={32} width={32}
+        <Image height={96} width={96}
           src="https://pngimg.com/uploads/amazon/amazon_PNG25.png"
           alt="Amazon"
-          className="h-8 invert"
+          className=" invert"
         />
       </Link>
 
@@ -175,7 +180,26 @@ export default function SignUpForm() {
                     </FormItem>
                   )}
                 />
-
+                   <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">Phone Number</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          id="phoneNumber"
+                          type="number"
+                          placeholder="+212653698840"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs text-red-600" />
+                    </FormItem>
+                  )}
+                />
                 {/* Password */}
                 <FormField
                   control={form.control}
@@ -262,18 +286,19 @@ export default function SignUpForm() {
             </p>
           </div>
         </div>
- <div className="flex items-center justify-center w-full max-w-sm gap-2 mt-7 mb-2">
+ <div className="flex items-center justify-center mx-auto w-full max-w-sm gap-2 mt-7 mb-2">
         <div className="flex-1 h-px bg-gray-500" />
         <span className="text-xs text-black">or</span>
         <div className="flex-1 h-px bg-gray-500" />
       </div>
 
-      <AuthFormBtns />
+      <AuthFormBtns isSubmitting={isSubmitting} />
         {/* footer */}
         <div className="mt-6 text-center text-xs text-gray-500">
           <p>© 1996–2024, Amazon.com, Inc. or its affiliates</p>
         </div>
       </div>
+      <OptModal phoneNumber={destination}  open={openOpt} setOpen={setOpenOpt} />
     </div>
   );
 }

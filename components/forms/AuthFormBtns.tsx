@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { } from "lucide-react"
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
-const AuthFormBtns = () => {
+const AuthFormBtns = ({isSubmitting}: {isSubmitting:boolean}) => {
    const searchParams = useSearchParams()
    const route = searchParams.get("shipping")
    const navigate = route ? "/checkout/shipping" : "/"
@@ -19,19 +19,14 @@ const AuthFormBtns = () => {
     }
   return (
     <div className="mt-5 flex flex-wrap items-center gap-2.5">
-         <Button  onClick={() => handleSignIn("google")} className={className}>
+         <Button disabled={isSubmitting} onClick={() => handleSignIn("google")} className={className}>
              <Image width={20} height={20} src="/google.svg"
              className="invert-colors  mr-2.5 object-contain"
              alt="google" />
               
              <span>Log In with Google</span>
          </Button>
-         {/* <Button  onClick={() => handleSignIn("github")} className={className}> 
-             <Image width={20} height={20} src="/github.png" alt="github"
-             className="invert-colors mr-2.5 object-contain"
-             />
-              <span>Log In with Github</span>
-         </Button> */}
+     
     </div>
   )
 }

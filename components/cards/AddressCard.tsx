@@ -105,7 +105,7 @@ export default function AddressCard() {
             Manage your addresses
           </Link>
         </div>
-        <AddAddressModal open={open} setOpen={setOpen} />
+        <AddAddressModal redirect={false} open={open} setOpen={setOpen} />
       </div>
     );
   }

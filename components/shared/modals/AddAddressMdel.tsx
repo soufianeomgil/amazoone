@@ -11,9 +11,10 @@ import {
 
 import AddAddressForm from "@/app/(root)/account/_components/AddAddressForm";
 
-export function AddAddressModal({open,setOpen}: {
+export function AddAddressModal({open,setOpen,redirect = false}: {
     open: boolean;
     setOpen: (v:boolean) => void;
+    redirect?: boolean
 }) {
   return (
     <Dialog   onOpenChange={setOpen} open={open}>
@@ -24,7 +25,7 @@ export function AddAddressModal({open,setOpen}: {
          <DialogTitle className="hidden">Add a new Address Delivery</DialogTitle>
   
 
-          <AddAddressForm />
+          <AddAddressForm redirect={redirect} />
        
          
         </DialogContent>

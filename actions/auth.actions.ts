@@ -13,133 +13,142 @@ import { AuthCredentials } from "@/types/actionTypes"
 import { completeProfileSchema, ForgotPasswordSchema, LoginValidationSchema, ResetPasswordSchema, SignUpValidationSchema } from "@/lib/zod"
 import Account, { IAccount } from "@/models/account.model"
 import Token from "@/models/token.model"
-import { sendPasswordChangedEmail, sendResetEmail, sendResetSMS, sendVerificationEmail } from "@/lib/nodemailer"
+import { sendPasswordChangedEmail, sendResetEmail } from "@/lib/nodemailer"
 import z from "zod"
 import { generateOTP, generateResetToken } from "@/lib/security/tokens"
-import resetCodeModel from "@/models/resetCode.model"
+
 import ResetCode from "@/models/resetCode.model"
 import { cookies, headers } from "next/headers"
-
-export async function signUpWithCredentials(params: AuthCredentials): Promise<ActionResponse> {
-  const validationResult = await action({ params, schema: SignUpValidationSchema });
-
-  if (validationResult instanceof Error) {
-    return handleError(validationResult) as ErrorResponse;
+import { sendSMS } from "@/lib/sms/twilio"
+import { maskPhoneE164, normalizeMoroccanPhone } from "@/lib/phone/normalizeMA"
+function maskDestination(type: "email" | "phone", value: string) {
+  if (type === "email") {
+    const [name, domain] = value.split("@");
+    return `${name?.slice(0, 2)}*****@${domain}`;
   }
+  // phone: +2126******12
+  return value.replace(/^(\+\d{3}\d)(\d+)(\d{2})$/, "$1******$3");
+}
 
-  const { fullName, email, password, gender } = validationResult.params!;
+
+
+
+
+export async function signUpWithCredentials(params: AuthCredentials): Promise<ActionResponse<{ step: string,
+        destination: string,
+        phone: string,
+        email: string}>> {
+  const validationResult = await action({ params, schema: SignUpValidationSchema });
+  if (validationResult instanceof Error) return handleError(validationResult) as ErrorResponse
+
+  const { fullName, email, password, gender, phoneNumber } = validationResult.params!;
   const normalizedEmail = email.toLowerCase().trim();
 
- 
+  let phoneE164: string
+  try {
+    phoneE164  = normalizeMoroccanPhone(phoneNumber) as string;
+  } catch (e) {
+    return handleError(e) as any;
+  }
 
-  await connectDB()
+  await connectDB();
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // Pre-generate expensive values
-    const [hashedPassword, verificationCode] = await Promise.all([
-      bcrypt.hash(password, 12),
-      Promise.resolve(Math.floor(100000 + Math.random() * 900000).toString()),
-    ]);
-
-    // Parallel user lookup
-    const existingUser = await  User.findOne({ email: normalizedEmail })
-     
-   
-
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       throw new ForbiddenError(`An account already exists with the email address ${normalizedEmail}.`);
     }
 
-   
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user and account in transaction
     const [newUser] = await User.create(
-      [{ fullName, email: normalizedEmail, gender, profileCompleted: true }],
+      [
+        {
+          fullName,
+          email: normalizedEmail,
+          gender,
+          phoneNumber: phoneE164,          // store normalized
+          phoneVerified: false,            // ✅ add this boolean in your user schema
+          profileCompleted: true,
+        },
+      ],
       { session }
     );
 
     await Account.create(
-      [{
-        userId: newUser._id,
-        name: newUser.fullName,
-        provider: 'credentials',
-        providerAccountId: normalizedEmail,
-        password: hashedPassword,
-       
-      }],
+      [
+        {
+          userId: newUser._id,
+          name: newUser.fullName,
+          provider: "credentials",
+          providerAccountId: normalizedEmail,
+          password: hashedPassword, // (or remove this later if you refactor to 1 source)
+        },
+      ],
       { session }
     );
-
-    // Clean previous tokens and create new one
-    await Token.deleteMany({ userId: newUser._id }, { session });
-    await Token.create([{
-      token: verificationCode,
-      userId: newUser._id,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 10), // 10 minutes
-    }], { session });
-
+  const rawCode = generateOTP();
+   // const hashedCode = await bcrypt.hash(rawCode, 10);
     await session.commitTransaction();
     session.endSession();
 
-    // Send email after transaction (non-blocking)
-    //sendVerificationEmail(normalizedEmail, verificationCode).catch(console.error);
- await signIn("credentials", { email: normalizedEmail, password, redirect: false });
-    // Optional: revalidate admin user list page
+    // ✅ Send WhatsApp OTP after DB commit
+    await sendSMS(phoneE164, `your verification code is ${rawCode}`);
+
     revalidatePath("/admin/usersList");
 
     return {
       success: true,
-      message: 'Please check your email to verify your account.',
+      data: {
+        step: "VERIFY_PHONE",
+        destination: maskPhoneE164(phoneE164),
+        phone: phoneE164,
+        email: normalizedEmail,
+      },
+      message: "We sent a verification code via SMS.",
     };
-
   } catch (error) {
-    await session.abortTransaction();
     session.endSession();
     return handleError(error) as ErrorResponse;
   }
 }
-// export async function signInWithCredentials(
-//   params: Pick<AuthCredentials, "email" | "password">
-// ): Promise<ActionResponse> {
-//   const validationResult = await action({ params, schema: LoginValidationSchema });
 
-//   if (validationResult instanceof Error) {
-//     return handleError(validationResult) as ErrorResponse;
-//   }
 
-//   const { email, password } = validationResult.params!;
-//   const normalizedEmail = email.toLowerCase().trim();
+// const VerifyPhoneSchema = z.object({
+//   phone: z.string(),
+//   code: z.string().min(4).max(10),
+// });
+
+// export async function verifySignupPhoneAction(params: z.infer<typeof VerifyPhoneSchema>) {
+//   const validated = await action({ params, schema: VerifyPhoneSchema });
+//   if (validated instanceof Error) return handleError(validated) as any;
+
+//   const { phone, code } = validated.params!;
 
 //   try {
-//     await connectDB()
-//     const existingUser = await User.findOne({ email: normalizedEmail }) as IUser;
+//     await connectDB();
 
-//     if (!existingUser) {
-//       throw new ForbiddenError("The email/password you entered is incorrect.");
+//     const result = await checkVerification(phone, code);
+
+//     // Twilio returns statuses like "approved"
+//     if (result.status !== "approved") {
+//       return { success: false, error: { message: "Invalid code" } };
 //     }
 
-//     const passwordMatches = await bcrypt.compare(password, existingUser.hashedPassword);
-//     if (!passwordMatches) {
-//       throw new ForbiddenError("The email/password you entered is incorrect.");
-//     }
-//     const account = await Account.findOne({ userId: existingUser._id, provider: "google" }) as IAccount
+//     await User.updateOne(
+//       { phoneNumber: phone },
+//       { $set: { phoneVerified: true } }
+//     );
 
-// if (account && !account.password) {
-//   throw new Error("This account was created using Google. Please sign in with Google or set a password.");
-// }
-//     //if (!existingUser.isVerified) throw new ForbiddenError("Please check your inbox and verify your email before logging in.")
-
-
-//     await signIn("credentials", { email: normalizedEmail, password, redirect: false });
-   
 //     return { success: true };
-
 //   } catch (error) {
-//     return handleError(error) as ErrorResponse;
+//     return handleError(error) as any;
 //   }
 // }
+
+
 export async function signInWithCredentials(
   params: Pick<AuthCredentials, "email" | "password">
 ): Promise<ActionResponse> {
@@ -258,9 +267,9 @@ export async function completeProfile(params:CompleteProfileParams): Promise<Act
 
 
 
-interface ForgotPasswordPayload  {
-  type: string;
-  value: string
+interface ForgotPasswordPayload {
+  type: "email" | "phone";
+  value: string;
 }
 
 export async function forgotPasswordAction(
@@ -271,41 +280,44 @@ export async function forgotPasswordAction(
 
     const { type, value } = payload;
 
+    const identifier =
+      type === "email"
+        ? value.toLowerCase().trim()
+        : normalizeMoroccanPhone(value);
+
+    // 🔒 SECURITY: always return success (also covers invalid phone formats)
+    if (!identifier) return { success: true };
+
     const user: IUser | null =
       type === "email"
-        ? await User.findOne({ email: value })
-        : await User.findOne({ phoneNumber: value });
+        ? await User.findOne({ email: identifier })
+        : await User.findOne({ phoneNumber: identifier });
 
-    /**
-     * 🔒 SECURITY: Always return success
-     */
-    if (!user) {
-      return { success: true };
-    }
+    if (!user) return { success: true };
 
-    // 🧠 Invalidate previous unused codes
+    // 🧠 Invalidate previous unused codes (scoped)
     await ResetCode.updateMany(
-      { identifier: value, used: false },
+      { identifier, type, used: false },
       { used: true }
     );
 
-    const rawCode = generateOTP(); // "483920"
+    const rawCode = generateOTP();
     const hashedCode = await bcrypt.hash(rawCode, 10);
 
     await ResetCode.create({
-      identifier: value,
+      identifier,
       type,
       code: hashedCode,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 min
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       attempts: 0,
       used: false,
     });
 
     // 🔔 SEND
     if (type === "email") {
-      await sendResetEmail({ to: value, code: rawCode });
+      await sendResetEmail({ to: identifier, code: rawCode });
     } else {
-      await sendResetSMS({ to: value, code: rawCode });
+      await sendSMS(identifier, `Your reset code is: ${rawCode}`);
     }
 
     return { success: true };
@@ -314,6 +326,7 @@ export async function forgotPasswordAction(
     return handleError(error) as ErrorResponse;
   }
 }
+
 
 
 

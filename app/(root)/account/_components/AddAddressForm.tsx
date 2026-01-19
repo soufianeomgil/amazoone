@@ -42,7 +42,7 @@ import Image from "next/image";
 
 
 
-const AddAddressForm = () => {
+const AddAddressForm = ({redirect}: {redirect?:boolean}) => {
   const moroccoRegions = [
   "Tanger-Tétouan-Al Hoceima",
   "Oriental",
@@ -91,7 +91,10 @@ const AddAddressForm = () => {
      }else if(success) {
        toast.success("Adress has been added successfuly")
        form.reset()
-       router.push(ROUTES.addresses)
+       if(redirect) {
+         return router.push(ROUTES.addresses)
+       } 
+      
        return
      }
 

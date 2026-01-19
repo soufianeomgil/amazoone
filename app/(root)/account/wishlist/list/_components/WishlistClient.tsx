@@ -115,7 +115,7 @@ console.log(products, "PRODUCTS WISHLIST HERE ...")
               `}
             >
               <div className="w-[60px] h-[60px] bg-white border border-gray-100 rounded-md flex items-center justify-center overflow-hidden">
-                <Image fill
+                <Image width={60} height={60}
                 alt={list.name}
                   className="w-full h-full object-contain"
                   src={

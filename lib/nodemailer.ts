@@ -72,20 +72,7 @@ export async function sendOrderConfirmationEmail({orderId,shippingAddress,order,
 }
 
 
-export async function sendResetSMS({
-  to,
-  code,
-}: {
-  to: string;
-  code: string;
-}) {
-  console.log("Send SMS to:", to);
-  console.log("OTP:", code.slice(0, 6));
 
-  // Plug in:
-  // - Twilio
-  // - Vonage
-}
 export async function sendResetEmail({
   to,
   code,

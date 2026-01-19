@@ -86,11 +86,11 @@ export default function LoginForm() {
       {/* Logo */}
       <Link href="/" className="mb-6">
         <Image 
-         width={32}
-         height={32}
+         width={96}
+         height={96}
           src="https://pngimg.com/uploads/amazon/amazon_PNG25.png"
           alt="Amazon Logo"
-          className="h-8 invert"
+          className=" invert"
         />
       </Link>
 

@@ -135,7 +135,7 @@ export interface AuthCredentials {
   email: string;
   gender: "male" | "female"
   fullName: string;
- 
+  phoneNumber:string;
   password: string;
  
 }

@@ -137,7 +137,7 @@ const session = await auth()
                             </div>
                         )}
                       <div className="grow space-y-1 text-sm text-gray-700">
-  {/* <p className="font-semibold text-base text-gray-900">{address.name}</p> */}
+  <p className="font-semibold text-base text-gray-900">{address.name}</p>
 
   <p className="leading-tight">{address.addressLine1}</p>
 

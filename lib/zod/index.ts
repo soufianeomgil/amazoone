@@ -238,7 +238,9 @@ export const SignUpValidationSchema = z
     gender: z.enum(["male", "female"], {
       message: "gender Type is not valid!",
     }),
-
+     phoneNumber: z
+    .string()
+    .regex(/^0[67]\d{8}$/, "Invalid Moroccan phone number"),
     fullName: z.string().min(1, {
       message: "fullName is required!",
     }),

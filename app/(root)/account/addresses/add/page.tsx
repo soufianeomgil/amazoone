@@ -13,7 +13,7 @@ const page = () => {
         >
           <ChevronLeft size={15} /> <span>Back to your addresses</span>
         </Link>
-        <AddAddressForm />
+        <AddAddressForm redirect={true} />
     </div>
   )
 }

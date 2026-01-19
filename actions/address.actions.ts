@@ -14,7 +14,7 @@ import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { ROUTES } from "@/constants/routes"
 import { cache } from "@/lib/cache"
-import { parseAppSegmentConfig } from "next/dist/build/segment-config/app/app-segment-config"
+
 
 export default async function addAddressAction(
   params: AddAddressParams
@@ -530,7 +530,7 @@ interface GetUserDefaultAddressParams {
   userId:string
 }
 // Response: { success: true, data: { address?: AddressObj | null } }
-export const  getDefaultUserAddressAction :(params:GetUserDefaultAddressParams)=> Promise<ActionResponse<{ address?: IAddress }>> = cache (async(params:GetUserDefaultAddressParams) => {
+export const  getDefaultUserAddressAction :(params:GetUserDefaultAddressParams)=> Promise<ActionResponse<{ address?: IAddress }>> = async(params:GetUserDefaultAddressParams) => {
   // 1) authorize + get session via shared action helper
   
   const  { userId } = params;
@@ -555,4 +555,4 @@ export const  getDefaultUserAddressAction :(params:GetUserDefaultAddressParams)=
   } catch (err) {
     return handleError(err) as ErrorResponse;
   }
-}, ["GetDeafultUserAddress", "getDefaultUserAddressAction"], {revalidate: 60 * 60 * 24})
+}

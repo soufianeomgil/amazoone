@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+
 import {
   Dialog,
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { LocationIcon } from "../icons";
+import { LocationIcon, SpinnerIcon } from "../icons";
 import { CheckIcon } from "lucide-react";
 import { IAddress } from "@/models/address.model";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,10 +29,12 @@ export function AddressModal({
   const [openAddressModal, setOpenAddressModal] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter()
+  const [loading,setLoading] = useState<boolean>(false)
   // read currently selected address id from redux
   const selectedAddress = useSelector((state: any) => state?.address?.selectedAddress);
-
+  
   async function handlePick(address: IAddress) {
+    setLoading(true)
     try {
       const { error, success } = await setDefaultAddressAction({ id: address._id });
       if (success) {
@@ -48,6 +50,8 @@ export function AddressModal({
       }
     } catch (err) {
       console.error(err);
+    }finally {
+       setLoading(false)
     }
   }
 
@@ -55,7 +59,12 @@ export function AddressModal({
     <>
       <Dialog onOpenChange={setOpen} open={open}>
         <form>
-          <DialogContent className="sm:max-w-[550px] border border-gray-300 shadow bg-white">
+          <DialogContent className="sm:max-w-[550px]  border border-gray-300 shadow bg-white">
+            {loading && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center ">
+                    <SpinnerIcon />
+                </div>
+              )}
             <DialogTitle className="text-lg font-semibold">Choisir une adresse de livraison</DialogTitle>
 
             <div className="mt-6 flex flex-col gap-4">
@@ -70,7 +79,7 @@ export function AddressModal({
                     key={a._id}
                     type="button"
                     onClick={() => handlePick(a)}
-                    className={`w-full text-left border rounded-lg p-4 flex items-start gap-3 transition
+                    className={`w-full text-left border cursor-pointer rounded-lg p-4 flex items-start gap-3 transition
                       ${isSelected || a.isDefault ? "border-[hsl(178,100%,34%)] bg-[hsl(180,69%,97%)]" : "border-gray-200 bg-white hover:shadow-sm"}
                     `}
                     aria-pressed={isSelected}

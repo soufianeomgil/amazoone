@@ -64,6 +64,7 @@ export interface IUser {
   profileCompleted: boolean;
   isVerified: boolean;
   phoneNumber?: string;
+  phoneVerified: boolean;
   gender: "male" | "female",
   isAdmin: boolean;
   // --- Profile & Personalization ---
@@ -139,6 +140,10 @@ const UserSchema = new Schema<IUser>({
 },
 
    isAdmin: {
+       type: Boolean,
+     default: false
+   },
+   phoneVerified: {
        type: Boolean,
      default: false
    },

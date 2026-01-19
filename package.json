@@ -60,6 +60,7 @@
     "nodemailer": "^6.10.1",
     "query-string": "^9.3.1",
     "react": "19.1.0",
+    "react-day-picker": "^9.13.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.65.0",
     "react-redux": "^9.2.0",

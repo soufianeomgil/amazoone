@@ -17,12 +17,12 @@ const AdminProducts = async () => {
    const result = await getAllProducts()
    const response = await getAdminUsersOverview()
    console.log(response, "USERS FOR ADMIN PREVIEW")
-    const getStatusClass = (status: ProductStatus) => {
-        switch (status) {
-            case 'Active': return 'bg-green-100 text-green-800';
-            case 'Draft': return 'bg-yellow-100 text-yellow-800';
-            case 'Out of Stock': return 'bg-red-100 text-red-800';
-        }
+    const getStatusClass = (status: string) => {
+        const s = String(status || '').trim().toLowerCase();
+        if (s === 'active') return 'bg-green-100 text-green-800';
+        if (s === 'draft') return 'bg-yellow-100 text-yellow-800';
+        if (s === 'out of stock' || s === 'inactive') return 'bg-red-100 text-red-800';
+        return '';
     };
 
     return (
@@ -97,7 +97,9 @@ const AdminProducts = async () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(product.status)}`}>
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+
+                                             ${getStatusClass(product.status)}`}>
                                             {product.status}
                                         </span>
                                     </td>

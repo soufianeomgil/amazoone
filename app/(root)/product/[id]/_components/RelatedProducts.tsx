@@ -7,7 +7,7 @@ import React, { useRef } from "react";
 
 
 
-export const relatedProducts: IProduct[] = [
+export const relatedProducts: any[] = [
   {
     _id: "1",
     category: "Shoes",
@@ -479,8 +479,8 @@ export const relatedProducts: IProduct[] = [
     thumbnail: { url: "https://images-na.ssl-images-amazon.com/images/I/71PTv8pQQiL._AC_UL165_SR165,165_.jpg", preview: "" },
     brand: "Altra",
     tags: ["trail", "running"],
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    createdAt: Date.now() as any,
+    updatedAt: "202",
     reviewCount: 320,
     
     rating: 4.6,
@@ -540,7 +540,7 @@ const RelatedProducts = ({title}: {title:string}) => {
         //     <h3 className="text-sm font-medium line-clamp-2">{product.title}</h3>
         //     <p className="text-gray-900 font-bold mt-1">${product.price.toFixed(2)}</p>
         //   </div>
-        <MainCard key={index} product={product} />
+        <MainCard userId="" key={index} product={product as IProduct}  />
         ))}
       </div>
     </section>

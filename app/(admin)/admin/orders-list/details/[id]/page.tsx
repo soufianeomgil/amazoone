@@ -120,7 +120,7 @@ const AdminOrderDetail: React.FC<AdminOrderDetailProps> = ({ order, onBack }) =>
                         </address>
                     </div>
                      <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center"><CreditCardIcon className="mr-2 h-5 w-5 text-gray-500" /> Payment Information</h2>
+                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center"><CreditCardIcon  /> Payment Information</h2>
                         <div className="text-sm text-gray-600">
                            <p><strong>Method:</strong> {order.paymentMethod.split(' ')[0]}</p>
                            <p><strong>Details:</strong> {order.paymentMethod.split(' ').slice(1).join(' ')}</p>

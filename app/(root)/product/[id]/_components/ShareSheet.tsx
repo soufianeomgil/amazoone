@@ -51,7 +51,9 @@ const ShareSheet = ({ url, title, onClose }: Props) => {
             <ShareItem icon={<WhatsappIcon />} label="WhatsApp" />
           </WhatsappShareButton>
 
-          <FacebookShareButton url={url} quote={title} className="w-full">
+          <FacebookShareButton url={url} 
+          // @ts-expect-error 
+           quote={title} className="w-full">
             <ShareItem icon={<FacebookIcon />} label="Facebook" />
           </FacebookShareButton>
 
@@ -82,7 +84,9 @@ const ShareSheet = ({ url, title, onClose }: Props) => {
             <ShareItem icon={<WhatsappIcon size={26} className="rounded-full" />} label="WhatsApp" />
           </WhatsappShareButton>
 
-          <FacebookShareButton url={url} quote={title}>
+          <FacebookShareButton url={url} 
+          // @ts-ignore
+           quote={title}>
             <ShareItem icon={<FacebookIcon size={26} className="rounded-full" />} label="Facebook" />
           </FacebookShareButton>
 

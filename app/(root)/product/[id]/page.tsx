@@ -71,7 +71,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
   const totalStock = product.totalStock ?? (safeVariants.length ? safeVariants.reduce((s, v) => s + (v.stock ?? 0), 0) : product.stock ?? 0);
 
   return (
-    <div className=" w-full max-sm:overflow-hidden bg-gray-50">
+    <div className=" w-full overflow-x-hidden bg-gray-50">
       {/* Breadcrumb */}
       <div className="bg-white max-sm:hidden border-b">
         <div className="max-w-7xl  mx-auto px-4 py-3">

@@ -177,7 +177,8 @@ export default function CancelOrderUI({ setOpen, orderId, open, onClose, onConfi
           <div>
             <h3 className="text-lg font-semibold">Cancel Order</h3>
             <p className="text-xs text-gray-500">
-              Order #{order?._id ?? orderId} • Placed{" "}
+             
+              Order #{(order as any)?._id ?? orderId} • Placed{" "}
               {order?.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}
             </p>
           </div>
@@ -269,7 +270,7 @@ export default function CancelOrderUI({ setOpen, orderId, open, onClose, onConfi
                   <div className="text-sm text-gray-600">Order</div>
                   <div className="mt-2 flex items-center justify-between">
                     <div>
-                      <div className="font-medium">Order #{order?._id ?? orderId}</div>
+                      <div className="font-medium">Order #{(order as any)?._id ?? orderId}</div>
                       <div className="text-xs text-gray-500">Placed {order?.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}</div>
                     </div>
                     <div className="font-semibold">${(order?.total ?? 0).toFixed(2)}</div>

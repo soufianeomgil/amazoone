@@ -161,6 +161,7 @@ const payload = {
   tags: cartItems.items.map((item) => (item.productId as any).tags),
   weight: 25,
 })
+// @ts-ignore
             router.push(`/success/order-summary/${data?.order?.id}`)  
             return
          }

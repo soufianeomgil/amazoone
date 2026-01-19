@@ -9,12 +9,13 @@ import { Button } from "../ui/button";
 import { IProduct } from "@/models/product.model";
 import { toggleAddToWishlist } from "@/actions/user.actions";
 import { toast } from "sonner";
-import { IUser } from "@/types/actionTypes";
+
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { addItemAsync } from "@/lib/store/cartSlice";
 import { RootState } from "@/lib/store";
 import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
+import { IUser } from "@/models/user.model";
 
 const CartAction = ({ product, user }: { product?: IProduct; user: IUser }) => {
   const variants = product?.variants ?? [];

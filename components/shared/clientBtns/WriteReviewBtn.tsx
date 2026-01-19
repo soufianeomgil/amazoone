@@ -1,8 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import AddReviewModal from "../modals/AddReviewModal"
+
 import { useState } from "react"
+import { WriteReviewModal } from "../modals/ReviewModel"
 
 const WriteReviewBtn = () => {
      const  [open,setOpen] = useState(false)
@@ -11,8 +12,13 @@ const WriteReviewBtn = () => {
            <Button onClick={()=> setOpen(true)}  type="button" className="px-3 py-1 rounded-md bg-white border
                                       border-gray-200 text-gray-700 text-sm hover:bg-gray-50">
                                        Write a product review
-                                     </Button>
-                     <AddReviewModal  open={open} productId={"690e64262942120edd24eb0c"} onClose={()=>  setOpen(false)} />
+                                     </Button> 
+                                     
+                                     <WriteReviewModal 
+                                     // @ts-ignore
+                                      product={{}} 
+                                      id="" open={open} setOpen={setOpen} />
+                    
     </div>
   )
 }

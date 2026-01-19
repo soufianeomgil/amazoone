@@ -7,12 +7,12 @@ import { LocationIcon } from "@/components/shared/icons";
 import { IAddress } from "@/models/address.model";
 import { AddAddressModal } from "../shared/modals/AddAddressMdel";
 
-
+// some
 
 type ApiResponse = {
   success: boolean;
   data?: { address?: IAddress };
-  message?: string;
+  message?: string
 };
 
 export default function AddressCard() {

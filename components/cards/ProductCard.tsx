@@ -6,7 +6,7 @@ import { IProduct } from "@/models/product.model";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import Rating from "../shared/Rating";
-import AmazonPrice from "../shared/AmazonPrice";
+import AmazonPrice from "../shared/AmazonPrice"
 import Image from "next/image";
 
 const ProductCard = ({

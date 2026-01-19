@@ -1,6 +1,7 @@
 "use client"
 import EditProfileModel from '@/components/shared/modals/EditProfileModel'
-import { IUser } from '@/types/actionTypes'
+import { IUser } from '@/models/user.model'
+
 import { Pencil } from 'lucide-react'
 import React, { useState } from 'react'
 

@@ -1,8 +1,9 @@
 
 
-import { IUser, SignInWithOAuthParams } from "@/types/actionTypes";
+import {  SignInWithOAuthParams } from "@/types/actionTypes";
 import { fetchHandler } from "./handlers/fetch";
 import { IAccount } from "@/models/account.model";
+import { IUser } from "@/models/user.model";
 
 
 

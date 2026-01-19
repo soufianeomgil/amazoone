@@ -1,12 +1,29 @@
-// pages/api/saved-lists.ts (or app/api/saved-lists/route.ts)
 import { createSavedListAction } from "@/actions/savedList.actions";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 
+// 1. Change to Named Export (POST)
+export async function POST(req: Request) {
+  try {
+    // 2. Parse the body from the request
+    const body = await req.json();
+    const { name, isPrivate, isDefault } = body;
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).end();
-  const { name,  isPrivate, isDefault } = req.body;
-  const { success, data, error } = await createSavedListAction({ name, isPrivate, isDefault });
-  if (!success) return res.status(400).json({ error });
-  return res.status(201).json({ list: data?.list });
+    // 3. Call your action
+    const { success, data, error } = await createSavedListAction({ 
+      name, 
+      isPrivate, 
+      isDefault 
+    });
+
+    if (!success) {
+      return NextResponse.json({ error }, { status: 400 });
+    }
+
+    // 4. Return using NextResponse
+    return NextResponse.json({ list: data?.list }, { status: 201 });
+
+  } catch (err) {
+    console.error("Saved Lists API Error:", err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

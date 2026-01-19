@@ -279,7 +279,7 @@ const MainCard: React.FC<Props> = ({ product, userId, listId, isWished, isWishli
   return (
     <div>
       <article
-        className="group relative flex flex-col min-w-[180px] w-full bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+        className="group relative flex flex-col sm:min-w-[180px] w-full bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
         aria-labelledby={`product-${product._id}-title`}
         style={{ minHeight: 300 }}
       >

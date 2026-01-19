@@ -1,19 +1,11 @@
-
-
 import { IProduct } from '@/models/product.model';
 import MainCard from '../cards/MainCard';
 import { auth } from '@/auth';
 
-
-
-
-
-
-
 const ProductGrid = async({ products, title }: { products: (IProduct)[], title:string }) => {
   const session = await auth()
 
-   console.log(products, "products here to verify.....")
+   
     return (
         <>
             <main className="max-w-[1500px] mx-auto     relative z-10">
@@ -36,11 +28,7 @@ const ProductGrid = async({ products, title }: { products: (IProduct)[], title:s
       </main>
                 </div>
             </main>
-            {/* <QuickViewModal 
-                product={selectedProduct}
-                isOpen={true}
-                onClose={handleCloseModal}
-            /> */}
+           
         </>
     );
 };

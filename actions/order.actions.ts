@@ -258,8 +258,10 @@ await Product.updateMany(
 
     mongoSession.endSession();
 
-    if (!createdOrder) return handleError(new Error("Failed to create order")) as any;
-
+    if (!createdOrder) throw new Error("Failed to create order")
+      revalidatePath(ROUTES.myorders)
+      revalidatePath(ROUTES.admin.orders)
+         
     return {
       success: true,
       data: { order: JSON.parse(JSON.stringify(createdOrder)) },

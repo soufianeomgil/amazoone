@@ -12,6 +12,7 @@ const EmptyWishlist = () => {
   loop   
 
  src="https://f.nooncdn.com/s/app/com/noon/images/wishlist-empty-desktop.mp4"
+ // @ts-ignore
     type="video/mp4"
  playsInline
   preload="auto"

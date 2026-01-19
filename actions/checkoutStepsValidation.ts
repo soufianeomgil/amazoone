@@ -5,8 +5,8 @@ import handleError from "@/lib/handlers/error";
 import { NotFoundError } from "@/lib/http-errors";
 import { Cart, ICart } from "@/models/cart.model";
 import { IProduct, Product } from "@/models/product.model";
-import User from "@/models/user.model";
-import { IUser } from "@/types/actionTypes";
+import User, { IUser } from "@/models/user.model";
+
 // server/actions/validateCheckoutAction.ts
 import { z } from "zod";
 

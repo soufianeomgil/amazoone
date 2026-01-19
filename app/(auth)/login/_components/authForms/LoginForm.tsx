@@ -213,7 +213,7 @@ export default function LoginForm() {
         <div className="flex-1 h-px bg-gray-500" />
       </div>
 
-      <AuthFormBtns />
+      <AuthFormBtns isSubmitting={isSubmitting} />
        <div className="mt-10 text-center text-xs text-gray-500">
           <p>© 1996–2024, Amazon.com, Inc. or its affiliates</p>
         </div>

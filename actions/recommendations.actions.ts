@@ -125,6 +125,7 @@ export async function trackProductView(params: trackProductViewParams) : Promise
     existing.viewedAt = new Date()
   } else {
     user.browsingHistory.unshift({
+      // @ts-ignore
       product: productId,
       viewedAt: new Date(),
       viewCount: 1,

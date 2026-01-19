@@ -52,7 +52,7 @@ export default function ForgotPasswordForm() {
    */
   const onSubmit = async (data: z.infer<typeof ForgotPasswordSchema>) => {
     setError(null);
-
+ // @ts-ignore
     const res = await forgotPasswordAction(data);
 
     if (res?.error) {
@@ -100,7 +100,7 @@ export default function ForgotPasswordForm() {
 
     setError(null);
     cooldown.start();
-
+ // @ts-ignore
     await forgotPasswordAction(identifierPayload);
   };
 

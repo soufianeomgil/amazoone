@@ -136,8 +136,8 @@ export default function OrderHistoryClient() {
         {/* Orders */}
         {orders.length > 0 ? (
  <div className="space-y-4 px-2">
-          {orders.map((order) => (
-            <div key={order.id} className="rounded-lg border border-gray-200 bg-white">
+          {orders.map((order,index) => (
+            <div key={index} className="rounded-lg border border-gray-200 bg-white">
               {/* Order header */}
               <div className="bg-[#f2f2f2] border-b border-gray-200 px-3 py-2 flex justify-between items-center">
                 <div>

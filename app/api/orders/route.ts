@@ -1,6 +1,8 @@
 // app/api/orders/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getUserOrdersAction } from "@/actions/order.actions";
+import { auth } from "@/auth";
+import { UnAuthorizedError } from "@/lib/http-errors";
 
 /**
  * GET /api/orders?page=1&limit=10
@@ -12,13 +14,14 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const pageParam = url.searchParams.get("page") ?? "1";
   const limitParam = url.searchParams.get("limit") ?? "10";
-
+  const session = await auth()
+  if(!session) throw new UnAuthorizedError("")
   const page = Math.max(1, Number.isFinite(Number(pageParam)) ? parseInt(pageParam, 10) : 1);
   const limit = Math.max(1, Math.min(100, Number.isFinite(Number(limitParam)) ? parseInt(limitParam, 10) : 10));
 
   try {
     // call your existing server action (it should read session from cookies on the server)
-    const { data, error } = await getUserOrdersAction({ page, pageSize: limit });
+    const { data, error } = await getUserOrdersAction({ page, pageSize: limit, userId:session?.user.id });
 
     if (error) {
       // If your action returns structured error objects adapt as needed

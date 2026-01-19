@@ -274,25 +274,25 @@ await Product.updateMany(
 type GetOrdersParams = {
   page?: number;
   pageSize?: number;
+  userId: string  | null
 };
 // TODO: FINISH FETCHING USER ORDERS WITH PAGINATION
 
 export const getUserOrdersAction: (params?: GetOrdersParams) =>
    Promise<ActionResponse<{ orders: IOrderDoc[]; isNext: boolean; ordersLength: number }>> = cache(async (params?: GetOrdersParams) => {
-  // 1) validate session / auth
-  const validated = await action({ params, authorize: true });
+  // 1) add zod schema
+  const validated = await action({ params });
   if (validated instanceof Error) throw validated;
 
-  const session = validated.session;
-  if (!session?.user?.id) throw new UnAuthorizedError("User not logged in");
+  
 
-  const { page = 1, pageSize = 20,} = validated.params as GetOrdersParams;
- 
+  const { page = 1, pageSize = 20, userId } = validated.params as GetOrdersParams;
+  if(!userId) throw new UnAuthorizedError("")
   try {
     await connectDB();
    const skip = pageSize * (page - 1)
-    const ordersCount = await Order.countDocuments({userId: session.user.id})
-    const orders = await Order.find({userId: session.user.id})
+    const ordersCount = await Order.countDocuments({userId})
+    const orders = await Order.find({userId})
     .populate({path: "items.productId"})
     .skip(skip)
     .limit(pageSize)

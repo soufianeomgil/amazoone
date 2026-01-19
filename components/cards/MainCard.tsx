@@ -483,12 +483,13 @@ const MainCard: React.FC<Props> = ({ product, userId, listId, isWished, isWishli
       </article>
 
       {isWishlist && (
-        <div className="w-full mt-2 gap-2.5 flex items-center">
+        <div className="w-full   mt-2 gap-2.5 flex items-center">
           <Button
             type="button"
             onClick={handleAddToCart}
             disabled={loading}
-            className="bg-[#08ada8] flex items-center cursor-pointer justify-center flex-1 uppercase font-medium text-[15px] text-white"
+            className="bg-[#08ada8] flex items-center cursor-pointer
+             justify-center flex-1 uppercase font-medium text-[10px] sm:text-[15px] text-white"
           >
             {loading ? <SpinnerIcon /> : "add to cart"}
           </Button>

@@ -201,11 +201,12 @@ const OrderSchema = new Schema<IOrderDoc, IOrderModel>(
     subtotal: { type: Number, required: true, default: 0 },
     shippingCost: { type: Number, required: true, default: 0 },
     tax: { type: Number, required: true, default: 0 },
-    checkoutId: {
-  type: String,
-  unique: true,
-  sparse: true,
-},
+  checkoutId: {
+    type: String,
+    required: true,
+    unique: true, // This prevents duplicates
+    index: true,  // This makes searching by checkoutId faster
+  },
 
     discount: { type: Number, default: 0 },
     total: { type: Number, required: true, default: 0 },

@@ -73,7 +73,7 @@ export async function GET(req: Request) {
 
     const mapped = (items || []).map((p: IProduct) => p);
 
-    const totalPages = Math.ceil(total / perPage);
+    const totalPages = Math.ceil(total / perPage)
 
     return NextResponse.json({
       success: true,

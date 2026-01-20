@@ -182,13 +182,13 @@ const Hero: React.FC = () => {
                 onClick={prevSlide}
                 className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full transition-all md:block hidden"
             >
-                <ChevronLeftIcon className="w-6 h-6" />
+                <ChevronLeftIcon  />
             </button>
             <button 
                 onClick={nextSlide}
                 className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full transition-all md:block hidden"
             >
-                <ChevronRightIcon className="w-6 h-6" />
+                <ChevronRightIcon  />
             </button>
 
             {/* Indicators (Dots) */}

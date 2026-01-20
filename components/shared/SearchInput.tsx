@@ -137,7 +137,7 @@ useEffect(() => {
   {suggestions.map((item) => (
     <Link
       key={item._id}
-      href={`/products/${item._id}`}
+      href={`/product/${item._id}`}
       className="
         group flex gap-4 px-4 py-3 
         hover:bg-gray-50 

@@ -58,14 +58,23 @@ const Header = ({qty, session, isAuthenticated}: {
                     <div className="flex items-center space-x-2">
                        <div className="flex items-center gap-2">
                         <button onClick={handleMenuToggle} className="font-bold p-1 border border-transparent hover:border-white rounded-sm">
-                            <MenuIcon />
+                            <MenuIcon  />
                         </button>
                         <Link href="/" className="p-1 border border-transparent hover:border-white rounded-sm">
-                            <Image
+                            {/* <Image
                              src="https://assets.aboutamazon.com/2e/d7/ac71f1f344c39f8949f48fc89e71/amazon-logo-squid-ink-smile-orange.png"
                              alt="Amazon Logo" 
                              width={96} height={40}
-                             className="h-10 w-24 object-contain invert" />
+                             className="h-10 w-24 object-contain invert" /> */}
+                               <Image
+                             src={"/ij.png"}
+                             alt="OMGIL Logo" 
+                              priority={true}
+                              loading='eager'
+                              height={50}
+                              width={100}
+                             className="h-[50px]  object-contain " />
+
                         </Link>
                        </div>
                         

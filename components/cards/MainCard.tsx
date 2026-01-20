@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { RootState } from "@/lib/store";
 import { addItemAsync } from "@/lib/store/cartSlice";
-import { IProduct } from "@/models/product.model";
+import { IProduct, IVariant } from "@/models/product.model";
 import { ArrowLeft, ArrowRight, Copy, Heart, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,7 @@ import { DotsVerticalIcon, SpinnerIcon, TrashIcon } from "../shared/icons";
 import { addItemToDefaultListAction, removeItemFromSavedListAction } from "@/actions/savedList.actions";
 import { toast } from "sonner";
 import Image from "next/image";
+import CartSidebar from "../shared/CartSidebar";
 
 type Props = {
   product: IProduct;
@@ -36,7 +37,17 @@ const SAMPLE_CONVERSION_BADGES = [
 ];
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
-
+type LocalCartItem = {
+  _id: string;
+  productId: string;
+  title: string;
+  price: number;
+  listPrice?: number | null;
+  variant: IVariant;
+  quantity: number;
+  thumbnail?: { url?: string };
+  sku?: string;
+};
 const MainCard: React.FC<Props> = ({ product, userId, listId, isWished, isWishlist }) => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -46,7 +57,8 @@ const MainCard: React.FC<Props> = ({ product, userId, listId, isWished, isWishli
   useEffect(() => setLocalWished(isWished), [isWished]);
 
   const [loading, setLoading] = useState(false);
-
+ const [open, setOpen] = useState(false);
+  const [addedItems, setAddedItems] = useState<LocalCartItem[]>([]);
   const selectedVariantIndex = useSelector(
     (state: RootState) => state.product.selectedVariant?.[String(product?._id ?? "")]
   );
@@ -201,13 +213,24 @@ const MainCard: React.FC<Props> = ({ product, userId, listId, isWished, isWishli
       };
 
       await dispatch(addItemAsync(payload) as any);
-
+ setAddedItems((prev) => [
+        {
+          _id: payload._id,
+          productId: payload.productId,
+          title: payload.name,
+          price: payload.basePrice,
+          variant: payload.variant,
+          quantity: payload.quantity,
+          thumbnail: payload.imageUrl,
+        },
+        ...prev,
+      ]);
       await updateUserInterestsEngine({
         userId,
         tags: product.tags,
         weight: 10,
       });
-
+      setOpen(true)
       router.refresh?.();
     } catch (err) {
       console.error("Add to cart failed:", err);
@@ -520,6 +543,8 @@ const MainCard: React.FC<Props> = ({ product, userId, listId, isWished, isWishli
           </DropdownMenu>
         </div>
       )}
+       {/* CART SIDEBAR */}
+            <CartSidebar open={open} onClose={() => setOpen(false)} setOpen={setOpen} items={addedItems} />
     </div>
   );
 };

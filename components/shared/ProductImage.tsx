@@ -9,7 +9,7 @@ import { IProduct } from "@/models/product.model";
 import ShareTrigger from "@/app/(root)/product/[id]/_components/ShareTrigger";
 
 const ProductImage = ({ product }: { product: IProduct }) => {
-  const shareUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/product/${product._id}`;
+  const shareUrl = `${process.env.NEXTAUTH_URL}/product/${product._id}`;
   const title = "Check out this product on Our Store";
   const selectedIndex = useSelector(
     (state: RootState) =>

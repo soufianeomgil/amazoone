@@ -123,7 +123,7 @@ session.user.profileCompleted = token.profileCompleted as boolean;
 
       const { success } = (await api.auth.oAuthSignIn({
         user: userInfo,
-        provider: account.provider as "github" | "google",
+        provider: account.provider as  "google",
         providerAccountId: account.providerAccountId,
       })) as ActionResponse;
 

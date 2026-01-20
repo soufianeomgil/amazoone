@@ -127,7 +127,7 @@ import Image from "next/image"
             <h4 className='text-white font-bold text-[17px] mb-3 border-gray-300  '>
                Modes de paiement
             </h4>
-              <Image width={350} height={350} className='w-[350px] object-contain' src="https://www.marjanemall.ma/media/footer/paiement_x2_1.png" alt="" />
+              {/* <Image width={350} height={350} className='w-[350px] object-contain' src="https://www.marjanemall.ma/media/footer/paiement_x2_1.png" alt="" /> */}
             </div>
             </div>
             <div className="flex items-center py-3 justify-between">

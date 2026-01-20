@@ -79,7 +79,7 @@ export default function CartSidebar({
         role="dialog"
         aria-label="Cart panel"
         className="
-          fixed z-50 bg-white shadow-2xl flex flex-col
+          fixed z-[99999] bg-white shadow-2xl flex flex-col
           max-sm:hidden
           right-0 top-0 h-full w-[420px] max-w-full
         "

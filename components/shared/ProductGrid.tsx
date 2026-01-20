@@ -8,11 +8,11 @@ const ProductGrid = async({ products, title }: { products: (IProduct)[], title:s
    
     return (
         <>
-            <main className="max-w-[1500px] mx-auto     relative z-10">
+            <main className="max-w-[1500px] mx-auto    relative z-10">
                 {/* <div className="bg-white p-4 rounded-t-lg shadow-md">
                     <h2 className="text-2xl font-bold text-gray-800">Today's Deals</h2>
                 </div> */}
-                 <div className="mt-6 bg-white p-4">
+                 <div className="mt-6 bg-white px-4">
                     <h2 className="text-xl font-bold mb-4">
                        {title}
                     </h2>

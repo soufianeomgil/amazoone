@@ -15,6 +15,7 @@ import React from 'react';
 import SoldWith from './cart/_component/SoldWith';
 import { auth } from '@/auth';
 import Image from 'next/image';
+import RecommendationCard from '@/components/cards/RecommendedCard';
 // best sellers in school and work bags
 // bags under 50
 // best sellers in sport bags
@@ -215,8 +216,10 @@ const Home = async () => {
                <section className="bg-gray-100 py-6">
   <SoldWith title="Items under $50" />
 </section>
+<RecommendationCard title='Inspired by your cart' products={response.data?.products.slice(0,3) ?? []} />
+<RecommendationCard title='More Top Picks for you' products={response.data?.products.slice(3,6) ?? []} />
  {response.data?.products && (
- <section className="bg-white py-6">
+ <section className="bg-white py-2.5">
   <ProductGrid title='Recommended for you' products={response.data?.products ?? []} />
 </section>
  )}

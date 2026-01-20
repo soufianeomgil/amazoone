@@ -8,7 +8,7 @@ import { IUser } from "@/models/user.model";
 
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://amazoone.vercel.app/api"
 
 export const api = {
   auth: {

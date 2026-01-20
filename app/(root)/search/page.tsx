@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import SearchClient from "./_components/SearchClient";
+import { auth } from "@/auth";
 
 type SearchParams = {
   q?: string;
@@ -12,13 +13,14 @@ type SearchParams = {
   sort?: string;
 };
 
-const page = async ({
+const Page = async ({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) => {
   const params = await searchParams;
   const q = params.q ?? "";
+  const session = await auth()
 
   const queryParams = new URLSearchParams({
     q,
@@ -28,33 +30,39 @@ const page = async ({
     onlyPrime: params.onlyPrime ?? "",
     inStockOnly: params.inStockOnly ?? "",
     ratingMin: params.ratingMin ?? "",
-    sort: params.sort ?? "",
+    sort: params.sort ?? "relevance",
   });
 
-  const headerList = headers();
-  const host = (await headerList).get("host");
-  const protocol = (await headerList).get("x-forwarded-proto") ?? "http";
+  const headerList = await headers();
+  const host = headerList.get("host");
+  const protocol = headerList.get("x-forwarded-proto") ?? "http";
   const baseUrl = host ? `${protocol}://${host}` : "http://localhost:3000";
 
-  const res = await fetch(`${baseUrl}/api/products?${queryParams.toString()}`, {
-    method: "GET",
-    headers: { Accept: "application/json" },
-    cache: "no-store",
-  });
-
-  const payload = await res.json();
-  const data = payload?.success ? payload.data : payload;
+  let initialData = { products: [], total: 0 };
+  
+  try {
+    const res = await fetch(`${baseUrl}/api/products?${queryParams.toString()}`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    const payload = await res.json();
+    initialData = payload?.success ? payload.data : payload;
+  } catch (error) {
+    console.error("Search fetch error:", error);
+  }
 
   return (
-    <div className="px-4 bg-white w-full md:px-8 lg:px-12 py-6">
+    <div className="min-h-screen bg-[#F9FAFB]">
       <SearchClient
         initialQuery={q}
-        initialProducts={data?.products ?? []}
-        initialTotal={data?.total ?? 0}
+        initialProducts={initialData?.products ?? []}
+        initialTotal={initialData?.total ?? 0}
         serverPerPage={20}
+        userId={session?.user.id ?? ""}
       />
     </div>
   );
 };
 
-export default page;
+export default Page;

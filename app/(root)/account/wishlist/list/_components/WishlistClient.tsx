@@ -65,11 +65,7 @@ const WishlistClient = ({
     setLoading(false)
   }
 }
-const wishlistedProductIds = new Set(
-  lists.flatMap(list =>
-    list.items?.map(item => String(item.productId?._id ?? item.productId))
-  )
-)
+
 const wishlistedMap = React.useMemo(() => {
   const map = new Set<string>()
 
@@ -89,7 +85,7 @@ const wishlistedMap = React.useMemo(() => {
 
   
  const [pending,setPending] = useState(false)
-console.log(products, "PRODUCTS WISHLIST HERE ...")
+
   return (
     <div className="bg-white w-full">
       <div className="flex flex-col gap-5 max-w-[1400px] px-3 mx-auto py-5">

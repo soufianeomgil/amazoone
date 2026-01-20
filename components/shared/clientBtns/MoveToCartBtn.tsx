@@ -6,39 +6,46 @@ import { ISaveForLaterDoc } from '@/models/saveForLater.model'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import React from 'react'
+import React, { useState } from 'react'
+import { toast } from 'sonner'
 interface props {  
     items: ISaveForLaterDoc[];
 }
 export const MoveToCartBtn = ({data}: {data: props}) => {
- 
+   const [pendingMove,setPendingMove] = useState<boolean>(false)
+   const [loadingRemove,setLoadingRemove] = useState<boolean>(false)
 
     const MoveToCartHandler = async(id:string)=> {
-         alert(id)
+       
+        setPendingMove(true)
       
         try {
-          const {error, data, success} =   await moveSavedItemToCart({id: String(id)})
+          const {error,success} =   await moveSavedItemToCart({id: String(id)})
           if(error) {
-            alert(error.message)
-          }else {
-            alert("let's go")
+            toast.error(error.message)
+          }else if(success) {
+            toast.success("Item has been moved to cart")
           }
         } catch (error) {
             console.log(error)
+        }finally  {
+           setPendingMove(false)
         }
     }
       const removeFromSaveHandler = async(id:string)=> {
         
-      
+        setLoadingRemove(true)
         try {
-          const {error, data, success} =   await removeFromSaveForLater({id: id})
+          const {error,success} =   await removeFromSaveForLater({id: id})
           if(error) {
-            alert(error.message)
-          }else {
-            alert("let's go")
+            toast.error(error.message)
+          }else if(success) {
+            toast.success("Item has been removed from saved For Later")
           }
         } catch (error) {
             console.log(error)
+        }finally {
+           setLoadingRemove(false)
         }
     }
   return (
@@ -72,7 +79,7 @@ export const MoveToCartBtn = ({data}: {data: props}) => {
                                                       </div>
                                         </article>
                                    </div>
-                                  <CardItem 
+                                  <CardItem  pendingMove={pendingMove} loadingRemove={loadingRemove}
                                    handleMoveToCart={() => MoveToCartHandler(item?._id as string)}
                                    handleRemove={() => removeFromSaveHandler(item?._id as string)}
                                     item={item} />

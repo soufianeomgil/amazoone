@@ -2,21 +2,15 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Switch } from "@/components/ui/switch";
 
-import { CircleCheck, Edit, HeartMinus } from "lucide-react";
-import { DotsVerticalIcon, TrashIcon } from "@/components/shared/icons";
+
+
 import EditWishlistModal from "@/components/shared/modals/EditWishlistModel";
 import { deleteWishlistAction, EmptyWishlistAction, setDefaultWishlistAction } from "@/actions/savedList.actions";
 import { toast } from "sonner";
 import { useConfirmStore } from "@/lib/store/confirm.store";
 import Image from "next/image";
+import WishlistMoreMenu from "./DropdownSheet";
 
 const Btns = ({name,id,isDefault,hasItems,setPending}: {name:string,setPending:(v:boolean)=> void,id:string,isDefault:boolean,hasItems:boolean}) => {
   const [publicSharing, setPublicSharing] = useState(false);
@@ -117,69 +111,15 @@ if (ok) {
       </Button>
 
       {/* More dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button className="px-3 sm:w-[120px] cursor-pointer max-sm:rounded-full flex items-center justify-center bg-gray-200 hover:bg-gray-100 text-gray-600">
-             <DotsVerticalIcon  />
-            <span className="max-sm:hidden">More</span>
-          </Button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent align="end" className="w-[320px] bg-white  ">
-          {/* Edit */}
-          <DropdownMenuItem onClick={()=> setOpen(true)} className="flex border-b  border-gray-100 items-center gap-2 cursor-pointer">
-            <Edit color="#00afaa" size={16} />
-            Edit
-          </DropdownMenuItem>
-
-          {/* Public sharing toggle */}
-          <DropdownMenuItem
-  onSelect={(e) => e.preventDefault()}
-  className="flex border-b border-gray-100 items-center justify-between"
->
-  <div className="flex flex-col">
-    <span className="text-sm">Public sharing</span>
-    <span className="text-xs text-gray-500">
-      {publicSharing ? "Anyone can view" : "Only you"}
-    </span>
-  </div>
-
-  <Switch
-    checked={publicSharing}
-    onCheckedChange={setPublicSharing}
-    className="
-      data-[state=unchecked]:bg-gray-300
-      data-[state=checked]:bg-[hsl(178,100%,34%)]
-    "
-  />
-</DropdownMenuItem>
- 
-   {!isDefault && (
-     <DropdownMenuItem onClick={handleSwitchDefault} className="flex items-center border-b border-gray-100 gap-2 text-gray-700 cursor-pointer">
-           
-            <CircleCheck color="gray" size={16} />
-            Make this default wishlist
-          </DropdownMenuItem>
-   )}
-
-         
- {hasItems ? (
- <DropdownMenuItem onClick={handleEmpty} className="flex items-center gap-2 text-gray-700 cursor-pointer">
-           
-            <HeartMinus color="gray" size={16} />
-            Empty wishlist
-          </DropdownMenuItem>
-            ): (
-               <DropdownMenuItem onClick={handleDelete} className="flex items-center gap-2 text-red-500! cursor-pointer">
-           
-            <TrashIcon  />
-            Delete
-          </DropdownMenuItem>
-            )}
-          {/* Empty wishlist */}
-         
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <WishlistMoreMenu 
+        setOpen={setOpen}
+        publicSharing={publicSharing}
+        setPublicSharing={setPublicSharing}
+        isDefault={isDefault}
+        hasItems={hasItems}
+        handleSwitchDefault={handleSwitchDefault}
+        handleEmpty={handleEmpty}
+        handleDelete={handleDelete}  />
       <EditWishlistModal id={id} name={name} open={open} setOpen={setOpen} />
     </div>
   );

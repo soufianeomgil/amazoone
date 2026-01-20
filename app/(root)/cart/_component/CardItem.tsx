@@ -1,13 +1,24 @@
 import AmazonPrice from '@/components/shared/AmazonPrice'
+import { SpinnerIcon } from '@/components/shared/icons';
 import { Button } from '@/components/ui/button'
 import { ISaveForLaterDoc } from '@/models/saveForLater.model';
 import { CheckCircle } from 'lucide-react'
 import Image from 'next/image';
 import React from 'react'
 
-const CardItem = ({item, handleMoveToCart, handleRemove}: {item: ISaveForLaterDoc,handleMoveToCart: ()=> void,handleRemove:()=> void}) => {
+const CardItem = ({item, handleMoveToCart, pendingMove,loadingRemove, handleRemove}: {item: ISaveForLaterDoc,handleMoveToCart: ()=> void,handleRemove:()=> void,pendingMove:boolean,loadingRemove:boolean}) => {
   return (
-    <div  className='bg-gray-50 px-3 py-3 sm:hidden flex flex-col rounded-lg'>
+    <div  className='bg-gray-50 relative px-3 py-3 sm:hidden flex flex-col rounded-lg'>
+      {pendingMove && (
+          <div className="absolute  inset-0 z-10 flex items-center justify-center ">
+              <SpinnerIcon />
+          </div>
+        )}
+        {loadingRemove && (
+          <div className="absolute  inset-0 z-10 flex items-center justify-center ">
+              <SpinnerIcon />
+          </div>
+        )}
          <div className='flex items-start gap-2'>
           {/* //@ */}
              <Image width={150} height={150} className="w-[150px] object-contain"

@@ -32,7 +32,7 @@ const SoldWith = ({title}: {title:string}) => {
       <button
         onClick={() => scroll("right")}
         className="absolute right-0 max-sm:hidden sm:right-[-30px] top-1/2 flex items-center justify-center -translate-y-1/2
-         z-10 bg-white dark:bg-gray-900 w-[40px] h-[40px] rounded-full shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+         z-10 bg-white dark:bg-gray-900 w-10 h-10 rounded-full shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition"
       >
         <ChevronRight color="gray" />
       </button>

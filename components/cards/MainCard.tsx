@@ -568,7 +568,7 @@ const MainCard: React.FC<Props> = ({
         > 
          <div className="flex flex-col">
                <div className="flex items-center gap-2">
-                 <span className="text-xl font-black text-gray-900">${priceForDisplay}</span>
+                 <span className="sm:text-xl text-[15px] font-black text-gray-900">${priceForDisplay}</span>
                  <span className="text-[10px] font-bold bg-red-100 text-red-600 px-1 rounded">
                    -{calculateDiscount(product.basePrice + 50, product.basePrice)}%
                  </span>

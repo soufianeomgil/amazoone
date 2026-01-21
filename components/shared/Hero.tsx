@@ -144,8 +144,8 @@ const Hero: React.FC = () => {
             </div>
 
             {/* Content Container */}
-            <div className="absolute inset-0 z-[99999] flex flex-col justify-end md:justify-center
-             px-6 md:px-20 pb-16 md:pb-0 pointer-events-none">
+            <div className="absolute inset-0 z-[99] flex flex-col justify-end md:justify-center
+              px-6 md:px-20 pb-16 md:pb-0 pointer-events-none">
                 <div className="max-w-2xl text-white pointer-events-auto">
                     {/* Animated Badge */}
                     <span className="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-widest text-black uppercase bg-yellow-400 rounded-sm">

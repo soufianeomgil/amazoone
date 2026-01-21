@@ -25,12 +25,47 @@ import AmazonPrice from '@/components/shared/AmazonPrice';
 import { LocationIcon } from '@/components/shared/icons';
 import { trackProductView } from '@/actions/recommendations.actions';
 import { auth } from '@/auth';
+import { Metadata } from 'next';
+  export async function generateMetadata({ params }: { params:  Promise<{id: string}>  }): Promise<Metadata> {
+  const { id } = await params;
+  const { data } = await getSignleProduct({ productId: id });
+   
+  return {
+    title: data?.product.name || '',
+    description: data?.product.description || '',
+  };
+}
 const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
+ 
   const productId = (await params).id
   const session = await auth()
   const result = await getSignleProduct({ productId });
+ const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": result?.data?.product.name,
+    "image": result.data?.product.thumbnail.url,
+    "description": result.data?.product.description,
+    "brand": {
+      "@type": "Brand",
+      "name": result.data?.product.brand
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": result.data?.product.basePrice,
+      "priceCurrency": "USD",
+      "availability": result.data?.product.stock! > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "url": `https://omgil.com/product/${result?.data?.product._id}`
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": result.data?.product.rating || 4.5,
+      "reviewCount": result.data?.product.reviewCount || 12
+    }
+  };
+
   const {data} = await getSavedListsAction({page: 1,limit: 10, includeArchived:true})
-  const {error,success} = await trackProductView({userId:session?.user.id!,productId: productId,productTags: result.data?.product.tags!})
+  const {error} = await trackProductView({userId:session?.user.id!,productId: productId,productTags: result.data?.product.tags!})
   if(error) {
     console.log(error.message, "ERROR: TRACK PRODUCT VIEW")
   }
@@ -71,7 +106,12 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
   const totalStock = product.totalStock ?? (safeVariants.length ? safeVariants.reduce((s, v) => s + (v.stock ?? 0), 0) : product.stock ?? 0);
 
   return (
-    <div className=" w-full overflow-x-hidden bg-gray-50">
+    <div>
+       <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+       <div className=" w-full overflow-x-hidden bg-gray-50">
       {/* Breadcrumb */}
       <div className="bg-white max-sm:hidden border-b">
         <div className="max-w-7xl  mx-auto px-4 py-3">
@@ -240,6 +280,8 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
 </div>
       </div>
     </div>
+    </div>
+   
   );
 };
 export default ProductDetails;

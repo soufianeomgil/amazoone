@@ -14,17 +14,11 @@ export const metadata: Metadata = {
   title: 'OMGIL | Premium Shopping',
   description: 'Find amazing products at OMGIL.',
   // This section handles your brand identity in the browser tab
-  icons: {
-    icon: "/app/favicon.png", // Standard
-    shortcut: '/app/favicon.png',
-    apple: '/apple-icon.png', // For iPhone home screens
-    other: [
-      {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '32x32',
-        url: '/icon.png',
-      },
+ icons: {
+   
+    icon: "/favicon.ico",
+     other: [
+    { sizes: '32x32',url: "/favicon.ico"}
     ],
   },
 };

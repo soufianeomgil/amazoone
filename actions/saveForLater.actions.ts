@@ -13,6 +13,7 @@ import { Types } from "mongoose";
 import { revalidatePath } from "next/cache";
 import {  AddToSaveForLaterSchema, MoveToCartSchema, RemoveFromSaveSchema } from "@/lib/zod";
 import z from "zod";
+import { auth } from "@/auth";
 
 interface paramsProps {
     payload: {
@@ -100,17 +101,20 @@ interface props  {
     page?: number, perPage?: number
 }
 export async function getUserSaveForLaterItems(params: props): Promise<ActionResponse<{items:ISaveForLaterDoc[]}>> {
-  const validatedResult = await action({params,authorize: true})
+  const validatedResult = await action({params})
   if(validatedResult instanceof Error) {
      return handleError(validatedResult) as ErrorResponse
   }
-  const userSession = validatedResult.session;
-  if(!userSession?.user.id) throw new UnAuthorizedError("")
+  const session = await auth()
+  
+  if(!session) return {
+     success: false
+  }
     const { page = 1, perPage = 2 } = validatedResult.params!
    try {
      await connectDB()
    const skip = Math.max(0, page) * Math.max(1, perPage);
-  const docs = await SaveForLaterModel.find({userId:userSession.user.id,active:true})
+  const docs = await SaveForLaterModel.find({userId:session.user.id,active:true})
   //  .sort({ addedAt: -1 })
     // .skip(skip)
     // .limit(perPage)

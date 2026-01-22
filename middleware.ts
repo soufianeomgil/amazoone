@@ -1,6 +1,11 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-
+// TODO: PROTECT ROUTES LIKE ORDERS PAGE AND FIX RENDERING CART ITEMS;
+// TODO: THANKYOU PAGE;
+// TODO: SHOULDERS DAY;
+// TODO: PAY DART;
+// TODO: FB ADS;
+// PUT MONEY IN BANK TO GET CRDET CARD;
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const user = req.auth?.user;

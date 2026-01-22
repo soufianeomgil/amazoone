@@ -67,8 +67,9 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
   const {data} = await getSavedListsAction({page: 1,limit: 10, includeArchived:true})
   const {error} = await trackProductView({userId:session?.user.id!,productId: productId,productTags: result.data?.product.tags!})
   if(error) {
-    console.log(error.message, "ERROR: TRACK PRODUCT VIEW")
+    console.log(error.message, "ERROR: TRACK PRODUCT VIEW HAKIM")
   }
+  console.log(error, "HAKIM ERROR ")
   // If the API shape differs, ensure a safe product object
   const product: IProduct | null = result?.data?.product ?? null;
  const productVideos = [

@@ -20,7 +20,7 @@ const page = async () => {
       const res = await getCurrentUser()
       const {data,error} = await getUserSaveForLaterItems({})
       console.log(data?.items, "data items")
-      console.log('error:', error)
+      console.log('error now:', error)
   
   const totalQty = result?.data?.qty ?? 0;
   
@@ -30,7 +30,7 @@ const page = async () => {
   const hasSavedItems = Array.isArray(data?.items) && data.items.length > 0;
 
   return (
-    <div className="w-full bg-inherit">
+    <div className={`${hasCartItems ? "" : "bg-white"} w-full bg-inherit`}>
  <div className="max-w-7xl overflow-hidden mx-auto sm:p-4">
       {hasCartItems ? (
         <>

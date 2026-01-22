@@ -114,7 +114,9 @@ export async function trackProductView(params: trackProductViewParams) : Promise
     try {
         await connectDB()
          const user = await User.findById(userId) as IUser
-    if (!user) throw new NotFoundError("User")
+    if (!user) return {
+        success: false,
+    }
     
   const existing = user.browsingHistory.find(
     h => String(h.product) === productId

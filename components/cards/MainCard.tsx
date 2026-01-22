@@ -563,19 +563,23 @@ const MainCard: React.FC<Props> = ({
 
         {/* Footer */}
         <div
-          className="p-3 border-t border-gray-100 bg-white flex items-center justify-between"
+          className="py-2 px-2 border-t border-gray-100 bg-white flex items-center justify-between"
           style={{ minHeight: 68 }}
         > 
          <div className="flex flex-col">
                <div className="flex items-center gap-2">
-                 <span className="sm:text-xl text-[15px] font-black text-gray-900">${priceForDisplay}</span>
+                 <span className="sm:text-xl text-[12px] font-black text-gray-900">${priceForDisplay}</span>
                  <span className="text-[10px] font-bold bg-red-100 text-red-600 px-1 rounded">
                    -{calculateDiscount(product.basePrice + 50, product.basePrice)}%
                  </span>
-               </div>
-               <span className="text-[10px] text-gray-400 line-through">
-                 List Price: ${(product.basePrice + 50).toFixed(2)}
+               </div> 
+             
+ <span className="text-[10px] text-gray-400 line-through">
+                 <span className="max-sm:hidden">List Price:</span> ${(product.basePrice + 50).toFixed(2)}
                </span>
+            
+             
+              
              </div>
           {/* <div className="flex flex-col">
             <div className="flex gap-1.5 items-center">
@@ -595,14 +599,14 @@ const MainCard: React.FC<Props> = ({
             </span>
           </div> */}
 
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex  flex-col ml-1.5 items-end ">
             {!isWishlist && (
               <button
                 onClick={handleAddToCart}
                 disabled={loading || (chosenVariant && chosenVariant.stock === 0)}
-                className="flex bg-[hsl(178,100%,34%)] cursor-pointer rounded-full w-[35px] h-[35px] items-center justify-center disabled:opacity-60"
+                className="flex bg-[hsl(178,100%,34%)] cursor-pointer rounded-full w-[30px] h-[30px] items-center justify-center disabled:opacity-60"
               >
-                <ShoppingCart size={16} color="white" />
+                <ShoppingCart size={14} color="white" />
               </button>
             )}
           </div>

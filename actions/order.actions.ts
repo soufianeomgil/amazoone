@@ -311,7 +311,7 @@ interface GetOrderDetailsParams {
 }
 export async function getOrderDetails(
   params: GetOrderDetailsParams
-): Promise<ActionResponse<{ order: IOrder }>> {
+): Promise<ActionResponse<{ order: IOrderDoc }>> {
 
   const validatedResult = await action({
     params,

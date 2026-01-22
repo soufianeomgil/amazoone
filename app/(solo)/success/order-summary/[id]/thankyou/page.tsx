@@ -54,7 +54,7 @@ const page = async({params}: {params: Promise<{id:string}>}) => {
                <p className='font-semibold text-[#333] text-[16px] '>Commande</p>
                <Link className='underline text-light_blue font-medium text-[16px] ' href={`/`}>
                   <span>
-                     {data?.order._id}
+                     {data?.order?.id}
                   </span>
                </Link>
           </div>
@@ -70,7 +70,7 @@ const page = async({params}: {params: Promise<{id:string}>}) => {
                       </p>
                       <div>
                          
-                          <p className='font-light text-gray-400 text-xs '>Vendu par {x.productId.brand}.</p>
+                          <p className='font-light text-gray-400 text-xs '>Vendu par {(x.productId as any).brand}.</p>
                           <p className='font-light text-gray-400 text-xs '><span>Qté :</span>{x.quantity}</p>
                           <h4 className='font-semibold text-black text-[18px]'>
                              {formatPrice(x.unitPrice)}

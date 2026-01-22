@@ -19,7 +19,7 @@ export default auth((req) => {
   ) {
     return NextResponse.next();
   }
-  if(!user && pathname.startsWith("/account") || pathname.startsWith("/checkout") || pathname.startsWith("/profile") || pathname.startsWith("/security-settings")) {
+  if(!user && pathname.startsWith("/account") || pathname.startsWith("/profile") || pathname.startsWith("/security-settings")) {
     return NextResponse.redirect(
       new URL("/", req.url)
     );

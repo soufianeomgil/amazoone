@@ -1,111 +1,169 @@
 import { getOrderDetails } from '@/actions/order.actions'
 import { auth } from '@/auth'
 import Alert from '@/components/shared/Alert'
-
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/utils'
-import { CreditCard } from 'lucide-react'
+import { CreditCard, CheckCircle2, Phone, MapPin, Package, ArrowLeft } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 
-const page = async({params}: {params: Promise<{id:string}>}) => {
+const OrderSuccessPage = async ({ params }: { params: Promise<{ id: string }> }) => {
     const id = (await params).id
-    const { data , error } = await getOrderDetails({orderId:id})
+    const { data, error } = await getOrderDetails({ orderId: id })
     const session = await auth()
 
-  return (
-    <section className='w-full'>
-         {error ? (
-             <div className='py-10'>
-                <Alert message={error.message} />
-             </div>
-         ):(
-            <>
-   <div style={{background: "rgba(0, 175, 170, .1)"}} className=' flex lg:flex-row lg:gap-2 flex-col items-center
-         justify-center leading-[1.8] text-center p-4 '>
-          <CreditCard className='text-light_blue lg:text-[25px] text-[20px] ' />
-            <p className='text-light_blue font-bold lg:text-[20px] text-[16px] '>Paiement à la livraison</p>
-        </div>
-        <div className="flex  mt-5 max-w-[1500px] border-b pb-5 border-black mx-auto lg:px-5 gap-4 px-3 items-start lg:flex-row flex-col lg:justify-between">
-             <div className='flex flex-col'>
-                 <h4 className='text-[22px] font-medium text-primary mb-2 leading-[1.8] '>Merci pour votre commande</h4>
-                 <p className="text-[#333] font-normal max-w-[500px] text-[16px] ">Vous allez recevoir un email de confirmation comprenant le numéro de commande, les liens de suivi et le détail de votre commande</p>
-             </div>
-             <div>
-                <h4 className='text-[22px] font-medium text-primary leading-[1.8] '>Livrée à</h4>
-                <div>
-                    <p className="text-[#333] font-normal  text-[16px] ">Mr. {session?.user.name}</p>
-                    <p className="text-[#333] font-normal  text-[16px] ">
-                         {data?.order.shippingAddress.addressLine1}
-                    </p>
-                    <p className="text-[#333] font-normal  text-[16px] ">{data?.order.shippingAddress.city}, {data?.order.shippingAddress.zipCode} <span>Morocco</span> </p>
-                    <p className="text-[#333] font-normal  text-[16px] ">
-                    +212{data?.order.shippingAddress.phone}
-                    </p>
-                    <div className='flex items-center gap-2.5'>
-                       <span className='text-light_blue font-light text-[16px] '>Total frais de livraison</span>
-                       <span  className='text-light_blue font-light text-[16px] '>15,00 Dh</span>
+    if (error) {
+        return (
+            <section className='w-full bg-gray-50 min-h-screen py-10'>
+                <div className='max-w-4xl mx-auto px-4'>
+                    <Alert message={error.message} />
+                </div>
+            </section>
+        )
+    }
+
+    return (
+        <section className='w-full bg-[#f8fafc] min-h-screen'>
+            {/* Header / Navbar */}
+            <div className="bg-teal-900 text-white shadow-md">
+                <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+                    <Link href="/" className="transition-opacity hover:opacity-80">
+                        <Image
+                            src="/ij.png"
+                            alt="OMGIL Logo"
+                            priority
+                            height={40}
+                            width={90}
+                            className="h-[35px] md:h-[45px] w-auto object-contain invert"
+                        />
+                    </Link>
+                    <div className="text-sm text-right hidden sm:block">
+                        <div className="font-medium opacity-80">Une question ?</div>
+                        <div className="font-bold text-teal-400">08 02 00 77 00</div>
                     </div>
                 </div>
-             </div>
-        </div>
-        <div className='flex items-center max-w-[1200px] mx-auto px-3 flex-col mt-7 justify-center'>
-          <div className='bg-gray-200 rounded-tr-lg mb-4 rounded-tl-lg p-4 flex items-center justify-between w-full '>
-               <p className='font-semibold text-[#333] text-[16px] '>Commande</p>
-               <Link className='underline text-light_blue font-medium text-[16px] ' href={`/`}>
-                  <span>
-                     {data?.order?.id}
-                  </span>
-               </Link>
-          </div>
-           <div className='grid lg:grid-cols-2 grid-cols-1 gap-2.5'>
-             {data?.order.items.map((x,index) => (
-                  <div key={index} className='border border-light_gray rounded-xl p-4 flex items-start gap-4 '>
-                  <div className='border border-light_gray  w-[140px]  '>
-                     <img className='w-full h-full object-contain' src={x.thumbnail ?? ""} alt={x.name} />
-                  </div>
-                  <div className='flex flex-col gap-2 justify-between'>
-                      <p className='font-semibold text-[#222] text-sm '>
-                         {x.name}
-                      </p>
-                      <div>
-                         
-                          <p className='font-light text-gray-400 text-xs '>Vendu par {(x.productId as any).brand}.</p>
-                          <p className='font-light text-gray-400 text-xs '><span>Qté :</span>{x.quantity}</p>
-                          <h4 className='font-semibold text-black text-[18px]'>
-                             {formatPrice(x.unitPrice)}
-                          </h4>
-                      </div>
-                  </div>
-             </div>
-             ))}
-               
-                {/* <div className='border border-light_gray rounded-xl p-[16px] flex items-start gap-4 '>
-                     <div className='border border-light_gray  w-[140px]  '>
-                        <img className='w-full h-full object-contain' src="https://www.marjanemall.ma/media/catalog/product/cache/217553b69ac53547513500483223f4df/_/p/_pdt2_4_1_2_1_700x700_AAAAG87412_2.jpg" alt="" />
-                     </div>
-                     <div className='flex flex-col gap-2 justify-between'>
-                         <p className='font-semibold text-[#222] text-sm '>Verres à Eau - TUA FH - Set de 6 - Transparent - Verre Plat - Compatible Lave-Vaisselle</p>
-                         <div>
-                             <p className='font-light text-gray-400 text-xs '>Vendu par Marjane.</p>
-                             <p className='font-light text-gray-400 text-xs '><span>Qté :</span>1</p>
-                             <h4 className='font-semibold text-black text-[18px]'>45,95 Dh</h4>
-                         </div>
-                     </div>
-                </div> */}
-           </div>
-            <Link href="/">
-                <Button className='bg-light_blue  my-10 rounded-full
-                 w-[300px] h-12 hover:bg-light_blue text-white font-medium ' type="button">
-                    Retour aux achats
-                </Button>
-            </Link>
-        </div>
-            </>
-         )}
-       
-    </section>
-  )
+            </div>
+
+            {/* Payment Method Banner */}
+            <div className='bg-teal-50 border-b border-teal-100 py-3'>
+                <div className='flex items-center justify-center gap-2 text-teal-700'>
+                    <CreditCard size={20} />
+                    <p className='font-bold uppercase tracking-wide text-sm'>Paiement à la livraison</p>
+                </div>
+            </div>
+
+            <main className="max-w-5xl mx-auto px-4 py-8 md:py-12">
+                {/* Success Message Section */}
+                <div className="flex flex-col items-center text-center mb-10">
+                    <div className="bg-green-100 p-3 rounded-full mb-4">
+                        <CheckCircle2 className="text-green-600 h-10 w-10" />
+                    </div>
+                    <h1 className='text-2xl md:text-3xl font-bold text-slate-900 mb-2'>Merci pour votre commande !</h1>
+                    <p className="text-slate-600 max-w-lg">
+                        Votre commande <span className="font-bold text-slate-900">#{data?.order?.id.slice(-8).toUpperCase()}</span> a été enregistrée. 
+                        Un email de confirmation vous a été envoyé à {session?.user.email}.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Left Column: Order Items */}
+                    <div className="lg:col-span-2 space-y-4">
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                                <div className="flex items-center gap-2 font-bold text-slate-800">
+                                    <Package size={18} />
+                                    <span>Articles commandés</span>
+                                </div>
+                                <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                                    {data?.order.items.length} {data?.order.items.length === 1 ? 'article' : 'articles'}
+                                </span>
+                            </div>
+                            
+                            <div className="divide-y divide-slate-100">
+                                {data?.order.items.map((item, index) => (
+                                    <div key={index} className="p-4 md:p-6 flex gap-4 md:gap-6">
+                                        <div className="h-24 w-24 flex-shrink-0 bg-slate-50 rounded-lg border border-slate-100 p-1">
+                                            <img 
+                                                className='w-full h-full object-contain' 
+                                                src={item.thumbnail ?? ""} 
+                                                alt={item.name} 
+                                            />
+                                        </div>
+                                        <div className="flex flex-col flex-grow">
+                                            <h3 className="text-sm md:text-base font-semibold text-slate-900 mb-1 line-clamp-2">
+                                                {item.name}
+                                            </h3>
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 mb-2">
+                                                <p>Vendu par: <span className="text-slate-700 font-medium">{(item.productId as any).brand}</span></p>
+                                                <p>Quantité: <span className="text-slate-700 font-medium">{item.quantity}</span></p>
+                                            </div>
+                                            <p className="text-lg font-bold text-teal-600 mt-auto">
+                                                {formatPrice(item.unitPrice)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-teal-600 transition-colors text-sm font-medium py-2">
+                            <ArrowLeft size={16} />
+                            Continuer mes achats
+                        </Link>
+                    </div>
+
+                    {/* Right Column: Shipping & Summary */}
+                    <div className="space-y-6">
+                        {/* Shipping Address Card */}
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <div className="flex items-center gap-2 font-bold text-slate-800 mb-4">
+                                <MapPin size={18} className="text-teal-600" />
+                                <span>Détails de livraison</span>
+                            </div>
+                            <div className="space-y-1 text-slate-600 text-sm">
+                                <p className="font-bold text-slate-900">Mr. {session?.user.name}</p>
+                                <p>{data?.order.shippingAddress.addressLine1}</p>
+                                <p>{data?.order.shippingAddress.city}, {data?.order.shippingAddress.zipCode}</p>
+                                <div className="flex items-center gap-2 pt-2 text-slate-900">
+                                    <Phone size={14} />
+                                    <span className="font-medium">+212 {data?.order.shippingAddress.phone}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Order Summary Card */}
+                        <div className="bg-slate-900 rounded-xl shadow-lg text-white p-6">
+                            <h3 className="font-bold text-lg mb-4 border-b border-slate-700 pb-2">Récapitulatif</h3>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between opacity-80">
+                                    <span>Sous-total</span>
+                                    <span>{formatPrice(data?.order.subtotal! - 15)}</span>
+                                </div>
+                                <div className="flex justify-between opacity-80">
+                                    <span>Frais de livraison</span>
+                                    <span>15,00 Dh</span>
+                                </div>
+                                <div className="flex justify-between text-lg font-bold pt-3 border-t border-slate-700">
+                                    <span>Total à payer</span>
+                                    <span className="text-teal-400">{formatPrice(data?.order.total!)}</span>
+                                </div>
+                            </div>
+                            <p className="text-[10px] mt-4 opacity-50 italic text-center">
+                                Payable en espèces à la réception de votre colis.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer className="bg-slate-100 text-slate-500 py-8 border-t border-slate-200">
+                <div className="max-w-6xl mx-auto px-6 text-center text-sm font-medium">
+                    © 2026 Omgil Marketplace. Tous droits réservés.
+                </div>
+            </footer>
+        </section>
+    )
 }
 
-export default page
+export default OrderSuccessPage

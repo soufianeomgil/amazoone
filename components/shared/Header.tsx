@@ -169,7 +169,7 @@ const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
                         {/* Wishlist */}
                         <Link href={ROUTES.mywishlist} className="p-1.5 md:p-2 border border-transparent hover:border-white rounded-sm relative">
                             <Heart className="h-7 w-7" />
-                           {totalWishQty && totalWishQty > 0 && <span className="absolute top-1 right-1 bg-[#FEBD69] text-black text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                           {totalWishQty && totalWishQty !== 0 && <span className="absolute top-1 right-1 bg-[#FEBD69] text-black text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                               {totalWishQty} </span>} 
                         </Link>
 

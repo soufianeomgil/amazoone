@@ -77,13 +77,16 @@ export default function SignUpForm() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center pt-10 pb-16 px-4">
       {/* Top logo */}
-      <Link href="/" className="mb-6">
-        <Image height={96} width={96}
-          src="https://pngimg.com/uploads/amazon/amazon_PNG25.png"
-          alt="Amazon"
-          className=" invert"
-        />
-      </Link>
+      <Link href="/" className="mb-4 ">
+                             <Image
+                                src="/ij.png"
+                                alt="OMGIL Logo" 
+                                priority
+                                height={80}
+                                width={140}
+                                className="  object-contain" 
+                            />
+                        </Link>
 
       <div className="w-full max-w-md">
         <div className="bg-white border border-gray-200 rounded-md shadow-sm">

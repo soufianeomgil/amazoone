@@ -1,15 +1,15 @@
 "use server"
 import { ROUTES } from "@/constants/routes";
 import connectDB from "@/database/db";
+import { cache } from "@/lib/cache";
 import { action } from "@/lib/handlers/action";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors";
 import { CreateListSchema, EditWishlistSchema } from "@/lib/zod";
 import { IVariant, Product } from "@/models/product.model";
 import SavedList, { ISavedItem, ISavedList } from "@/models/savedList.model";
-// server/actions/createSavedListAction.ts
 import mongoose from "mongoose";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
 
@@ -140,6 +140,8 @@ export default async function toggleSavedListItemAction(params: ToggleItemParams
     });
 
     mongoSession.endSession();
+    revalidateTag(`savedlists:${session.user.id}`);
+    revalidatePath(ROUTES.mywishlist)
 
     return { success: true, data: result }
   } catch (err) {
@@ -436,7 +438,8 @@ export async function addItemToListAction(params: ParamsProps): Promise<
     // revalidate client-side path
     
       revalidatePath(ROUTES.mywishlist);
-   
+   revalidateTag(`savedlists:${userId}`);
+
 
     return {
       success: true,
@@ -488,7 +491,7 @@ export async function editWishlistAction(
     if (!updated) {
       throw new NotFoundError("List not found or access denied");
     }
-
+   revalidatePath(ROUTES.mywishlist)
     return { success: true };
   } catch (error) {
     return handleError(error) as ErrorResponse;
@@ -533,7 +536,9 @@ export async function EmptyWishlistAction(params: EmptyWishlistParams): Promise<
     if (!updated) {
       throw new NotFoundError("List not found or already empty")
     }
-   revalidatePath("/account/wishlist/list")
+   revalidatePath(ROUTES.mywishlist)
+   revalidateTag(`savedlists:${session.user.id}`);
+
     return {
       success: true,
     }
@@ -584,6 +589,8 @@ export async function deleteWishlistAction(params: {
 
     await SavedList.deleteOne({ _id: id });
     revalidatePath(ROUTES.mywishlist)
+    revalidateTag(`savedlists:${session.user.id}`);
+
     return {
       success: true,
     };
@@ -665,6 +672,7 @@ export async function setDefaultWishlistAction(
 
       await dbSession.commitTransaction();
       revalidatePath(ROUTES.mywishlist)
+
       return { success: true };
     } catch (err) {
       await dbSession.abortTransaction();
@@ -766,6 +774,8 @@ export async function addItemToDefaultListAction(
     mongoSession.endSession();
 
     revalidatePath(ROUTES.mywishlist);
+    revalidateTag(`savedlists:${session.user.id}`);
+
 
     return {
       success: true,
@@ -821,6 +831,8 @@ export async function removeItemFromSavedListAction(
     const after = list.items.length;
    
     revalidatePath(ROUTES.mywishlist);
+    revalidateTag(`savedlists:${session.user.id}`);
+
 
     return {
       success: true,
@@ -832,3 +844,47 @@ export async function removeItemFromSavedListAction(
 }
 
 
+// actions/savedList.actions.ts
+
+
+
+
+ async function _getSavedListsCount(userId: string): Promise<{ totalItems: number }> {
+  await connectDB();
+
+  const uid = new mongoose.Types.ObjectId(userId);
+
+  const result = await SavedList.aggregate([
+    { $match: { userId: uid, archived: { $ne: true } } },
+    { $project: { itemsCount: { $size: "$items" } } },
+    { $group: { _id: null, totalItems: { $sum: "$itemsCount" } } },
+  ]);
+
+  return  {totalItems: result?.[0]?.totalItems ?? 0 }
+  
+}
+
+// ✅ Cached wrapper (10-30s is perfect for header badges)
+const getSavedListsCountCached = (userId: string) =>
+  cache(
+    () => _getSavedListsCount(userId),
+    ["savedlists:count", userId],
+    { revalidate: 20, tags: [`savedlists:${userId}`] }
+  )();
+
+export async function getSavedListsCountAction(): Promise<ActionResponse<{ totalItems: number }>> {
+  const validated = await action({ authorize: true });
+  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
+
+  const session = validated.session;
+  if (!session?.user?.id) return{
+     success: false
+  }
+
+  try {
+    const data = await getSavedListsCountCached(session.user.id);
+    return { success: true, data };
+  } catch (err) {
+    return handleError(err) as ErrorResponse;
+  }
+}

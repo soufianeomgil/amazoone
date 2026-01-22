@@ -19,10 +19,11 @@ import SearchInput from './SearchInput';
 interface HeaderProps {
     qty?: number;
     session: Session | null;
-    isAuthenticated: boolean;
+    
+    totalWishQty: number | null
 }
 
-const Header = ({ qty, session }: HeaderProps) => {
+const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isRightMenuOpen, setIsRightMenuOpen] = useState(false);
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
@@ -127,7 +128,7 @@ const Header = ({ qty, session }: HeaderProps) => {
                                         <ChevronDown size={14} className="ml-0.5 text-gray-500" />
                                     </div>
                                 </div>
-                                <div className="p-1.5 md:p-2 border border-transparent hover:border-white rounded-sm relative">
+                                <div className="p-1.5 md:hidden md:p-2 border border-transparent hover:border-white rounded-sm relative">
                                     <User className="h-7 w-7" />
                                      <span className="absolute top-1 right-1 bg-[#FEBD69] text-black text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">SH</span>
                                 </div>
@@ -168,18 +169,19 @@ const Header = ({ qty, session }: HeaderProps) => {
                         {/* Wishlist */}
                         <Link href={ROUTES.mywishlist} className="p-1.5 md:p-2 border border-transparent hover:border-white rounded-sm relative">
                             <Heart className="h-7 w-7" />
-                            <span className="absolute top-1 right-1 bg-[#FEBD69] text-black text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">2</span>
+                           {totalWishQty && totalWishQty > 0 && <span className="absolute top-1 right-1 bg-[#FEBD69] text-black text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                              {totalWishQty} </span>} 
                         </Link>
 
                         {/* Cart */}
                         <Link href="/cart" className="flex items-end p-1.5 md:p-2 border border-transparent hover:border-white rounded-sm relative">
                             <div className="relative">
                                 <CartIcon />
-                               {qty! > 0 || totalCartItems > 0 && (
+                              
 <span className="absolute -top-1 left-3 bg-[#FEBD69] text-black text-[11px] font-bold rounded-full h-4 w-5 flex items-center justify-center">
                                     {qty || totalCartItems}
                                 </span>
-                               )} 
+                             
                             </div>
                             <span className="hidden md:inline font-bold text-[14px] ml-1">Cart</span>
                         </Link>

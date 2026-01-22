@@ -7,6 +7,7 @@ import { getAuthenticatedUserCart } from "@/actions/cart.actions";
 import { auth } from "@/auth";
 import MobileFooter from "@/components/shared/MobileFooter";
 import WhatsAppSupport from "@/components/shared/WhatsappSupport";
+import { getSavedListsCountAction } from "@/actions/savedList.actions";
 
 
 
@@ -29,11 +30,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth()
+  const res = await getSavedListsCountAction();
+  const total = res?.data?.totalItems ?? 0;
   const result = await getAuthenticatedUserCart({userId: session?.user?.id as string})
   return (
     
         <main className="min-h-screen w-full">
-           <Header qty={result.data?.qty} session={session} isAuthenticated={session?.user !== null} />
+           <Header totalWishQty={total} qty={result.data?.qty} session={session}  />
   {children}
    <WhatsAppSupport />
   <Footer />

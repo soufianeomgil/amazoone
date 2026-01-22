@@ -1,9 +1,10 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-// TODO: PROTECT ROUTES LIKE ORDERS PAGE AND FIX RENDERING CART ITEMS;
-// TODO: THANKYOU PAGE;
+// TODO: PROTECT ROUTES LIKE ORDERS PAGE [DONE]
+// TODO:  FIX RENDERING CART ITEMS;
+// TODO: THANKYOU PAGE [DONE];
 // TODO: SHOULDERS DAY;
-// TODO: PAY DART;
+// TODO: PAY DART [DONE];
 // TODO: FB ADS;
 // PUT MONEY IN BANK TO GET CRDET CARD;
 export default auth((req) => {
@@ -18,7 +19,11 @@ export default auth((req) => {
   ) {
     return NextResponse.next();
   }
-
+  if(!user && pathname.startsWith("/account") || pathname.startsWith("/checkout") || pathname.startsWith("/profile") || pathname.startsWith("/security-settings")) {
+    return NextResponse.redirect(
+      new URL("/", req.url)
+    );
+  }
   // Logged in but profile incomplete
   if (user && !user.profileCompleted) {
     return NextResponse.redirect(

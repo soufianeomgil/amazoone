@@ -110,15 +110,16 @@ export default function ForgotPasswordForm() {
   if (step === "verify") {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center pt-10 pb-16 px-4">
-        <Link href="/" className="mb-6">
-          <Image 
-           width={48}
-           height={48}
-            src="https://pngimg.com/uploads/amazon/amazon_PNG25.png"
-            alt="Amazon Logo"
-            className="h-12 invert"
-          />
-        </Link>
+        <Link href="/" className="mb-4 ">
+                             <Image
+                                src="/ij.png"
+                                alt="OMGIL Logo" 
+                                priority
+                                height={80}
+                                width={140}
+                                className="  object-contain" 
+                            />
+                        </Link>
 
         <div className="w-full max-w-sm">
           <div className="bg-white border border-gray-200 rounded-md shadow-sm">
@@ -186,15 +187,16 @@ export default function ForgotPasswordForm() {
    */
   return (
     <div className="min-h-screen bg-white flex flex-col items-center pt-10 pb-16 px-4">
-      <Link href="/" className="mb-6">
-        <Image 
-         width={48}
-         height={48}
-          src="https://pngimg.com/uploads/amazon/amazon_PNG25.png"
-          alt="Amazon Logo"
-          className="h-12 invert"
-        />
-      </Link>
+      <Link href="/" className="mb-4 ">
+                                  <Image
+                                     src="/ij.png"
+                                     alt="OMGIL Logo" 
+                                     priority
+                                     height={80}
+                                     width={140}
+                                     className="  object-contain" 
+                                 />
+                             </Link>
 
       <div className="w-full max-w-sm">
         <div className="bg-white border border-gray-200 rounded-md shadow-sm">

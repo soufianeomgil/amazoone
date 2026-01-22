@@ -84,15 +84,16 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center pt-10 pb-16 px-4">
       {/* Logo */}
-      <Link href="/" className="mb-6">
-        <Image 
-         width={96}
-         height={96}
-          src="https://pngimg.com/uploads/amazon/amazon_PNG25.png"
-          alt="Amazon Logo"
-          className=" invert"
-        />
-      </Link>
+      <Link href="/" className="mb-4 ">
+                             <Image
+                                src="/ij.png"
+                                alt="OMGIL Logo" 
+                                priority
+                                height={80}
+                                width={140}
+                                className="  object-contain" 
+                            />
+                        </Link>
 
       {/* Card */}
       <div className="w-full max-w-sm">

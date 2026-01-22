@@ -3,6 +3,7 @@ import WishlistClient from "./_components/WishlistClient"
 import { getSavedListsAction } from "@/actions/savedList.actions"
 
 
+
 const page = async () => {
   const session = await auth()
 
@@ -18,7 +19,7 @@ const page = async () => {
     lists.find(list => list.isDefault) ?? lists[0]
 
   const products = defaultList?.items ?? []
-
+  console.log(listsResult.data?.meta.total, "TOTAL")
   return (
     <WishlistClient
       session={session}

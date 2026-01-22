@@ -162,7 +162,7 @@ const payload = {
   weight: 25,
 })
 // @ts-ignore
-            router.push(`/success/order-summary/${data?.order?.id}`)  
+            router.push(`/success/order-summary/${data?.order?.id}/thankyou`)  
             return
          }
       } catch (error) {

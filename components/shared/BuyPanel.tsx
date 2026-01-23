@@ -17,6 +17,7 @@ import { ISavedList } from "@/models/savedList.model";
 import { LocationIcon } from "./icons";
 import AmazonPrice from "./AmazonPrice";
 import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
+import { gaEvent } from "@/lib/analytics/ga";
 
 type LocalCartItem = {
   _id: string;
@@ -84,6 +85,20 @@ const BuyPanel = ({ product, data,userId }: { product: IProduct; userId: string;
   tags: product.tags,
   weight: 10,
 })
+gaEvent("add_to_cart", {
+  currency: "MAD",
+  value: payload.basePrice,
+  items: [{
+    item_id: payload.productId,
+    item_name: payload.name,
+    item_brand: payload.brand,
+    item_image: payload?.variant?.images?.[0]?.url ?? (payload.productId as any).thumbnail.url,
+    price: payload.basePrice,
+    quantity: payload.quantity,
+    item_variant: payload.variant ?? undefined,
+  }],
+});
+
       setOpen(true);
       router.refresh?.();
     } finally {

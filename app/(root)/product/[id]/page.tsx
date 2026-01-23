@@ -26,6 +26,7 @@ import { LocationIcon } from '@/components/shared/icons';
 import { trackProductView } from '@/actions/recommendations.actions';
 import { auth } from '@/auth';
 import { Metadata } from 'next';
+import { gaEvent } from '@/lib/analytics/ga';
   export async function generateMetadata({ params }: { params:  Promise<{id: string}>  }): Promise<Metadata> {
   const { id } = await params;
   const { data } = await getSignleProduct({ productId: id });
@@ -65,11 +66,8 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
   };
 
   const {data} = await getSavedListsAction({page: 1,limit: 10, includeArchived:true})
-  const {error} = await trackProductView({userId:session?.user.id!,productId: productId,productTags: result.data?.product.tags!})
-  if(error) {
-    console.log(error.message, "ERROR: TRACK PRODUCT VIEW HAKIM")
-  }
-  console.log(error, "HAKIM ERROR ")
+   await trackProductView({userId:session?.user.id!,productId: productId,productTags: result.data?.product.tags!})
+ 
   // If the API shape differs, ensure a safe product object
   const product: IProduct | null = result?.data?.product ?? null;
  const productVideos = [
@@ -87,6 +85,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
   },
 ];
 
+
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -97,6 +96,17 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
       </div>
     );
   }
+  gaEvent("view_item", {
+  currency: "MAD",
+  value: product.basePrice,
+  items: [{
+    item_id: product._id,
+    item_name: product.name,
+     image: product.thumbnail.url,
+    item_brand: product.brand,
+    price: product.basePrice,
+  }],
+});
 
   // Fallbacks for a few commonly-missing fields
   const safeThumbnail = product.thumbnail ?? { url: '', preview: '', public_id: '' };

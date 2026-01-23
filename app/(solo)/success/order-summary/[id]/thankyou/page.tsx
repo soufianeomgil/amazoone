@@ -2,6 +2,7 @@ import { getOrderDetails } from '@/actions/order.actions'
 import { auth } from '@/auth'
 import Alert from '@/components/shared/Alert'
 import { Button } from '@/components/ui/button'
+import { gaEvent } from '@/lib/analytics/ga'
 import { formatPrice } from '@/lib/utils'
 import { CreditCard, CheckCircle2, Phone, MapPin, Package, ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
@@ -22,7 +23,18 @@ const OrderSuccessPage = async ({ params }: { params: Promise<{ id: string }> })
             </section>
         )
     }
-
+gaEvent("purchase", {
+  currency: "MAD",
+  total: data?.order.total,
+  address: data?.order.shippingAddress,
+  items:data?.order.items.map(i => ({
+    item_id: i.productId._id,
+    item_name: i.name,
+    image: i.thumbnail,
+    price: i.linePrice,
+    quantity: i.quantity,
+  })),
+});
     return (
         <section className='w-full bg-[#f8fafc] min-h-screen'>
             {/* Header / Navbar */}

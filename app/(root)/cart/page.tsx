@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 
 import SoldWith from "./_component/SoldWith";
 import EmptyOrder from "../account/order-history/_components/EmptyOrder";
+import { gaEvent } from "@/lib/analytics/ga";
 
 const page = async () => {
   // Authorize & fetch resources in parallel
@@ -19,8 +20,7 @@ const page = async () => {
       const result = await getAuthenticatedUserCart({userId: userId})
       const res = await getCurrentUser()
       const {data,error} = await getUserSaveForLaterItems({})
-      console.log(data?.items, "data items")
-      console.log('error now:', error)
+     
   
   const totalQty = result?.data?.qty ?? 0;
   
@@ -28,6 +28,18 @@ const page = async () => {
   // UI-level booleans
   const hasCartItems = Array.isArray(result?.data?.userCart?.items) && result.data.userCart.items.length > 0;
   const hasSavedItems = Array.isArray(data?.items) && data.items.length > 0;
+gaEvent("view_cart", {
+  currency: "MAD",
+  value: totalQty,
+  items: result?.data?.userCart.items.map((i) => ({
+    item_id: i.productId,
+    item_name: (i.productId as any).name,
+    price: (i.productId as any).basePrice,
+    image: i?.variant?.images?.[0]?.url ?? (i.productId as any).thumbnail.url,
+    quantity: i.quantity,
+    item_variant: i.variant ?? undefined,
+  })),
+});
 
   return (
     <div className={`${hasCartItems ? "" : "bg-white"} w-full bg-inherit`}>

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
 import { SpinnerIcon } from "@/components/shared/icons";
+import { gaEvent } from "@/lib/analytics/ga";
 
 
 
@@ -161,7 +162,10 @@ const payload = {
   tags: cartItems.items.map((item) => (item.productId as any).tags),
   weight: 25,
 })
+
+
 // @ts-ignore
+
             router.push(`/success/order-summary/${data?.order?.id}/thankyou`)  
             return
          }

@@ -5,6 +5,7 @@ import connectDB from '@/database/db';
 import { action } from '@/lib/handlers/action';
 import handleError from '@/lib/handlers/error';
 import { Cart, ICart, ICartItem } from '@/models/cart.model';
+import { IVariant } from '@/models/product.model';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
 
@@ -14,7 +15,7 @@ interface AddToCartParams {
     productId: string;
     quantity: number;
     variantId?: string | null;
-    variant?: Record<string, any> | null;
+    variant?: IVariant;
   };
 }
 
@@ -114,7 +115,7 @@ export async function updateCartItemQuantity({
     const item = cart.items.find((i: ICartItem) => {
       const storedProductId = String(i.productId);
       // stored variant may be undefined/null/ObjectId/string
-      const storedVariant = i.variant._id === undefined || i.variant._id === null ? null : String(i.variant._id);
+      const storedVariant = i?.variant?._id === undefined || i.variant._id === null ? null : String(i.variant._id);
       return storedProductId === String(productId) && storedVariant === normalizedVariantId;
     });
 

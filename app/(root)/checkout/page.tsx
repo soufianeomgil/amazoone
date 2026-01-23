@@ -7,6 +7,7 @@ import { getAuthenticatedUserCart } from "@/actions/cart.actions";
 import { auth } from "@/auth";
 import { ICart } from "@/models/cart.model";
 import { redirect } from "next/navigation";
+import { gaEvent } from "@/lib/analytics/ga";
 
 
 const Checkout= async() => {
@@ -14,6 +15,8 @@ const Checkout= async() => {
   if(!session) redirect("/login?checkout=true")
  const result = await getAuthenticatedUserCart({userId: session?.user.id as string})
    if(result.data?.qty === 0) redirect("/cart")
+    gaEvent("begin_checkout", { currency: "MAD", value: result.data?.qty, items:result.data?.userCart.items });
+
   return (
     <div className="w-full">
       <div className="bg-white shadow px-4 flex items-center gap-3 py-5">

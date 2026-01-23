@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { initServer } from "@/lib/init";
 import ConfirmModal from "@/components/shared/modals/ConfirmModal";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 const roboto  = Roboto({
   weight: ["300","400", "500", "600", "700", "800", "900"],
@@ -63,6 +64,7 @@ export default async function RootLayout({
             <Toaster richColors position="top-center" />
             <ConfirmModal />
             <SpeedInsights />
+            <GoogleAnalytics />
         </main>
          
       </SessionProvider>

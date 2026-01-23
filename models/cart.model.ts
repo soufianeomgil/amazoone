@@ -1,10 +1,11 @@
 import mongoose, { model, models, Schema } from 'mongoose';
+import { IVariant } from './product.model';
 
 export  interface ICartItem {
   productId: mongoose.Schema.Types.ObjectId;
   quantity: number;
   variantId?: string | null;           // optional variant id (string)
-  variant?: any | null;                // variant metadata (size/color/etc.)
+  variant?: IVariant | null;                // variant metadata (size/color/etc.)
 }
 
 export interface ICart {

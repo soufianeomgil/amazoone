@@ -96,16 +96,19 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
       </div>
     );
   }
-  gaEvent("view_item", {
+gaEvent("view_item", {
   currency: "MAD",
-  value: product.basePrice,
-  items: [{
-    item_id: product._id,
-    item_name: product.name,
-     image: product.thumbnail.url,
-    item_brand: product.brand,
-    price: product.basePrice,
-  }],
+  value: Number(product.basePrice), // Ensure this is a number
+  items: [
+    {
+      item_id: String(product._id),
+      item_name: product.name,
+      item_brand: product.brand,
+      price: Number(product.basePrice),
+      // GA4 uses 'item_list_name' or 'item_category' instead of 'image'
+      item_category: product.category || "General", 
+    },
+  ],
 });
 
   // Fallbacks for a few commonly-missing fields

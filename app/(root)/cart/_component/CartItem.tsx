@@ -12,6 +12,7 @@ import { addToSaveForLater } from "@/actions/saveForLater.actions";
 import AmazonPrice from "@/components/shared/AmazonPrice";
 import { SpinnerIcon } from "@/components/shared/icons";
 import Image from "next/image";
+import { gaEvent } from "@/lib/analytics/ga";
 
 
 interface Props {
@@ -68,6 +69,19 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }>
          await new Promise(resolve => setTimeout(resolve, 500) )
          dispatch(removeItemAsync({productId,variantId}) as any)
          setPending(false)
+         gaEvent("remove_from_cart", {
+    currency: "MAD",
+    value: Number(item.productId.basePrice) * item.quantity,
+    items: [
+      {
+        item_id: String(product._id),
+        item_name: item.productId.name,
+        item_brand: item.productId.brand,
+        price: Number(item.productId.basePrice),
+        quantity: item.quantity,
+      },
+    ],
+  });
          router.refresh()
       } catch (error) {
           console.log(error)

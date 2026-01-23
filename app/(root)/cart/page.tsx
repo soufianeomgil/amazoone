@@ -28,17 +28,19 @@ const page = async () => {
   // UI-level booleans
   const hasCartItems = Array.isArray(result?.data?.userCart?.items) && result.data.userCart.items.length > 0;
   const hasSavedItems = Array.isArray(data?.items) && data.items.length > 0;
+    const totalPriceNumber = result?.data?.userCart.items.reduce((acc, it) => {
+    const base = Number((it.productId as any)?.basePrice ?? 0);
+    const modifier = Number(it.variant?.priceModifier ?? 0);
+    return acc + (base + modifier) * (it.quantity ?? 0);
+  }, 0);
 gaEvent("view_cart", {
   currency: "MAD",
-  value: totalQty,
-  items: result?.data?.userCart.items.map((i) => ({
-    item_id: i.productId,
-    item_name: (i.productId as any).name,
-    price: (i.productId as any).basePrice,
-    image: i?.variant?.images?.[0]?.url ?? (i.productId as any).thumbnail.url,
-    quantity: i.quantity,
-    item_variant: i.variant ?? undefined,
-  })),
+  value: totalPriceNumber,
+  items: result?.data?.userCart.items.map(item => ({
+    item_id: (item.productId as any)._id,
+    item_name: (item.productId as any).name,
+    price: (item.productId as any).basePrice
+  }))
 });
 
   return (

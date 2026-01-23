@@ -1,13 +1,13 @@
 import { getOrderDetails } from '@/actions/order.actions'
 import { auth } from '@/auth'
 import Alert from '@/components/shared/Alert'
-import { Button } from '@/components/ui/button'
-import { gaEvent } from '@/lib/analytics/ga'
+
 import { formatPrice } from '@/lib/utils'
 import { CreditCard, CheckCircle2, Phone, MapPin, Package, ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import PurchaseTracker from '../../_components/PurchaseTracker'
 
 const OrderSuccessPage = async ({ params }: { params: Promise<{ id: string }> }) => {
     const id = (await params).id
@@ -23,20 +23,10 @@ const OrderSuccessPage = async ({ params }: { params: Promise<{ id: string }> })
             </section>
         )
     }
-gaEvent("purchase", {
-  currency: "MAD",
-  total: data?.order.total,
-  address: data?.order.shippingAddress,
-  items:data?.order.items.map(i => ({
-    item_id: i.productId._id,
-    item_name: i.name,
-    image: i.thumbnail,
-    price: i.linePrice,
-    quantity: i.quantity,
-  })),
-});
+
     return (
         <section className='w-full bg-[#f8fafc] min-h-screen'>
+            <PurchaseTracker order={data?.order} />
             {/* Header / Navbar */}
             <div className="bg-teal-900 text-white shadow-md">
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">

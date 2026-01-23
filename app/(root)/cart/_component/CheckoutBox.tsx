@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import AmazonPrice from "@/components/shared/AmazonPrice";
 import { IUser } from "@/models/user.model";
+import { gaEvent } from "@/lib/analytics/ga";
 
 type Props = {
   isMobile?: boolean;
@@ -59,6 +60,17 @@ export const CheckoutBox: React.FC<Props> = ({ isMobile = false, data, user }) =
         setOpenAuthModel(true)
         return
      }
+     gaEvent("begin_checkout", {
+    currency: "MAD",
+    value: totalPriceNumber, // Total value of all items in cart
+    items: items.map((item) => ({
+      item_id: (item.productId as any)._id,
+      item_name: (item.productId as any).name,
+      item_brand: (item.productId as any).brand,
+      price: Number((item.productId as any).price),
+      quantity: item.quantity,
+    })),
+  });
      router.push("/checkout")
      return
   };

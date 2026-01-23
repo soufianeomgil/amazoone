@@ -18,6 +18,7 @@ import { LocationIcon } from "./icons";
 import AmazonPrice from "./AmazonPrice";
 import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
 import { gaEvent } from "@/lib/analytics/ga";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 type LocalCartItem = {
   _id: string;
@@ -37,7 +38,7 @@ const BuyPanel = ({ product, data,userId }: { product: IProduct; userId: string;
     (state: RootState) => state.product.selectedVariant[product?._id as string]
   );
   const selectedVariant = product?.variants?.[selectedVariantIndex ?? 0] || null;
-
+ const  { trackAddToCart } = useAnalytics()
   const defaultStock = variants.length ? variants[0].stock ?? 0 : product?.stock ?? 0;
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -85,19 +86,8 @@ const BuyPanel = ({ product, data,userId }: { product: IProduct; userId: string;
   tags: product.tags,
   weight: 10,
 })
-gaEvent("add_to_cart", {
-  currency: "MAD",
-  value: payload.basePrice,
-  items: [{
-    item_id: payload.productId,
-    item_name: payload.name,
-    item_brand: payload.brand,
-    item_image: payload?.variant?.images?.[0]?.url ?? (payload.productId as any).thumbnail.url,
-    price: payload.basePrice,
-    quantity: payload.quantity,
-    item_variant: payload.variant ?? undefined,
-  }],
-});
+ trackAddToCart(product, quantity)
+
 
       setOpen(true);
       router.refresh?.();

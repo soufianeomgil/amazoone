@@ -27,6 +27,7 @@ import { trackProductView } from '@/actions/recommendations.actions';
 import { auth } from '@/auth';
 import { Metadata } from 'next';
 import { gaEvent } from '@/lib/analytics/ga';
+import ViewItemTracker from './_components/TrackItemView';
   export async function generateMetadata({ params }: { params:  Promise<{id: string}>  }): Promise<Metadata> {
   const { id } = await params;
   const { data } = await getSignleProduct({ productId: id });
@@ -96,20 +97,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
       </div>
     );
   }
-gaEvent("view_item", {
-  currency: "MAD",
-  value: Number(product.basePrice), // Ensure this is a number
-  items: [
-    {
-      item_id: String(product._id),
-      item_name: product.name,
-      item_brand: product.brand,
-      price: Number(product.basePrice),
-      // GA4 uses 'item_list_name' or 'item_category' instead of 'image'
-      item_category: product.category || "General", 
-    },
-  ],
-});
+
 
   // Fallbacks for a few commonly-missing fields
   const safeThumbnail = product.thumbnail ?? { url: '', preview: '', public_id: '' };
@@ -121,6 +109,7 @@ gaEvent("view_item", {
 
   return (
     <div>
+      <ViewItemTracker product={product} />
        <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

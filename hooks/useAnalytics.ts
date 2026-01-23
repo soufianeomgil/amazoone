@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { sendGAEvent } from "@next/third-parties/google";
 import { IProduct } from "@/models/product.model";
+import { ItemProps } from "@/app/(root)/cart/_component/CheckoutBox";
 
 export const useAnalytics = () => {
   
@@ -52,14 +53,14 @@ const trackSearch = useCallback((term: string) => {
     });
   }, []);
 
-  const trackBeginCheckout = useCallback((orderData: { total: number, items: any[] }) => {
+  const trackBeginCheckout = useCallback((orderData: { total: number, items: ItemProps[] }) => {
     sendGAEvent("begin_checkout", {
       currency: "MAD",
       value: Number(orderData.total),
       items: orderData.items.map((item) => ({
-        item_id: String(item.id || item._id),
-        item_name: item.name,
-        price: Number(item.price || item.unitPrice),
+        item_id: String(item.productId._id),
+        item_name: item.productId.name,
+        price: Number(item.productId.basePrice),
         quantity: item.quantity,
       })),
     });

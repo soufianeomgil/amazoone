@@ -13,6 +13,7 @@ import AmazonPrice from "@/components/shared/AmazonPrice";
 import { SpinnerIcon } from "@/components/shared/icons";
 import Image from "next/image";
 import { gaEvent } from "@/lib/analytics/ga";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 
 interface Props {
@@ -29,6 +30,7 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }>
   const variant = item.variant ?? null;
   const dispatch = useDispatch();
   const router = useRouter();
+ 
   const [pending, setPending] = useState(false);
 
   const imageUrl =

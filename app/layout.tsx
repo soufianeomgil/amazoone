@@ -11,7 +11,6 @@ import { initServer } from "@/lib/init";
 import ConfirmModal from "@/components/shared/modals/ConfirmModal";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GoogleAnalytics } from '@next/third-parties/google'
-import Script from "next/script"; // Import the Script component
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
@@ -39,7 +38,7 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
   initServer();
-
+  console.log(process.env.NEXT_PUBLIC_GA_ID , "GOOGLE GA4")
   return (
     <html lang="en">
       <body className={`${roboto.className} ${poppins.className} antialiased`}>

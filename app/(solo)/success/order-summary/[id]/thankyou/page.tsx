@@ -40,7 +40,7 @@ const OrderSuccessPage = async ({ params }: { params: Promise<{ id: string }> })
                     </Link>
                     <div className="text-sm text-right hidden sm:block">
                         <div className="font-medium opacity-80">Une question ?</div>
-                        <div className="font-bold text-teal-400">08 02 00 77 00</div>
+                        <div className="font-bold text-teal-400">07 15 12 04 95</div>
                     </div>
                 </div>
             </div>
@@ -122,7 +122,7 @@ const OrderSuccessPage = async ({ params }: { params: Promise<{ id: string }> })
                                 <span>Détails de livraison</span>
                             </div>
                             <div className="space-y-1 text-slate-600 text-sm">
-                                <p className="font-bold text-slate-900">Mr. {session?.user.name}</p>
+                                <p className="font-bold text-slate-900">Mr. {data?.order.shippingAddress.name}</p>
                                 <p>{data?.order.shippingAddress.addressLine1}</p>
                                 <p>{data?.order.shippingAddress.city}, {data?.order.shippingAddress.zipCode}</p>
                                 <div className="flex items-center gap-2 pt-2 text-slate-900">

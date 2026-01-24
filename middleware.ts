@@ -3,9 +3,12 @@ import { NextResponse } from "next/server";
 // TODO: PROTECT ROUTES LIKE ORDERS PAGE [DONE]
 // TODO:  FIX RENDERING CART ITEMS;
 // TODO: THANKYOU PAGE [DONE];
-// TODO: SHOULDERS DAY;
+// TODO: SHOULDERS DAY ;
 // TODO: PAY DART [DONE];
-// TODO: FB ADS;
+// TODO: FB ADS ;
+
+// TODO: MAKE A CARD THAT CONTAINS OMGIL'S FB PAGE instagram page tiktok page website ect.. and give it to clients;
+// CLOUDFLARE REPATCHA
 // PUT MONEY IN BANK TO GET CRDET CARD;
 export default auth((req) => {
   const { pathname } = req.nextUrl;

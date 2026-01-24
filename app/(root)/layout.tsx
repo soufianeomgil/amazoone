@@ -8,6 +8,7 @@ import { auth } from "@/auth";
 import MobileFooter from "@/components/shared/MobileFooter";
 import WhatsAppSupport from "@/components/shared/WhatsappSupport";
 import { getSavedListsCountAction } from "@/actions/savedList.actions";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 
 
@@ -39,6 +40,7 @@ export default async function RootLayout({
            <Header totalWishQty={total} qty={result.data?.qty} session={session}  />
   {children}
    <WhatsAppSupport />
+   <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID as string} />
   <Footer />
   <MobileFooter />
        

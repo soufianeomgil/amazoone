@@ -11,6 +11,7 @@ import { initServer } from "@/lib/init";
 import ConfirmModal from "@/components/shared/modals/ConfirmModal";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GoogleAnalytics } from '@next/third-parties/google'
+import PageView from "@/components/analytics/PageView";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
@@ -44,7 +45,7 @@ export default async function RootLayout({
       <body className={`${roboto.className} ${poppins.className} antialiased`}>
         {/* 1. Google Analytics Component (Handles G-P939Q23VXL internally) */}
        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID as string} />
-
+        <PageView />
         <StoreProvider>
           <SessionProvider session={session}>
             <main className="min-h-screen w-full">

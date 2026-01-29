@@ -1,12 +1,24 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
+@plugin "@tailwindcss/typography";
 
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
-
+/* Inside your globals.css */
+@layer base {
+  .prose h1 {
+    @apply text-slate-900 mb-8 border-b border-slate-100 pb-4;
+  }
+  .prose h3 {
+    @apply text-slate-800 mt-10 mb-4 flex items-center gap-2;
+  }
+  /* Custom styling for list bullets to match your brand */
+  .prose ul > li::marker {
+    @apply text-orange-500;
+  }
+}
 
 @layer utilities {
    .input_styles {

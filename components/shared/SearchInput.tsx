@@ -97,20 +97,16 @@ useEffect(() => {
          } 
        }}
         type="text"
-         className="w-full bg-white p-2 text-black focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Search Amazon" />
+         className="w-full bg-white p-2 text-black focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Search Omgil..." />
                                 <button className="bg-[#FEBD69] hover:bg-orange-400 p-2 rounded-r-md">
                                     <SearchIcon />
                                 </button>
                             </div>
 
-        {/* {value &&  <X onClick={() => setValue("")} className="text-white rounded-full bg-black cursor-pointer"  size={22}/>} */}
+        
         {value !== "" &&  open && (
   <div className="absolute  shadow-md bg-white rounded-xl
    !z-[999999999999999999999999999999999999999] top-[40px] left-0 right-0 flex-col mt-4 w-full pt-3 flex  ">
-     {/* <Link href={`/search?q=${value}`} className="px-3 mb-4 flex items-center gap-2">
-     <SearchIcon  color="gray" size={18} />
-     <p className="text-red-700 font-medium text-base  ">{value} </p>
-     </Link> */}
      <div className="px-4 py-2 text-xs text-gray-500">
   Showing results for <span className="font-medium text-gray-800">"{value}"</span>
 </div>
@@ -155,7 +151,7 @@ useEffect(() => {
 
       {/* Content */}
       <div className="flex flex-col flex-1 min-w-0">
-        {/* Name */}
+        
         <p className="
           text-sm text-gray-900 font-medium
           line-clamp-2
@@ -201,10 +197,6 @@ useEffect(() => {
       )}  
     </div>
  )}
- 
-  
-  
-
 </div>
         )}
     </div>

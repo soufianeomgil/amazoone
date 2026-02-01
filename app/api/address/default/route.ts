@@ -8,7 +8,7 @@ import type { NextRequest } from "next/server";
 // Adjust the path to where your action lives.
 
 
-export async function GET(req: NextRequest) {
+export async function GET(_: NextRequest) {
 const session = await auth()
   try {
     // Call the server action (it will authorize the session internally).

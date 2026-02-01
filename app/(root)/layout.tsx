@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import "@/app/globals.css"
-import Header from "@/components/shared/Header";
+import Header from "@/components/shared/navbars/Header";
 import Footer from "@/components/shared/Footer";
 import { getAuthenticatedUserCart } from "@/actions/cart.actions";
 import { auth } from "@/auth";

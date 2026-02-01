@@ -1,210 +1,159 @@
+"use client"
+import { brands, footerCategories } from '@/constants'
+import { Facebook, Instagram, Youtube } from 'lucide-react'
+import Link from 'next/link'
+import React from 'react'
+import { Button } from '../ui/button'
+import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 
-
-"use client";
-import React from "react";
-import { FlagIcon, GlobeIcon, UpDownArrowsIcon } from "./icons";
-import Link from "next/link";
-
-const footerTopLinks = [
-  {
-    title: "Get to Know Us",
-    items: [
-      "Careers",
-      "Blog",
-      "About Amazon",
-      "Investor Relations",
-      "Amazon Devices",
-      "Amazon Science",
-    ],
-  },
-  {
-    title: "Make Money with Us",
-    items: [
-      "Sell products on Amazon",
-      "Sell on Amazon Business",
-      "Sell apps on Amazon",
-      "Become an Affiliate",
-      "Advertise Your Products",
-      "Self-Publish with Us",
-      "Host an Amazon Hub",
-      "› See More Make Money with Us",
-    ],
-  },
-  {
-    title: "Amazon Payment Products",
-    items: [
-      "Amazon Business Card",
-      "Shop with Points",
-      "Reload Your Balance",
-      "Amazon Currency Converter",
-    ],
-  },
-  {
-    title: "Let Us Help You",
-    items: [
-      "Amazon and COVID-19",
-      "Your Account",
-      "Your Orders",
-      "Shipping Rates & Policies",
-      "Returns & Replacements",
-      "Manage Your Content and Devices",
-      "Amazon Assistant",
-      "Help",
-    ],
-  },
-];
-
-const footerBottomGrid = [
-  {
-    title: "Amazon Music",
-    desc: "Stream millions of songs",
-  },
-  {
-    title: "Amazon Ads",
-    desc: "Reach customers wherever they spend their time",
-  },
-  {
-    title: "6pm",
-    desc: "Score deals on fashion brands",
-  },
-  {
-    title: "AbeBooks",
-    desc: "Books, art & collectibles",
-  },
-  {
-    title: "ACX",
-    desc: "Audiobook Publishing Made Easy",
-  },
-  {
-    title: "Sell on Amazon",
-    desc: "Start a Selling Account",
-  },
-  {
-    title: "Amazon Business",
-    desc: "Everything For Your Business",
-  },
-  {
-    title: "AmazonGlobal",
-    desc: "Ship Orders Internationally",
-  },
-  {
-    title: "Home Services",
-    desc: "Experienced Pros Happiness Guarantee",
-  },
-  {
-    title: "Amazon Web Services",
-    desc: "Scalable Cloud Computing Services",
-  },
-  {
-    title: "Audible",
-    desc: "Listen to Books & Original Audio Performances",
-  },
-  {
-    title: "Box Office Mojo",
-    desc: "Find Movie Box Office Data",
-  },
-  {
-    title: "Goodreads",
-    desc: "Book reviews & recommendations",
-  },
-  {
-    title: "IMDb",
-    desc: "Movies, TV & Celebrities",
-  },
-];
-
-const Footer: React.FC = () => {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
+const Footer = () => {
+ const pathname = usePathname()
+ if(pathname === "/customer/account/sign-up" || pathname === "/customer/account/login") return null
   return (
-    <footer className="text-white max-lg:hidden">
-      <div
-        className="bg-[#37475A] hover:bg-[#485769] cursor-pointer"
-        onClick={scrollToTop}
-      >
-        <p className="text-center py-4 text-sm">Back to top</p>
-      </div>
-
-      {/* TOP FOUR COLUMNS */}
-      <div className="bg-[#232F3E] py-10">
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {footerTopLinks.map((section, index) => (
-            <div key={index}>
-              <h3 className="font-bold mb-2">{section.title}</h3>
-              <ul className="text-sm space-y-2 text-gray-300">
-                {section.items.map((item, idx) => (
-                  <li  className="list-none!" key={idx}>
-                    <Link href={"/"} className="hover:underline">
-                      {item}
-                    </Link>
-                  </li>
+    <footer className='lg:flex hidden flex-col '>
+        <div className='w-full px-4 py-3 bg-[#232f3e] flex  flex-col'>
+             <h4 className='text-white font-bold text-[17px] '>Suivez nous</h4>
+             <div className='flex items-center mt-2 gap-1'>
+                <Link target='_blank' href="https://www.youtube.com" className='flex items-center justify-center border-2 w-[45px] h-[45px] rounded-full border-white'>
+                  <Youtube color='white' size={20} />
+                </Link>
+                
+                <Link target='_blank' href="https://www.instagram.com" className='flex items-center justify-center border-2 w-[45px] h-[45px] rounded-full border-white'>
+                  <Instagram color='white' size={20} />
+                </Link>
+                <Link target='_blank' href="https://www.facebook.com" className='flex items-center justify-center border-2 w-[45px] h-[45px] rounded-full border-white'>
+                  <Facebook color='white' size={20} />
+                </Link>
+             </div>
+        </div>
+        <div className='bg-[#131921] px-4 py-6 lg:flex hidden items-start gap-10 '>
+            <div>
+            <h4 className='text-white font-bold text-[17px]  mb-3 '>categories</h4>
+           <ul className='flex flex-col gap-3'>
+                {footerCategories.map((item,index)=> (
+                     <li className='text-white list-none! hover:underline  text-[13px] font-normal' key={index}>
+                         <Link href={`/${item}`}>
+                            {item}
+                         </Link>
+                     </li>
                 ))}
-              </ul>
+           </ul>
+
             </div>
-          ))}
+            <div>
+            <h4 className='text-white font-bold text-[17px]  mb-3 '>Découvrez la Marketplace</h4>
+           <ul className='flex flex-col gap-3'>
+                
+                     <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                            Engagements
+                         </Link>
+                      </li>
+                      <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                             Modes et frais de livraison
+                         </Link>
+                      </li>
+                      <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                            Politique de Retour
+                         </Link>
+                      </li>
+                      <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                            Garantie
+                         </Link>
+                      </li>
+                      <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                            Utiliser un coupon
+                         </Link>
+                      </li>
+                      <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                            FAQ
+                         </Link>
+                      </li>
+                      <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                         Assistance
+
+                         </Link>
+                      </li>
+                      <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                         Accès espace vendeur
+                         </Link>
+                      </li>
+                     
+              
+           </ul>
+
+            </div>
+            <div>
+            <h4 className='text-white font-bold text-[17px]  mb-3 '>Informations légales</h4>
+           <ul className='flex flex-col gap-3'>
+                
+                     <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                            CGU/CGV
+                         </Link>
+                      </li>
+                      <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                            Données personnelles et cookies
+                         </Link>
+                      </li>
+                      <li className='text-white  hover:underline list-none! text-[13px] font-normal'>
+                         <Link href={`/engagement}`}>
+                            Mentions légales
+                         </Link>
+                      </li>
+                    
+                     
+           </ul>
+
+            </div>
+            <div className='border border-gray-500 h-[200px]'/>
+            <div>
+            <h4 className='text-white font-bold text-[17px] mb-3 border-gray-300  '>
+               Nos engagement
+            </h4>
+            <div className='grid lg:grid-cols-2 grid-cols-4 gap-7'>
+                <div className='flex items-center gap-1'>
+                  <Image width={40} height={40} className='w-10 object-contain' src="https://www.marjanemall.ma/images/auth-white.png" alt="" />
+                    <p className='text-[13px] text-white font-medium'>Produits 100% <br /> authentiques</p>
+                </div>
+                <div className='flex items-center gap-1'>
+                  <img width={40} height={40}  className='w-10 object-contain' src="https://www.marjanemall.ma/images/morocco-white.png" alt="" />
+                    <p className='text-[13px] text-white font-medium'>Livraison partout <br /> au Maroc</p>
+                </div>
+                <div className='flex items-center gap-1'>
+                  <Image width={40} height={40}  className='w-10 object-contain' src="https://www.marjanemall.ma/images/return-white.png" alt="" />
+                    <p className='text-[13px] text-white font-medium'>Satisfait ou <br /> remboursé</p>
+                </div>
+                <div className='flex items-center gap-1'>
+                  <Image width={40} height={40} className='w-10 object-contain'
+                   src="https://www.marjanemall.ma/images/globe-white.png" alt="" />
+                    <p className='text-[13px] text-white font-medium'>Offre nationale et <br /> internationale</p>
+                </div>
+            </div>
+            <div className='mt-4'>
+            <h4 className='text-white font-bold text-[17px] mb-3 border-gray-300  '>
+               Modes de paiement
+            </h4>
+              <Image width={150} height={150} className=' object-contain'
+               src="https://www.marjanemall.ma/images/cards.png" alt="" />
+            </div>
+            </div>
         </div>
-      </div>
-
-      {/* LANGUAGE & SETTINGS BAR */}
-      <div className="bg-[#232F3E] border-t border-gray-700 py-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
-          <img
-            src="https://pngimg.com/uploads/amazon/amazon_PNG11.png"
-            alt="Amazon Logo"
-            className="h-7 w-24 object-contain "
-          />
-
-          <div className="flex space-x-2">
-            <button className="flex items-center border border-gray-500 rounded-sm px-3 py-1 text-sm">
-              <GlobeIcon />
-              <span>English</span>
-              <UpDownArrowsIcon />
-            </button>
-
-            <button className="flex items-center border border-gray-500 rounded-sm px-3 py-1 text-sm">
-              <span className="mr-1">$</span>
-              <span>USD - U.S. Dollar</span>
-            </button>
-
-            <button className="flex items-center border border-gray-500 rounded-sm px-3 py-1 text-sm">
-              <FlagIcon />
-              <span className="ml-2">United States</span>
-            </button>
-          </div>
+      
+        <div className='bg-[#232f3e] w-full px-4 py-6'>
+           <p className='text-white text-[13px] font-normal'><span>© </span>2026 - Omgil - Tous droits réservés.</p>
         </div>
-      </div>
-
-      {/* BOTTOM GRID */}
-      {/* <div className="bg-[#131921] py-8 text-xs">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-x-4 gap-y-6">
-            {footerBottomGrid.map((item, index) => (
-              <div key={index} className="space-y-1">
-                <a href="#" className="block hover:underline font-bold text-white">
-                  {item.title}
-                </a>
-                <a href="#" className="block hover:underline text-gray-400">
-                  {item.desc}
-                </a>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center pt-8 mt-8 space-x-4 text-gray-300">
-            <a href="#" className="hover:underline">Conditions of Use</a>
-            <a href="#" className="hover:underline">Privacy Notice</a>
-            <a href="#" className="hover:underline">Your Ads Privacy Choices</a>
-          </div>
-
-          <p className="text-center mt-2 text-gray-300">
-            © 1996-2024, Amazon.com, Inc. or its affiliates
-          </p>
-        </div>
-      </div> */}
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

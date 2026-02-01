@@ -83,26 +83,9 @@ import Image from "next/image"
       </ul>
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="item-3">
-          <AccordionTrigger className="no-underline!  text-white font-medium text-[15px] ">Nos marques</AccordionTrigger>
-          <AccordionContent className="no-focus">
-          <ul className=' flex flex-col gap-3 lg:px-5 mt-3'>
-                {brands.map((item,index)=> (
-                     <li className='text-white lg:list-disc hover:underline list-none text-[13px] font-medium' key={index}>
-                         <Link href={`/boutique-officielle/${item}`}>
-                            {item}
-                         </Link>
-                     </li>
-                ))}
-           </ul>
-          </AccordionContent>
-        </AccordionItem>
+       
       </Accordion>
-       <Link href="/">
-                              <Button className='bg-transparent hover:bg-transparent text-sm font-normal w-full hover:underline text-white border rounded-full ' type='button'>
-                                  Devenir vendeur
-                              </Button>
-                           </Link>
+      
                            <div>
            
             <div className='grid max-sm:grid-cols-2 grid-cols-4 gap-7'>
@@ -111,7 +94,7 @@ import Image from "next/image"
                     <p className='text-[13px] text-white font-medium'>Produits 100% <br /> authentiques</p>
                 </div>
                 <div className='flex items-center gap-1'>
-                  <Image width={40} height={40}  className='w-10 object-contain' src="https://www.marjanemall.ma/images/morocco-white.png" alt="" />
+                  <img width={40} height={40}  className='w-10 object-contain' src="https://www.marjanemall.ma/images/morocco-white.png" alt="" />
                     <p className='text-[13px] text-white font-medium'>Livraison partout <br /> au Maroc</p>
                 </div>
                 <div className='flex items-center gap-1'>
@@ -120,18 +103,19 @@ import Image from "next/image"
                 </div>
                 <div className='flex items-center gap-1'>
                   <Image width={40} height={40} className='w-10 object-contain' src="https://www.marjanemall.ma/images/globe-white.png" alt="" />
-                    <p className='text-[13px] text-white font-medium'>Offre nationale et <br /> internationale</p>
+                    <p className='text-[13px] text-white font-medium'>Hand made <br /> crafted</p>
                 </div>
             </div>
             <div className='mt-7'>
             <h4 className='text-white font-bold text-[17px] mb-3 border-gray-300  '>
                Modes de paiement
             </h4>
-              {/* <Image width={350} height={350} className='w-[350px] object-contain' src="https://www.marjanemall.ma/media/footer/paiement_x2_1.png" alt="" /> */}
+             <Image width={150} height={150} className=' object-contain'
+                            src="https://www.marjanemall.ma/images/cards.png" alt="" />
             </div>
             </div>
             <div className="flex items-center py-3 justify-between">
-                 <p className="text-[12px] text-white font-normal">© 2025 marjanemall.</p>
+                 <p className="text-[12px] text-white font-normal">© 2026 Omgil.</p>
                   <div className='flex items-center gap-1'>
                                  <Link target='_blank' href="https://www.youtube.com" className='flex items-center justify-center border-2 w-[45px] h-[45px] rounded-full border-white'>
                                    <Youtube color='white' size={20} />

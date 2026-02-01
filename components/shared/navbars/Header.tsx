@@ -10,11 +10,11 @@ import { useSelector } from 'react-redux';
 import { ChevronDown, User, ChevronRight, Heart, Menu, X } from 'lucide-react';
 
 // Local imports
-import { LocationIcon, CartIcon, FlagIcon, CaretDownIcon, UserIcon, CloseIcon } from './icons';
-import { Button } from '../ui/button';
+import { LocationIcon, CartIcon, FlagIcon, CaretDownIcon, UserIcon, CloseIcon } from '../icons';
+import { Button } from '../../ui/button';
 import { ROUTES } from '@/constants/routes';
 import { getTotalItems } from '@/lib/store/cartSlice';
-import SearchInput from './SearchInput';
+import SearchInput from '../SearchInput';
 
 interface HeaderProps {
     qty?: number;

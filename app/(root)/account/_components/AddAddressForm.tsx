@@ -1,7 +1,5 @@
 "use client";
 
-
-
 import { z } from "zod";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +24,6 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, LocateIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { AddAddressSchema } from "@/lib/zod";
 import addAddressAction from "@/actions/address.actions";
@@ -36,12 +33,6 @@ import { ROUTES } from "@/constants/routes";
 import { Spinner } from "@/components/ui/spinner";
 import React from "react";
 import Image from "next/image";
-
-
-
-
-
-
 const AddAddressForm = ({redirect}: {redirect?:boolean}) => {
   const moroccoRegions = [
   "Tanger-Tétouan-Al Hoceima",
@@ -58,14 +49,6 @@ const AddAddressForm = ({redirect}: {redirect?:boolean}) => {
   "Dakhla-Oued Ed-Dahab",
 ];
 
-
-
-
-
-
-
-
- 
   const form = useForm<z.infer<typeof AddAddressSchema>>({
       resolver: zodResolver(AddAddressSchema) as Resolver<z.infer<typeof AddAddressSchema>>,
       defaultValues: {
@@ -84,7 +67,7 @@ const AddAddressForm = ({redirect}: {redirect?:boolean}) => {
  const router = useRouter()
   const onSubmit = async(values: z.infer<typeof AddAddressSchema>) => {
     try {
-     const { error, success } =   await addAddressAction(values)
+     const { error, success } = await addAddressAction(values)
      if(error) {
         toast.error((error.message))
         return
@@ -113,9 +96,7 @@ const AddAddressForm = ({redirect}: {redirect?:boolean}) => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
             <div className="space-y-4">
-              
-              
-
+          
               {/* Full name */}
               <FormField
                 control={form.control}

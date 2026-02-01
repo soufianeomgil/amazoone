@@ -4,13 +4,12 @@ import connectDB from "@/database/db"
 import { action } from "@/lib/handlers/action"
 import handleError from "@/lib/handlers/error"
 import mongoose from "mongoose"
-import { ForbiddenError, NotFoundError, UnAuthorizedError } from "@/lib/http-errors"
+import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors"
 import { AddAddressSchema, EditAddressSchema, GetAddressDetailsSchema } from "@/lib/zod"
 import Address, {IAddress} from "@/models/address.model"
 
-import User, {IUser} from "@/models/user.model"
+import User from "@/models/user.model"
 import { AddAddressParams, EditAddressParams, GetAddressDetailsParams } from "@/types/actionTypes"
-import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { ROUTES } from "@/constants/routes"
 import { cache } from "@/lib/cache"
@@ -94,7 +93,7 @@ export default async function addAddressAction(
 
         // If addresses are embedded subdocs on user (uncommon), clear flags:
         if (Array.isArray(user.addresses) && user.addresses.length) {
-          user.addresses = user.addresses.map((a: any) => {
+          user.addresses = user.addresses.map((a:IAddress) => {
             if (a.isDefault) a.isDefault = false;
             return a;
           });
@@ -212,7 +211,6 @@ export async function editAddressAction(params: EditAddressParams): Promise<Acti
     id,
     name,
     city,
-    
     phone,
     state,
     addressLine1,
@@ -226,7 +224,6 @@ export async function editAddressAction(params: EditAddressParams): Promise<Acti
   const clean = {
     name: typeof name === "string" ? name.trim() : undefined,
     city: typeof city === "string" ? city.trim() : undefined,
-   
     phone: typeof phone === "string" ? phone.trim() : undefined,
     state: typeof state === "string" ? state.trim() : undefined,
     addressLine1: typeof addressLine1 === "string" ? addressLine1.trim() : undefined,

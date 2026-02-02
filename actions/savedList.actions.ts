@@ -1,10 +1,12 @@
-"use server"
+"use server";
+
 import { ROUTES } from "@/constants/routes";
 import connectDB from "@/database/db";
 import { cache } from "@/lib/cache";
 import { action } from "@/lib/handlers/action";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError, UnAuthorizedError } from "@/lib/http-errors";
+import { isSameItem } from "@/lib/savedList/match";
 import { CreateListSchema, EditWishlistSchema } from "@/lib/zod";
 import { IVariant, Product } from "@/models/product.model";
 import SavedList, { ISavedItem, ISavedList } from "@/models/savedList.model";
@@ -12,10 +14,19 @@ import mongoose from "mongoose";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
+/** ---------------------------------------------------------
+ * ✅ SINGLE SOURCE OF TRUTH: matching logic
+ * --------------------------------------------------------*/
 
 
+function touchTagAndPath(userId: string) {
+  revalidateTag(`savedlists:${userId}`);
+  revalidatePath(ROUTES.mywishlist);
+}
 
-
+/** ---------------------------------------------------------
+ * ✅ CREATE LIST
+ * --------------------------------------------------------*/
 type CreateListParams = z.infer<typeof CreateListSchema>;
 
 export async function createSavedListAction(
@@ -27,8 +38,7 @@ export async function createSavedListAction(
     authorize: true,
   });
 
-  if (validated instanceof Error)
-    return handleError(validated) as ErrorResponse;
+  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
   if (!session?.user?.id) throw new UnAuthorizedError("");
@@ -38,24 +48,19 @@ export async function createSavedListAction(
   try {
     await connectDB();
 
-    // limit lists
     const existingCount = await SavedList.countDocuments({
       userId: session.user.id,
       archived: { $ne: true },
     });
 
-    if (existingCount >= 20) {
-      throw new Error("Max saved lists reached");
-    }
+    if (existingCount >= 20) throw new Error("Max saved lists reached");
 
     const mongoSession = await mongoose.startSession();
-    let created: ISavedList | null = null;
+    let created: any = null;
 
     await mongoSession.withTransaction(async () => {
-      // 👇 determine final default value
       const shouldBeDefault = existingCount === 0 || isDefault === true;
 
-      // If this list should be default → unset others
       if (shouldBeDefault) {
         await SavedList.updateMany(
           { userId: session.user.id, isDefault: true },
@@ -72,6 +77,7 @@ export async function createSavedListAction(
               name,
               isPrivate,
               isDefault: shouldBeDefault,
+              meta: { count: 0 },
             },
           ],
           { session: mongoSession }
@@ -81,7 +87,7 @@ export async function createSavedListAction(
 
     mongoSession.endSession();
 
-    revalidatePath(ROUTES.mywishlist);
+    touchTagAndPath(session.user.id);
 
     return {
       success: true,
@@ -91,6 +97,11 @@ export async function createSavedListAction(
     return handleError(err) as ErrorResponse;
   }
 }
+
+/** ---------------------------------------------------------
+ * ✅ TOGGLE ITEM IN ANY LIST (your "save for later" foundation)
+ * default export
+ * --------------------------------------------------------*/
 
 
 const ToggleItemSchema = z.object({
@@ -104,64 +115,130 @@ const ToggleItemSchema = z.object({
 
 type ToggleItemParams = z.infer<typeof ToggleItemSchema>;
 
-export default async function toggleSavedListItemAction(params: ToggleItemParams): Promise<ActionResponse> {
-  const validated = await action({ params, schema: ToggleItemSchema, authorize: true });
+function buildElemMatch(productId: mongoose.Types.ObjectId, variantId?: string | null) {
+  // If variantId is null => treat ANY variant as match (remove/add product-level)
+  if (variantId == null) return { productId };
+  return { productId, variantId: String(variantId) };
+}
+
+export default async function toggleSavedListItemAction(
+  params: ToggleItemParams
+): Promise<ActionResponse<{ added: boolean }>> {
+  const validated = await action({
+    params,
+    schema: ToggleItemSchema,
+    authorize: true,
+  });
   if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
-  if (!session?.user?.id) throw new UnAuthorizedError("")
+  if (!session?.user?.id) throw new UnAuthorizedError("");
 
-  const { listId, productId, variantId, priceSnapshot, thumbnail, note } = validated.params as ToggleItemParams;
+  const { listId, productId, variantId, priceSnapshot, thumbnail, note } =
+    validated.params as ToggleItemParams;
 
   try {
     await connectDB();
 
-    // basic validation of ObjectId shape is left to Mongoose
-    const mongoSession = await mongoose.startSession();
-    let result: { added: boolean; list: any } | null = null;
-     
-    await mongoSession.withTransaction(async () => {
-      const list = await SavedList.findOne({ _id: listId, userId: session.user.id }).session(mongoSession) 
-      if (!list) throw new NotFoundError("Saved list");
+    const uid = new mongoose.Types.ObjectId(session.user.id);
+    const pid = new mongoose.Types.ObjectId(productId);
 
-      // optional guard: max items per list, e.g., 500
-      if (!list.hasItem(productId, variantId) && list.items.length >= 500) {
-        throw new Error("Saved list reached maximum items");
+    // 1) 🔴 Attempt to remove first (atomic)
+    // If item exists, remove it and we're done.
+    const pullMatch =
+      variantId == null
+        ? { productId: pid } // remove all variants for that product
+        : { productId: pid, variantId: String(variantId) }; // exact variant
+
+    const pullRes = await SavedList.updateOne(
+      { _id: listId, userId: uid, archived: { $ne: true } },
+      {
+        $pull: { items: pullMatch },
+        $set: { "meta.lastRemovedAt": new Date() },
       }
+    );
 
-      const exists = list.hasItem(productId, variantId);
-      if (exists) {
-        await list.removeItem(productId, variantId);
-        result = { added: false, list };
-      } else {
-        await list.addItem({ productId, variantId, priceSnapshot, thumbnail, note });
-        result = { added: true, list };
+    // If it actually removed something -> return added:false
+    if (pullRes.modifiedCount > 0) {
+      // update meta.count cheaply (optional but nice)
+      await SavedList.updateOne(
+        { _id: listId, userId: uid },
+        [{ $set: { "meta.count": { $size: "$items" } } }]
+      );
+
+      revalidateTag(`savedlists:${session.user.id}`);
+      revalidatePath(ROUTES.mywishlist);
+
+      return { success: true, data: { added: false } };
+    }
+
+    // 2) 🟢 Not removed => add, but ONLY if not already exists (race-safe)
+    const elemMatch = buildElemMatch(pid, variantId);
+
+    const itemToAdd: ISavedItem = {
+      productId: pid,
+      variantId: variantId == null ? null : String(variantId),
+      addedAt: new Date(),
+      priceSnapshot,
+      thumbnail,
+      note,
+    };
+
+    const addRes = await SavedList.updateOne(
+      {
+        _id: listId,
+        userId: uid,
+        archived: { $ne: true },
+        items: { $not: { $elemMatch: elemMatch } }, // ✅ prevents duplicates under race
+      },
+      {
+        $push: { items: { $each: [itemToAdd], $position: 0 } },
+        $set: { "meta.lastAddedAt": new Date() },
       }
-    });
+    );
 
-    mongoSession.endSession();
+    const added = addRes.modifiedCount > 0;
+
+    // update meta.count cheaply (optional)
+    if (added) {
+      await SavedList.updateOne(
+        { _id: listId, userId: uid },
+        [{ $set: { "meta.count": { $size: "$items" } } }]
+      );
+    }
+
     revalidateTag(`savedlists:${session.user.id}`);
-    revalidatePath(ROUTES.mywishlist)
+    revalidatePath(ROUTES.mywishlist);
 
-    return { success: true, data: result }
+    return { success: true, data: { added } };
   } catch (err) {
     return handleError(err) as ErrorResponse;
   }
 }
 
+
+/** ---------------------------------------------------------
+ * ✅ DELETE LIST (archive by default)
+ * --------------------------------------------------------*/
 const DeleteListSchema = z.object({
   listId: z.string().min(1),
-  soft: z.boolean().optional().default(true), // default to soft-delete (archive)
+  soft: z.boolean().optional().default(true),
 });
 
 type DeleteListParams = z.infer<typeof DeleteListSchema>;
 
-export  async function deleteSavedListAction(params: DeleteListParams): Promise<ActionResponse> {
-  const validated = await action({ params, schema: DeleteListSchema, authorize: true });
+export async function deleteSavedListAction(
+  params: DeleteListParams
+): Promise<ActionResponse> {
+  const validated = await action({
+    params,
+    schema: DeleteListSchema,
+    authorize: true,
+  });
   if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
-  if (!session?.user?.id) throw new UnAuthorizedError("")
+  if (!session?.user?.id) throw new UnAuthorizedError("");
 
   const { listId, soft } = validated.params as DeleteListParams;
 
@@ -169,28 +246,36 @@ export  async function deleteSavedListAction(params: DeleteListParams): Promise<
     await connectDB();
 
     const mongoSession = await mongoose.startSession();
-
     await mongoSession.withTransaction(async () => {
-      const list = await SavedList.findOne({ _id: listId, userId: session.user.id }).session(mongoSession);
+      const list: ISavedList = await SavedList.findOne({
+        _id: listId,
+        userId: session.user.id,
+      }).session(mongoSession);
+
       if (!list) throw new NotFoundError("Saved list");
 
       if (soft) {
         list.archived = true;
         await list.save({ session: mongoSession });
       } else {
-        await SavedList.deleteOne({ _id: listId, userId: session.user.id }).session(mongoSession);
+        await SavedList.deleteOne({ _id: listId, userId: session.user.id }).session(
+          mongoSession
+        );
       }
     });
 
     mongoSession.endSession();
+    touchTagAndPath(session.user.id);
 
-    return { success: true, message: "Saved list removed" }
+    return { success: true, message: "Saved list removed" };
   } catch (err) {
     return handleError(err) as ErrorResponse;
   }
 }
 
-
+/** ---------------------------------------------------------
+ * ✅ GET LISTS
+ * --------------------------------------------------------*/
 const GetListsSchema = z.object({
   page: z.coerce.number().optional().default(1),
   limit: z.coerce.number().optional().default(20),
@@ -199,21 +284,23 @@ const GetListsSchema = z.object({
 
 type GetListsParams = z.infer<typeof GetListsSchema>;
 
-
 type GetSavedListsData = {
   lists: ISavedList[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-  };
+  meta: { total: number; page: number; limit: number };
 };
-export async function getSavedListsAction(params: GetListsParams): Promise<ActionResponse<GetSavedListsData>> {
-  const validated = await action({ params, schema: GetListsSchema, authorize: true });
+
+export async function getSavedListsAction(
+  params: GetListsParams
+): Promise<ActionResponse<GetSavedListsData>> {
+  const validated = await action({
+    params,
+    schema: GetListsSchema,
+    authorize: true,
+  });
   if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
-  if (!session?.user?.id) throw new UnAuthorizedError('')
+  if (!session?.user?.id) throw new UnAuthorizedError("");
 
   const { page, limit, includeArchived } = validated.params as GetListsParams;
 
@@ -224,262 +311,48 @@ export async function getSavedListsAction(params: GetListsParams): Promise<Actio
     if (!includeArchived) query.archived = { $ne: true };
 
     const skip = Math.max(0, page - 1) * limit;
+
     const [lists, total] = await Promise.all([
       SavedList.find(query)
-      .populate({path: "items.productId", model: Product})
-      .sort({ isDefault: -1, updatedAt: -1 })
-      .skip(skip).limit(limit),
+        .populate({ path: "items.productId", model: Product })
+        .sort({ isDefault: -1, updatedAt: -1 })
+        .skip(skip)
+        .limit(limit),
       SavedList.countDocuments(query),
     ]);
-
-    return { success: true, data: { lists: JSON.parse(JSON.stringify(lists)), meta: { total, page, limit } } }
-  } catch (err) {
-    return handleError(err) as ErrorResponse;
-  }
-}
-
-
-
-
-interface AddToListParams {
-  listId: string;
-  productId: string;
-  variantId?: string;
-  variant?: IVariant;
-  thumbnail?: string;
-}
-
-// export async function addItemToSavedListAction(params: AddToListParams): Promise<ActionResponse> {
-//    const validatedResult = await action({params,schema:AddItemToListSchema,authorize:true})
-//    if(validatedResult instanceof Error) {
-//      return handleError(validatedResult) as ErrorResponse;
-//    }
-//   try {
-//     await connectDB()
-
-//     const { listId, productId, variantId, thumbnail, variant } = validatedResult.params!;
-
-//     const list = await SavedList.findById(listId) 
-
-//     if (!list) throw new NotFoundError("List")
-
-//     // Prevent duplicates
-//     const alreadyExists = list.items.some(
-//       (i) =>
-//         String(i.productId) === String(productId) &&
-//         (!variantId || i.variantId === variantId)
-//     );
-
-//     if (alreadyExists) {
-//       return { success: true, message: "Item already in list" };
-//     }
-
-//     list.items.push({
-//       productId: new mongoose.Types.ObjectId(productId),
-//       variantId,
-//       variant,
-//       thumbnail,
-//       addedAt: new Date(),
-//     });
-
-//     await list.save();
-
-//     revalidatePath("/lists"); // or wherever you show the lists
-
-//     return { success: true, message: "Item added to list" };
-//   } catch (err) {
-//     console.error(err);
-//     return handleError(err) as ErrorResponse
-//   }
-// }
-interface paramsProps  {
-   listId: string;
-  variant: IVariant;
-  productId: string;
-  variantId?: string | null;
-  priceSnapshot?: number;
-  thumbnail?: string;
-  note?: string;
-}
-// export async function addItemToListAction(params:paramsProps): Promise<ActionResponse<{list: ISavedList}>> {
-//   const validatedResult = await action({params, authorize: true})
-//   if(validatedResult  instanceof Error) {
-//     return handleError(validatedResult) as ErrorResponse
-//   }
-
-//   // come back to validation
-//   const userId = validatedResult.session?.user.id
-//   if(!userId) throw new UnAuthorizedError("User")
-//   try {
-//     await connectDB()
-    
-//     const { listId,variant, variantId, priceSnapshot, thumbnail, note, productId } = validatedResult.params!
-//     const list = await SavedList.findOne({ _id: listId, userId }) 
-
-//     if (!list) throw new NotFoundError("List")
-
-//     await list.addItem({
-//       productId,
-//       variantId,
-//       priceSnapshot,
-//       variant,
-//       thumbnail,
-//       note,
-//     });
-
-//     revalidatePath("/profile/lists");
-//     return { success: true, data: {list: JSON.parse(JSON.stringify(list))}};
-
-//   } catch (err) {
-//     console.error("ADD ITEM ERROR:", err);
-//     return handleError(err) as ErrorResponse;
-//   }
-// }
-type ParamsProps = {
-  listId: string;
-  productId: string;
-  variant?: IVariant | null;
-  variantId?: string | null;
-  priceSnapshot?: number;
-  thumbnail?: string;
-  note?: string;
-};
-
-
-
-
-// server/action (updated)
-export async function addItemToListAction(params: ParamsProps): Promise<
-  ActionResponse<{ list: ISavedList; added: boolean; item?: ISavedItem }>
-> {
-  // validate & auth
-  const validatedResult = await action({ params, authorize: true });
-  if (validatedResult instanceof Error) {
-    return handleError(validatedResult) as ErrorResponse;
-  }
-
-  const userId = validatedResult.session?.user.id;
-  if (!userId) throw new UnAuthorizedError("User");
-
-  try {
-    await connectDB();
-
-    const {
-      listId,
-      variant,
-      variantId,
-      priceSnapshot,
-      thumbnail,
-      note,
-      productId,
-    } = validatedResult.params as ParamsProps;
-
-    // load list as full document (so methods available)
-    const list = await SavedList.findOne({ _id: listId, userId }).exec();
-    if (!list) throw new NotFoundError("List");
-
-    // matching logic (same as schema)
-    const pid = String(productId);
-
-    const existingIndex = list.items.findIndex((it: ISavedItem) => {
-      const sameProduct = String(it.productId) === pid;
-      if (!sameProduct) return false;
-      if (variantId == null) return true;
-      if (it.variantId && String(it.variantId) === String(variantId)) return true;
-      if (it.variant && (it.variant as any)._id && String((it.variant as any)._id) === String(variantId)) return true;
-      if (it.variant && (it.variant as any).sku && String((it.variant as any).sku) === String(variantId)) return true;
-      return false;
-    });
-
-    // Populate helper - choose which product fields to include
-    const populateOptions = { path: "items.productId", select: "_id name basePrice thumbnail brand slug" };
-
-    if (existingIndex !== -1) {
-      // Populate the list so the existing item has product info
-      await list.populate(populateOptions);
-
-      const existingItem = list.items[existingIndex];
-
-      return {
-        success: true,
-        data: {
-          list: JSON.parse(JSON.stringify(list)),
-          added: false,
-          item: JSON.parse(JSON.stringify(existingItem)),
-        },
-      };
-    }
-
-    // Not present => add item (uses instance method which saves)
-    await list.addItem({
-      productId,
-      variantId: variantId ?? null,
-      variant: variant ?? undefined,
-      priceSnapshot,
-      thumbnail,
-      note,
-    });
-
-    // reload the list and populate the product references
-    const updated = await SavedList.findById(list._id).populate(populateOptions).exec();
-
-    // find the newly inserted item (should be first because addItem unshifts)
-    const updatedDoc = updated ?? list;
-    const newItem = (updatedDoc.items || []).find((it: ISavedItem) => {
-      const sameProduct = String(it.productId && (it.productId as any)._id ? (it.productId as any)._id : it.productId) === pid;
-      if (!sameProduct) return false;
-      if (variantId == null) return true;
-      if (it.variantId && String(it.variantId) === String(variantId)) return true;
-      if (it.variant && (it.variant as any)._id && String((it.variant as any)._id) === String(variantId)) return true;
-      if (it.variant && (it.variant as any).sku && String((it.variant as any).sku) === String(variantId)) return true;
-      return false;
-    }) as ISavedItem | undefined;
-
-    // revalidate client-side path
-    
-      revalidatePath(ROUTES.mywishlist);
-   revalidateTag(`savedlists:${userId}`);
-
 
     return {
       success: true,
       data: {
-        list: JSON.parse(JSON.stringify(updatedDoc)),
-        added: true,
-        item: newItem ? JSON.parse(JSON.stringify(newItem)) : undefined,
+        lists: JSON.parse(JSON.stringify(lists)),
+        meta: { total, page, limit },
       },
     };
   } catch (err) {
-    console.error("ADD ITEM ERROR:", err);
     return handleError(err) as ErrorResponse;
   }
 }
-interface EditWishlistParams {
+
+/** ---------------------------------------------------------
+ * ✅ EDIT LIST NAME
+ * --------------------------------------------------------*/
+export async function editWishlistAction(params: {
   id: string;
   name: string;
-}
-
-export async function editWishlistAction(
-  params: EditWishlistParams
-): Promise<ActionResponse> {
-  const validatedResult = await action({
+}): Promise<ActionResponse> {
+  const validated = await action({
     params,
     schema: EditWishlistSchema,
     authorize: true,
   });
+  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
-  if (validatedResult instanceof Error) {
-    return handleError(validatedResult) as ErrorResponse;
-  }
+  const session = validated.session;
+  if (!session?.user?.id) throw new UnAuthorizedError("");
 
-  const { id, name } = validatedResult.params!;
-  const session = validatedResult.session;
+  const { id, name } = validated.params!;
 
   try {
-    if (!session) {
-      throw new UnAuthorizedError("User is not authorized");
-    }
-
     await connectDB();
 
     const updated = await SavedList.findOneAndUpdate(
@@ -488,67 +361,61 @@ export async function editWishlistAction(
       { new: true }
     );
 
-    if (!updated) {
-      throw new NotFoundError("List not found or access denied");
-    }
-   revalidatePath(ROUTES.mywishlist)
+    if (!updated) throw new NotFoundError("List");
+
+    touchTagAndPath(session.user.id);
     return { success: true };
-  } catch (error) {
-    return handleError(error) as ErrorResponse;
+  } catch (err) {
+    return handleError(err) as ErrorResponse;
   }
 }
 
-interface EmptyWishlistParams  {
-  id: string;
-}
+/** ---------------------------------------------------------
+ * ✅ EMPTY LIST
+ * --------------------------------------------------------*/
 const EmptyWishlistSchema = z.object({
-  id: z.string().min(1, "List ID is required")
-})
-export async function EmptyWishlistAction(params: EmptyWishlistParams): Promise<ActionResponse> {
+  id: z.string().min(1, "List ID is required"),
+});
+
+export async function EmptyWishlistAction(params: {
+  id: string;
+}): Promise<ActionResponse> {
   const validated = await action({
     params,
     schema: EmptyWishlistSchema,
     authorize: true,
-  })
+  });
+  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
-  if (validated instanceof Error) {
-    return handleError(validated) as ErrorResponse
-  }
+  const session = validated.session;
+  if (!session?.user?.id) throw new UnAuthorizedError("");
 
-  const { id } = validated.params!
-  const session = validated.session
+  const { id } = validated.params!;
 
   try {
-    if (!session) throw new UnAuthorizedError("Unauthorized")
-
-    await connectDB()
+    await connectDB();
 
     const updated = await SavedList.findOneAndUpdate(
-      {
-        _id: id,
-        userId: session.user.id,
-        "items.0": { $exists: true },
-      },
-      { $set: { items: [] } },
+      { _id: id, userId: session.user.id },
+      { $set: { items: [], meta: { count: 0, lastRemovedAt: new Date() } } },
       { new: true }
-    )
+    );
 
-    if (!updated) {
-      throw new NotFoundError("List not found or already empty")
-    }
-   revalidatePath(ROUTES.mywishlist)
-   revalidateTag(`savedlists:${session.user.id}`);
+    if (!updated) throw new NotFoundError("List");
 
-    return {
-      success: true,
-    }
-  } catch (error) {
-    return handleError(error) as ErrorResponse
+    touchTagAndPath(session.user.id);
+    return { success: true };
+  } catch (err) {
+    return handleError(err) as ErrorResponse;
   }
 }
+
+/** ---------------------------------------------------------
+ * ✅ DELETE LIST (hard delete, not default)
+ * --------------------------------------------------------*/
 const DeleteWishlistSchema = z.object({
-   id: z.string().min(1, "wishlist ID is required")
-})
+  id: z.string().min(1, "wishlist ID is required"),
+});
 
 export async function deleteWishlistAction(params: {
   id: string;
@@ -558,112 +425,73 @@ export async function deleteWishlistAction(params: {
     schema: DeleteWishlistSchema,
     authorize: true,
   });
+  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
-  if (validated instanceof Error) {
-    return handleError(validated) as ErrorResponse;
-  }
+  const session = validated.session;
+  if (!session?.user?.id) throw new UnAuthorizedError("");
 
   const { id } = validated.params!;
-  const session = validated.session;
 
   try {
-    if (!session?.user?.id) {
-      throw new UnAuthorizedError("Unauthorized");
-    }
-
     await connectDB();
 
-    const list = await SavedList.findById(id);
-
-    if (!list) {
-      throw new NotFoundError("Wishlist not found");
-    }
-
-    if (list.userId.toString() !== session.user.id) {
-      throw new UnAuthorizedError("You do not own this wishlist");
-    }
-
-    if (list.isDefault) {
-      throw new Error("Default wishlist cannot be deleted");
-    }
+    const list: ISavedList | null = await SavedList.findById(id);
+    if (!list) throw new NotFoundError("Wishlist");
+    if (String(list.userId) !== String(session.user.id)) throw new UnAuthorizedError("");
+    if (list.isDefault) throw new Error("Default wishlist cannot be deleted");
 
     await SavedList.deleteOne({ _id: id });
-    revalidatePath(ROUTES.mywishlist)
-    revalidateTag(`savedlists:${session.user.id}`);
 
-    return {
-      success: true,
-    };
-  } catch (error) {
-    return handleError(error) as ErrorResponse;
+    touchTagAndPath(session.user.id);
+    return { success: true };
+  } catch (err) {
+    return handleError(err) as ErrorResponse;
   }
 }
 
-
-
- const SetDefaultWishlistSchema = z.object({
+/** ---------------------------------------------------------
+ * ✅ SET DEFAULT LIST
+ * --------------------------------------------------------*/
+const SetDefaultWishlistSchema = z.object({
   id: z.string().min(1, "Wishlist id is required"),
 });
 
-export type SetDefaultWishlistParams = z.infer<
-  typeof SetDefaultWishlistSchema
->;
-
-
-export async function setDefaultWishlistAction(
-  params: { id: string }
-): Promise<ActionResponse> {
+export async function setDefaultWishlistAction(params: { id: string }): Promise<ActionResponse> {
   const validated = await action({
     params,
     schema: SetDefaultWishlistSchema,
     authorize: true,
   });
+  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
-  if (validated instanceof Error) {
-    return handleError(validated) as ErrorResponse;
-  }
+  const session = validated.session;
+  if (!session?.user?.id) throw new UnAuthorizedError("");
 
   const { id } = validated.params!;
-  const session = validated.session;
 
   try {
-    if (!session?.user?.id) {
-      throw new UnAuthorizedError("Unauthorized");
-    }
-
     await connectDB();
 
     const dbSession = await mongoose.startSession();
     dbSession.startTransaction();
 
     try {
-      const list = await SavedList.findById(id).session(dbSession);
+      const list: any = await SavedList.findById(id).session(dbSession);
+      if (!list) throw new NotFoundError("Wishlist");
+      if (String(list.userId) !== String(session.user.id)) throw new UnAuthorizedError("");
 
-      if (!list) {
-        throw new NotFoundError("Wishlist not found");
-      }
-
-      if (list.userId.toString() !== session.user.id) {
-        throw new UnAuthorizedError("You do not own this wishlist");
-      }
-
-      // If already default → idempotent success
       if (list.isDefault) {
         await dbSession.commitTransaction();
+        touchTagAndPath(session.user.id);
         return { success: true };
       }
 
-      // 1️⃣ Unset any existing default list for this user
       await SavedList.updateMany(
-        {
-          userId: session.user.id,
-          isDefault: true,
-        },
+        { userId: session.user.id, isDefault: true },
         { $set: { isDefault: false } },
         { session: dbSession }
       );
 
-      // 2️⃣ Set selected list as default
       await SavedList.updateOne(
         { _id: id },
         { $set: { isDefault: true } },
@@ -671,8 +499,7 @@ export async function setDefaultWishlistAction(
       );
 
       await dbSession.commitTransaction();
-      revalidatePath(ROUTES.mywishlist)
-
+      touchTagAndPath(session.user.id);
       return { success: true };
     } catch (err) {
       await dbSession.abortTransaction();
@@ -680,14 +507,14 @@ export async function setDefaultWishlistAction(
     } finally {
       dbSession.endSession();
     }
-
-  } catch (error) {
-    return handleError(error) as ErrorResponse;
+  } catch (err) {
+    return handleError(err) as ErrorResponse;
   }
 }
 
-
-
+/** ---------------------------------------------------------
+ * ✅ TOGGLE IN DEFAULT LIST
+ * --------------------------------------------------------*/
 const AddToDefaultListSchema = z.object({
   productId: z.string().min(1),
   variantId: z.string().nullable().optional(),
@@ -698,6 +525,13 @@ const AddToDefaultListSchema = z.object({
 
 type AddToDefaultListParams = z.infer<typeof AddToDefaultListSchema>;
 
+function normalizeVariantId(v: unknown): string | null {
+  if (v == null) return null;
+  const s = String(v).trim();
+  if (!s || s === "null" || s === "undefined") return null;
+  return s;
+}
+
 export async function addItemToDefaultListAction(
   params: AddToDefaultListParams
 ): Promise<ActionResponse<{ added: boolean }>> {
@@ -706,96 +540,129 @@ export async function addItemToDefaultListAction(
     schema: AddToDefaultListSchema,
     authorize: true,
   });
-
-  if (validated instanceof Error) {
-    return handleError(validated) as ErrorResponse;
-  }
+  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
   if (!session?.user?.id) throw new UnAuthorizedError("");
 
-  const {
-    productId,
-    variantId = null,
-    priceSnapshot,
-    thumbnail,
-    note,
-  } = validated.params!;
+  const { productId, priceSnapshot, thumbnail, note } = validated.params!;
+  const variantId = normalizeVariantId(validated.params?.variantId);
 
   try {
     await connectDB();
 
-    const mongoSession = await mongoose.startSession();
-    let added = false;
+    const uid = new mongoose.Types.ObjectId(session.user.id);
+    const pid = new mongoose.Types.ObjectId(productId);
 
-    await mongoSession.withTransaction(async () => {
-      /** 1️⃣ Get default list */
-      let list = await SavedList.findOne({
-        userId: session.user.id,
-        isDefault: true,
+    // ✅ Ensure default list exists (safe under concurrency)
+    // Uses your unique index (userId + name) to avoid duplicates.
+    const list = await SavedList.findOneAndUpdate(
+      { userId: uid, isDefault: true, archived: { $ne: true } },
+      {
+        $setOnInsert: {
+          userId: uid,
+          name: "Wishlist",
+          isDefault: true,
+          isPrivate: true,
+          archived: false,
+          items: [],
+          meta: { count: 0 },
+        },
+      },
+      { new: true, upsert: true }
+    ).exec();
+
+    // -----------------------------
+    // 1) 🔴 Try remove first (atomic)
+    // -----------------------------
+    const pullMatch =
+      variantId == null
+        ? { productId: pid } // product-level (remove all variants for that product)
+        : { productId: pid, variantId }; // exact variant
+
+    const pullRes = await SavedList.updateOne(
+      { _id: list._id, userId: uid, archived: { $ne: true } },
+      {
+        $pull: { items: pullMatch },
+        $set: { "meta.lastRemovedAt": new Date() },
+      }
+    );
+
+    if (pullRes.modifiedCount > 0) {
+      // recompute count cheaply (optional but correct)
+      await SavedList.updateOne(
+        { _id: list._id, userId: uid },
+        [{ $set: { "meta.count": { $size: "$items" } } }]
+      );
+
+      touchTagAndPath(session.user.id);
+
+      return {
+        success: true,
+        data: { added: false },
+        message: "Item removed from wishlist",
+      };
+    }
+
+    // -----------------------------------
+    // 2) 🟢 Not removed => add (race-safe)
+    // Only add if it doesn't already exist
+    // -----------------------------------
+    const elemMatch =
+      variantId == null ? { productId: pid } : { productId: pid, variantId };
+
+    const itemToAdd = {
+      productId: pid,
+      variantId: variantId ?? null,
+      addedAt: new Date(),
+      priceSnapshot,
+      thumbnail,
+      note,
+    };
+
+    const addRes = await SavedList.updateOne(
+      {
+        _id: list._id,
+        userId: uid,
         archived: { $ne: true },
-      }).session(mongoSession);
-
-      /** 2️⃣ Auto-create default list */
-      if (!list) {
-        list = await SavedList.create(
-          [
-            {
-              userId: session.user.id,
-              name: "Wishlist",
-              isDefault: true,
-              isPrivate: true,
-            },
-          ],
-          { session: mongoSession }
-        ).then(docs => docs[0]);
+        items: { $not: { $elemMatch: elemMatch } }, // ✅ blocks duplicates under race
+      },
+      {
+        $push: { items: { $each: [itemToAdd], $position: 0 } },
+        $set: { "meta.lastAddedAt": new Date() },
       }
+    );
 
-      /** 3️⃣ TOGGLE LOGIC */
-      const exists = list?.hasItem(productId, variantId);
+    const added = addRes.modifiedCount > 0;
 
-      if (exists) {
-        // 🔴 REMOVE
-        await list?.removeItem(productId, variantId);
-        added = false;
-      } else {
-        // 🟢 ADD
-        await list?.addItem({
-          productId,
-          variantId,
-          priceSnapshot,
-          thumbnail,
-          note,
-        });
-        added = true;
-      }
-    });
+    if (added) {
+      await SavedList.updateOne(
+        { _id: list._id, userId: uid },
+        [{ $set: { "meta.count": { $size: "$items" } } }]
+      );
+    }
 
-    mongoSession.endSession();
-
-    revalidatePath(ROUTES.mywishlist);
-    revalidateTag(`savedlists:${session.user.id}`);
-
+    touchTagAndPath(session.user.id);
 
     return {
       success: true,
       data: { added },
-      message: added
-        ? "Item added to wishlist"
-        : "Item removed from wishlist",
+      message: added ? "Item added to wishlist" : "Wishlist unchanged",
     };
-  } catch (error) {
-    return handleError(error) as ErrorResponse;
+  } catch (err) {
+    return handleError(err) as ErrorResponse;
   }
 }
 
-export async function removeItemFromSavedListAction(
-  params: {
-    listId: string;
-    productId: string;
-    variantId?: string | null;
-  }
-): Promise<ActionResponse<{ removed: boolean }>> {
+
+/** ---------------------------------------------------------
+ * ✅ REMOVE ITEM FROM ANY LIST (exact match logic)
+ * --------------------------------------------------------*/
+export async function removeItemFromSavedListAction(params: {
+  listId: string;
+  productId: string;
+  variantId?: string | null;
+}): Promise<ActionResponse<{ removed: boolean }>> {
   const validated = await action({
     params,
     schema: z.object({
@@ -805,10 +672,7 @@ export async function removeItemFromSavedListAction(
     }),
     authorize: true,
   });
-
-  if (validated instanceof Error) {
-    return handleError(validated) as ErrorResponse;
-  }
+  if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
   if (!session?.user?.id) throw new UnAuthorizedError("");
@@ -818,38 +682,37 @@ export async function removeItemFromSavedListAction(
   try {
     await connectDB();
 
-    const list = await SavedList.findOne({
-      _id: listId,
-      userId: session.user.id,
-      archived: { $ne: true },
-    });
+    const uid = new mongoose.Types.ObjectId(session.user.id);
+    const pid = new mongoose.Types.ObjectId(productId);
 
-    if (!list) throw new NotFoundError("List")
+    const pullMatch =
+      variantId == null ? { productId: pid } : { productId: pid, variantId: String(variantId) };
 
-    const before = list.items.length;
-    await list.removeItem(new mongoose.Types.ObjectId(productId),variantId)
-    const after = list.items.length;
-   
-    revalidatePath(ROUTES.mywishlist);
+    const res = await SavedList.updateOne(
+      { _id: listId, userId: uid, archived: { $ne: true } },
+      { $pull: { items: pullMatch }, $set: { "meta.lastRemovedAt": new Date() } }
+    );
+
+    await SavedList.updateOne(
+      { _id: listId, userId: uid },
+      [{ $set: { "meta.count": { $size: "$items" } } }]
+    );
+
     revalidateTag(`savedlists:${session.user.id}`);
+    revalidatePath(ROUTES.mywishlist);
 
-
-    return {
-      success: true,
-      data: { removed: after < before },
-    };
+    return { success: true, data: { removed: res.modifiedCount > 0 } };
   } catch (err) {
     return handleError(err) as ErrorResponse;
   }
 }
 
 
-// actions/savedList.actions.ts
-
-
-
-
- async function _getSavedListsCount(userId: string): Promise<{ totalItems: number }> {
+/** ---------------------------------------------------------
+ * ✅ HEADER COUNT (sum items across all lists)
+ * cached (20s) + tag invalidation
+ * --------------------------------------------------------*/
+async function _getSavedListsCount(userId: string): Promise<{ totalItems: number }> {
   await connectDB();
 
   const uid = new mongoose.Types.ObjectId(userId);
@@ -860,26 +723,23 @@ export async function removeItemFromSavedListAction(
     { $group: { _id: null, totalItems: { $sum: "$itemsCount" } } },
   ]);
 
-  return  {totalItems: result?.[0]?.totalItems ?? 0 }
-  
+  return { totalItems: result?.[0]?.totalItems ?? 0 };
 }
 
-// ✅ Cached wrapper (10-30s is perfect for header badges)
 const getSavedListsCountCached = (userId: string) =>
-  cache(
-    () => _getSavedListsCount(userId),
-    ["savedlists:count", userId],
-    { revalidate: 20, tags: [`savedlists:${userId}`] }
-  )();
+  cache(() => _getSavedListsCount(userId), ["savedlists:count", userId], {
+    revalidate: 20,
+    tags: [`savedlists:${userId}`],
+  })();
 
-export async function getSavedListsCountAction(): Promise<ActionResponse<{ totalItems: number }>> {
+export async function getSavedListsCountAction(): Promise<
+  ActionResponse<{ totalItems: number }>
+> {
   const validated = await action({ authorize: true });
   if (validated instanceof Error) return handleError(validated) as ErrorResponse;
 
   const session = validated.session;
-  if (!session?.user?.id) return{
-     success: false
-  }
+  if (!session?.user?.id) return { success: false };
 
   try {
     const data = await getSavedListsCountCached(session.user.id);

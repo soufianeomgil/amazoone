@@ -24,6 +24,7 @@ interface HeaderProps {
 }
 
 const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
+    const cutName = session ? session.user?.name?.split(' ').map((word) => word[0]?.toUpperCase())?.join("") : ""
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isRightMenuOpen, setIsRightMenuOpen] = useState(false);
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
@@ -130,7 +131,9 @@ const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
                                 </div>
                                 <div className="p-1.5 md:hidden md:p-2 border border-transparent hover:border-white rounded-sm relative">
                                     <User className="h-7 w-7" />
-                                     <span className="absolute top-1 right-1 bg-[#FEBD69] text-black text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">SH</span>
+                                     <span className="absolute top-1 right-1 bg-[#FEBD69] text-black text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                                         {cutName}
+                                     </span>
                                 </div>
                             </div>
 

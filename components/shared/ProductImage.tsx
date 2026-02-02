@@ -7,6 +7,9 @@ import Image from "next/image";
 import { RootState } from "@/lib/store";
 import { IProduct } from "@/models/product.model";
 import ShareTrigger from "@/app/(root)/product/[id]/_components/ShareTrigger";
+import { addItemToDefaultListAction } from "@/actions/savedList.actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const ProductImage = ({ product }: { product: IProduct }) => {
   const shareUrl = `${process.env.NEXTAUTH_URL}/product/${product._id}`;
@@ -15,7 +18,8 @@ const ProductImage = ({ product }: { product: IProduct }) => {
     (state: RootState) =>
       state.product.selectedVariant?.[product._id ?? product.name] ?? 0
   );
-
+  
+ const router = useRouter()
   const gallery = useMemo(() => {
     const normalize = (img: any) =>
       typeof img === "string"
@@ -40,7 +44,41 @@ const ProductImage = ({ product }: { product: IProduct }) => {
 
   const next = () => setActive((i) => (i + 1) % gallery.length);
   const prev = () => setActive((i) => (i - 1 + gallery.length) % gallery.length);
+const handleAddItemToWishlist = async () => {
+    //if (wishLoading) return;
 
+    try {
+     // setWishLoading(true);
+
+      const variant = product.variants[selectedIndex] ?? null;
+      const variantId = variant?._id ? String(variant._id) : null;
+
+      const thumbnail =
+        variant?.images?.[0]?.url ??
+        product?.thumbnail?.url ??
+        product?.images?.[0]?.url;
+
+      const res = await addItemToDefaultListAction({
+        productId: String(product._id),
+        variantId,
+        priceSnapshot: Number(product.basePrice ?? 0),
+        thumbnail,
+      });
+
+      if (res?.error) {
+        toast.error("Wishlist update failed");
+        return;
+      }
+
+    //  setLocalWished(Boolean(res?.data?.added));
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    } finally {
+     // setWishLoading(false);
+    }
+  };
   return (
     <div className="lg:col-span-5 px-2.5">
       {/* 🔒 Sticky container */}
@@ -121,7 +159,7 @@ const ProductImage = ({ product }: { product: IProduct }) => {
           )}
 
           <div className="flex sm:hidden items-center gap-2.5">
-            <div className="flex rounded-full bg-gray-100 w-[45px] h-[45px] items-center justify-center">
+            <div onClick={handleAddItemToWishlist} className="flex rounded-full bg-gray-100 w-[45px] h-[45px] items-center justify-center">
               <Heart color="black" />
             </div>
 

@@ -1,21 +1,16 @@
 "use client";
 
-import { addItemToListAction } from "@/actions/savedList.actions";
+
 import { Button } from "@/components/ui/button";
 import { RootState } from "@/lib/store";
 import { IProduct } from "@/models/product.model";
 import { ISavedItem, ISavedList } from "@/models/savedList.model";
-
 import { Plus } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import AddToListModal from "../modals/AddToListModel";
 import CreateListModal from "../modals/CreateListModal";
-
-
-
-
 
 export default function AddToListButton({ data,product }: {data: ISavedList[], product: IProduct}) {
   const [open, setOpen] = useState(false);
@@ -48,34 +43,34 @@ export default function AddToListButton({ data,product }: {data: ISavedList[], p
    );
    const selectedVariant = product?.variants?.[selectedVariantIndex ?? 0] || null;
 
-  async function handleAddToList(list:ISavedList) {
-    console.log(list, 'list item')
-     try {
-        const { error, data, success } = await addItemToListAction({
+  // async function handleAddToList(list:ISavedList) {
+  //   console.log(list, 'list item')
+  //    try {
+  //       const { error, data, success } = await addItemToListAction({
            
-            productId: String(product._id),
-            listId: String(list.id),
-            variant: selectedVariant ?? undefined,
-            variantId: String(selectedVariant?._id ?? selectedVariant?.sku ?? ""),
-            priceSnapshot: product.basePrice,
-            thumbnail: product.thumbnail.url,
-            note: ""
-        })
+  //           productId: String(product._id),
+  //           listId: String(list.id),
+  //           variant: selectedVariant ?? undefined,
+  //           variantId: String(selectedVariant?._id ?? selectedVariant?.sku ?? ""),
+  //           priceSnapshot: product.basePrice,
+  //           thumbnail: product.thumbnail.url,
+  //           note: ""
+  //       })
        
-        if(error) {
-          return toast.error(error.message)
-        }else if(success) {
-           setItem(data?.item)
-           setListName(data?.list.name as string)
-            setOpenModel(true)
+  //       if(error) {
+  //         return toast.error(error.message)
+  //       }else if(success) {
+  //          setItem(data?.item)
+  //          setListName(data?.list.name as string)
+  //           setOpenModel(true)
            
             
-        }
-     } catch (error) {
-        console.log(error)
-     }
+  //       }
+  //    } catch (error) {
+  //       console.log(error)
+  //    }
    
-  }
+  // }
 
   // create new list
   async function handleCreateList(e?: React.FormEvent) {
@@ -135,7 +130,7 @@ export default function AddToListButton({ data,product }: {data: ISavedList[], p
            
              <div className="flex flex-col ">
             {data.map((list,index) => (
-                <button onClick={() => handleAddToList(list)} className={`flex ${index === 0 ? "bg-blue-50" : ""}
+                <button  className={`flex ${index === 0 ? "bg-blue-50" : ""}
                  items-center p-2 hover:bg-[#f6f6f6] w-full cursor-pointer gap-2`} key={index}>
                      <div>
                         <img className="object-contain" src="https://www.amazon.com/hz/wishlist/listimage?listId=L956MFXM7DWD&listType=WishList&redirect=true" alt="" />

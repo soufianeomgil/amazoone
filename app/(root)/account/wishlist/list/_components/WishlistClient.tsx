@@ -223,4 +223,3 @@ const wishlistedMap = React.useMemo(() => {
 }
 
 export default WishlistClient
-

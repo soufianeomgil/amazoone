@@ -49,6 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               name: existingUser.fullName,
               email: existingUser.email,
               image: existingUser.profilePictureUrl,
+              isVerified: existingUser.isVerified,
               isAdmin: existingUser.isAdmin, 
               profileCompleted: existingUser.profileCompleted
             };
@@ -67,7 +68,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session.user.id = token.sub as string;
 session.user.isAdmin = token.isAdmin as boolean;
 session.user.profileCompleted = token.profileCompleted as boolean;
-
+session.user.isVerified = token.isVerified as boolean
       
       return session;
     
@@ -79,6 +80,7 @@ session.user.profileCompleted = token.profileCompleted as boolean;
   if (user) {
     token.sub = user.id
     token.isAdmin = user.isAdmin
+    token.isVerified = user.isVerified
     token.profileCompleted = user.profileCompleted
   }
 
@@ -99,6 +101,7 @@ session.user.profileCompleted = token.profileCompleted as boolean;
         token.sub = dbUser._id
         token.isAdmin = dbUser.isAdmin
         token.name = dbUser.fullName
+        token.isVerified = dbUser.isVerified
         token.profileCompleted = dbUser.profileCompleted
       }
     }

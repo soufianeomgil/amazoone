@@ -1,5 +1,3 @@
-
-
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
@@ -23,14 +21,12 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { DotsVerticalIcon, SpinnerIcon, TrashIcon } from "../shared/icons";
-import {
-  addItemToDefaultListAction,
-  removeItemFromSavedListAction,
-} from "@/actions/savedList.actions";
+
 import { toast } from "sonner";
 import Image from "next/image";
 import CartSidebar from "../shared/CartSidebar";
 import BottomSheet from "../shared/Sheet";
+
 
 
 type Props = {
@@ -270,58 +266,43 @@ const MainCard: React.FC<Props> = ({
     return base.toFixed(2);
   })();
 
-  const handleAddItemToWishlist = async () => {
-    if (wishLoading) return;
+  // const handleAddItemToWishlist = async () => {
+  //   if (wishLoading) return;
 
-    try {
-      setWishLoading(true);
+  //   try {
+  //     setWishLoading(true);
 
-      const variant = chosenVariant ?? null;
-      const variantId = variant?._id ? String(variant._id) : null;
+  //     const variant = chosenVariant ?? null;
+  //     const variantId = variant?._id ? String(variant._id) : null;
 
-      const thumbnail =
-        variant?.images?.[0]?.url ??
-        product?.thumbnail?.url ??
-        product?.images?.[0]?.url;
+  //     const thumbnail =
+  //       variant?.images?.[0]?.url ??
+  //       product?.thumbnail?.url ??
+  //       product?.images?.[0]?.url;
 
-      const res = await addItemToDefaultListAction({
-        productId: String(product._id),
-        variantId,
-        priceSnapshot: Number(product.basePrice ?? 0),
-        thumbnail,
-      });
+  //     const res = await toggleSavedItemAction(userId, {
+  //       productId: String(product._id),
+  //       variantId,
+  //       priceSnapshot: Number(product.basePrice ?? 0),
+  //       thumbnail,
+  //     });
 
-      if (res?.error) {
-        toast.error("Wishlist update failed");
-        return;
-      }
+  //     if (res?.error) {
+  //       toast.error("Wishlist update failed");
+  //       return;
+  //     }
 
-      setLocalWished(Boolean(res?.data?.added));
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong");
-    } finally {
-      setWishLoading(false);
-    }
-  };
+     
+      
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Something went wrong");
+  //   } finally {
+  //     setWishLoading(false);
+  //   }
+  // };
 
-  const handleDeleteItem = async () => {
-    if (!listId) return;
 
-    const variantId = chosenVariant?._id ? String(chosenVariant._id) : null;
-
-    const res = await removeItemFromSavedListAction({
-      listId,
-      productId: String(product._id),
-      variantId,
-    });
-
-    if (res?.success) {
-      toast.success("Item deleted");
-      router.refresh();
-    }
-  };
 
   // placeholders for later (your logic)
   const handleMoveToAnother = async () => {
@@ -354,7 +335,7 @@ const MainCard: React.FC<Props> = ({
 
           {!isWishlist && (
             <div
-              onClick={!wishLoading ? handleAddItemToWishlist : undefined}
+             
               className="absolute top-3 cursor-pointer right-3 z-30 w-[35px] h-[35px] flex items-center justify-center rounded-full bg-white shadow"
             >
               {localWished ? (
@@ -669,10 +650,7 @@ const MainCard: React.FC<Props> = ({
 
                 <button
                   type="button"
-                  onClick={() => {
-                    handleDeleteItem();
-                    setMoreOpen(false);
-                  }}
+                  
                   className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-50 active:bg-red-100"
                 >
                   <TrashIcon />
@@ -711,7 +689,7 @@ const MainCard: React.FC<Props> = ({
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  onClick={handleDeleteItem}
+                 
                   className="flex items-center gap-2 text-red-500! cursor-pointer"
                 >
                   <TrashIcon />

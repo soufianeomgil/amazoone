@@ -1,6 +1,7 @@
 import { combineReducers, configureStore, ConfigureStoreOptions } from '@reduxjs/toolkit'
 import cartReducer from "@/lib/store/cartSlice"
 import productReducer from "@/lib/store/productSlice"
+
 import addressReducer from "@/lib/store/addressSlice"
 import {
   persistStore,
@@ -18,8 +19,8 @@ import storage from 'redux-persist/lib/storage';
 const rootReducer = combineReducers({
   cart: cartReducer,
    product: productReducer,
-   address: addressReducer
-  // Add other reducers here
+   address: addressReducer,
+  
 });
 const persistConfig = {
   key: 'root', // The key for the persisted state in storage

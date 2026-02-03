@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 
 import EditWishlistModal from "@/components/shared/modals/EditWishlistModel";
-import { deleteWishlistAction, EmptyWishlistAction, setDefaultWishlistAction } from "@/actions/savedList.actions";
+
 import { toast } from "sonner";
 import { useConfirmStore } from "@/lib/store/confirm.store";
 import Image from "next/image";
@@ -15,90 +15,90 @@ import WishlistMoreMenu from "./DropdownSheet";
 const Btns = ({name,id,isDefault,hasItems,setPending}: {name:string,setPending:(v:boolean)=> void,id:string,isDefault:boolean,hasItems:boolean}) => {
   const [publicSharing, setPublicSharing] = useState(false);
   const [open,setOpen] = useState(false)
-  const handleEmptyWishlist = async()=> {
-    setPending(true)
-     try {
-       const {error,success} = await EmptyWishlistAction({id})
-       if(error) {
-         toast.error(error.message)
-         return;
-       }else if(success) {
-         toast.success("Success")
-         return
-       }
-     } catch (error) {
-        console.log(error)
-     }finally {
-      setPending(false)
-     }
-  }
-  const handleDeleteWishlist = async(id:string)=> {
-    setPending(true)
-     try {
-     const {error,success} =  await deleteWishlistAction({id})
-     if(error) {
-        toast.error(error.message)
-        return
-     }else if(success) {
-       return toast.success('Wishlist has been deleted')
-     }
-     } catch (error) {
-       console.log(error)
-     }finally {
-        setPending(false)
-     }
-  }
+  // const handleEmptyWishlist = async()=> {
+  //   setPending(true)
+  //    try {
+  //      const {error,success} = await EmptyWishlistAction({id})
+  //      if(error) {
+  //        toast.error(error.message)
+  //        return;
+  //      }else if(success) {
+  //        toast.success("Success")
+  //        return
+  //      }
+  //    } catch (error) {
+  //       console.log(error)
+  //    }finally {
+  //     setPending(false)
+  //    }
+  // }
+  // const handleDeleteWishlist = async(id:string)=> {
+  //   setPending(true)
+  //    try {
+  //    const {error,success} =  await deleteWishlistAction({id})
+  //    if(error) {
+  //       toast.error(error.message)
+  //       return
+  //    }else if(success) {
+  //      return toast.success('Wishlist has been deleted')
+  //    }
+  //    } catch (error) {
+  //      console.log(error)
+  //    }finally {
+  //       setPending(false)
+  //    }
+  // }
   const confirm = useConfirmStore((s) => s.confirm)
-  const handleEmpty = async()=> {
-   const ok = await confirm({
-  title: "Empty wishlist",
-  description: "All saved items will be removed.",
-  confirmText: "Empty",
-});
-    if(!ok) return;
-    await handleEmptyWishlist()
-  }
-  const handleDelete = async () => {
-  const ok = await confirm({
-    title: "Delete wishlist",
-    description: "This will permanently remove the wishlist.",
-    confirmText: "Delete",
-    destructive: true,
-  });
+//   const handleEmpty = async()=> {
+//    const ok = await confirm({
+//   title: "Empty wishlist",
+//   description: "All saved items will be removed.",
+//   confirmText: "Empty",
+// });
+//     if(!ok) return;
+//     await handleEmptyWishlist()
+//   }
+//   const handleDelete = async () => {
+//   const ok = await confirm({
+//     title: "Delete wishlist",
+//     description: "This will permanently remove the wishlist.",
+//     confirmText: "Delete",
+//     destructive: true,
+//   });
 
-  if (!ok) return;
+//   if (!ok) return;
 
-  await handleDeleteWishlist(id)
-};
-  const handleSwitchToDefaultWishlist = async()=> {
-    setPending(true)
-     try {
-     const {error,success} =  await setDefaultWishlistAction({id})
-     if(error) {
-        toast.error(error.message)
-        return
-     }else if(success) {
-       return toast.success('Success')
-     }
-     } catch (error) {
-       console.log(error)
-     }finally  {
-       setPending(false)
-     }
-  }
-  const handleSwitchDefault = async()=> {
-     const ok = await confirm({
-  title: "Make default wishlist?",
-  description: "This will replace your current default wishlist.",
-  confirmText: "Make default",
-  destructive: false,
-});
+//   await handleDeleteWishlist(id)
+// };
+  // const handleSwitchToDefaultWishlist = async()=> {
+  //   setPending(true)
+  //    try {
+  //    const {error,success} =  await setDefaultWishlistAction({id})
+  //    if(error) {
+  //       toast.error(error.message)
+  //       return
+  //    }else if(success) {
+  //      return toast.success('Success')
+  //    }
+  //    } catch (error) {
+  //      console.log(error)
+  //    }finally  {
+  //      setPending(false)
+  //    }
+  // }
+//   const handleSwitchDefault = async()=> {
+//      const ok = await confirm({
+//   title: "Make default wishlist?",
+//   description: "This will replace your current default wishlist.",
+//   confirmText: "Make default",
+//   destructive: false,
+// });
 
-if (ok) {
-  await handleSwitchToDefaultWishlist();
-}
+// if (ok) {
+//   await handleSwitchToDefaultWishlist();
+// }
 
-  }
+//   }
   return (
     <div className="flex items-center gap-3">
       {/* Share */}
@@ -117,9 +117,9 @@ if (ok) {
         setPublicSharing={setPublicSharing}
         isDefault={isDefault}
         hasItems={hasItems}
-        handleSwitchDefault={handleSwitchDefault}
-        handleEmpty={handleEmpty}
-        handleDelete={handleDelete}  />
+        handleSwitchDefault={()=> {}}
+        handleEmpty={()=> {}}
+        handleDelete={()=> {}}  />
       <EditWishlistModal id={id} name={name} open={open} setOpen={setOpen} />
     </div>
   );

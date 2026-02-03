@@ -61,7 +61,7 @@ export default function SignUpForm() {
         form.reset();
         // mimic Amazon: after signup they often redirect to home or to verify step
         //router.push(redirect);
-        setDestination(data?.destination as string)
+        setDestination(data?.email as string)
         setOpenOpt(true)
         return;
       }
@@ -298,10 +298,10 @@ export default function SignUpForm() {
       <AuthFormBtns isSubmitting={isSubmitting} />
         {/* footer */}
         <div className="mt-6 text-center text-xs text-gray-500">
-          <p>© 1996–2024, Amazon.com, Inc. or its affiliates</p>
+          <p>© 2015–2026, Omgil, Inc. or its affiliates</p>
         </div>
       </div>
-      <OptModal phoneNumber={destination}  open={openOpt} setOpen={setOpenOpt} />
+      <OptModal email={destination}  open={openOpt} setOpen={setOpenOpt} />
     </div>
   );
 }

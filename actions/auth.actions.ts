@@ -13,13 +13,13 @@ import { AuthCredentials } from "@/types/actionTypes"
 import { completeProfileSchema, ForgotPasswordSchema, LoginValidationSchema, ResetPasswordSchema, SignUpValidationSchema } from "@/lib/zod"
 import Account, { IAccount } from "@/models/account.model"
 import Token from "@/models/token.model"
-import { sendPasswordChangedEmail, sendResetEmail } from "@/lib/nodemailer"
+import { sendPasswordChangedEmail, sendResetEmail, sendVerificationEmail } from "@/lib/nodemailer"
 import z from "zod"
 import { generateOTP, generateResetToken } from "@/lib/security/tokens"
 
 import ResetCode from "@/models/resetCode.model"
 import { cookies, headers } from "next/headers"
-import { sendSMS } from "@/lib/sms/twilio"
+// import { sendSMS } from "@/lib/sms/twilio"
 import { maskPhoneE164, normalizeMoroccanPhone } from "@/lib/phone/normalizeMA"
 function maskDestination(type: "email" | "phone", value: string) {
   if (type === "email") {
@@ -93,9 +93,13 @@ export async function signUpWithCredentials(params: AuthCredentials): Promise<Ac
    // const hashedCode = await bcrypt.hash(rawCode, 10);
     await session.commitTransaction();
     session.endSession();
-
+    const hashedToken  = await bcrypt.hash(rawCode,12)
+     await Token.create({
+       userId: newUser._id,
+       token: hashedToken
+    })
     // ✅ Send WhatsApp OTP after DB commit
-    await sendSMS(phoneE164, `your verification code is ${rawCode}`);
+    await sendVerificationEmail(normalizedEmail, `your verification code is ${rawCode}`);
 
     revalidatePath("/admin/usersList");
 
@@ -107,7 +111,7 @@ export async function signUpWithCredentials(params: AuthCredentials): Promise<Ac
         phone: phoneE164,
         email: normalizedEmail,
       },
-      message: "We sent a verification code via SMS.",
+      message: "We sent a verification code via Email.",
     };
   } catch (error) {
     session.endSession();
@@ -116,37 +120,6 @@ export async function signUpWithCredentials(params: AuthCredentials): Promise<Ac
 }
 
 
-// const VerifyPhoneSchema = z.object({
-//   phone: z.string(),
-//   code: z.string().min(4).max(10),
-// });
-
-// export async function verifySignupPhoneAction(params: z.infer<typeof VerifyPhoneSchema>) {
-//   const validated = await action({ params, schema: VerifyPhoneSchema });
-//   if (validated instanceof Error) return handleError(validated) as any;
-
-//   const { phone, code } = validated.params!;
-
-//   try {
-//     await connectDB();
-
-//     const result = await checkVerification(phone, code);
-
-//     // Twilio returns statuses like "approved"
-//     if (result.status !== "approved") {
-//       return { success: false, error: { message: "Invalid code" } };
-//     }
-
-//     await User.updateOne(
-//       { phoneNumber: phone },
-//       { $set: { phoneVerified: true } }
-//     );
-
-//     return { success: true };
-//   } catch (error) {
-//     return handleError(error) as any;
-//   }
-// }
 
 
 export async function signInWithCredentials(
@@ -192,14 +165,7 @@ export async function signInWithCredentials(
   provider: "credentials",
 });
 
-    /**
-     * 🔑 PASSWORD CHECK
-     */
-    // if (!existingUser.hashedPassword) {
-    //   throw new ForbiddenError(
-    //     "Please set a password before signing in with email."
-    //   );
-    // }
+   
 if (!account || !account.password) {
   throw new ForbiddenError(
     "This account was created using Google. Please sign in with Google or set a password."
@@ -317,7 +283,7 @@ export async function forgotPasswordAction(
     if (type === "email") {
       await sendResetEmail({ to: identifier, code: rawCode });
     } else {
-      await sendSMS(identifier, `Your reset code is: ${rawCode}`);
+      //await sendSMS(identifier, `Your reset code is: ${rawCode}`);
     }
 
     return { success: true };
@@ -526,6 +492,77 @@ export async function resetPasswordAction(
     return {
   success: true,
   data: { autoLogin: true,identifier: user.email}};
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+
+interface VerifyEmailParams {
+  email: string;
+  code: string
+
+}
+
+
+export async function VerifyEmail(params: VerifyEmailParams): Promise<ActionResponse> {
+  try {
+    await connectDB();
+    const { email, code } = params;
+
+    // 1. Find the user
+    const user = await User.findOne({ email });
+    if (!user) throw new Error("User not found");
+
+    // 2. Find the token document for this specific user
+    // We can't query by the hashed token, so we get the most recent one for this user
+    const tokenDoc = await Token.findOne({ userId: user._id });
+
+    if (!tokenDoc) {
+      throw new Error("Invalid or expired verification code");
+    }
+
+    // 3. Verify the plain-text 'code' against the hashed 'tokenDoc.token'
+    const isMatch = await bcrypt.compare(code, tokenDoc.token);
+
+    if (!isMatch) {
+      throw new Error("Invalid verification code");
+    }
+
+    // 4. Double-check expiration (Fail-safe for MongoDB TTL)
+    if (new Date() > tokenDoc.expiresAt) {
+      await Token.deleteOne({ _id: tokenDoc._id });
+      throw new Error("Verification code has expired");
+    }
+
+    // 5. Update User Status
+    // We also set phoneVerified if you want to consider email verification enough 
+    // for initial access, or just stick to isVerified.
+    user.isVerified = true;
+    await user.save();
+
+    // 6. Delete the token so it cannot be reused
+    await Token.deleteOne({ _id: tokenDoc._id });
+     const account = await Account.findOne({
+  userId: user._id,
+  provider: "credentials",
+}) as IAccount
+
+   
+if (!account || !account.password) {
+  throw new ForbiddenError(
+    "Account not found"
+  );
+}
+     await signIn("credentials", {
+      email: user.email,
+      password: account.password,
+      redirect: false,
+    });
+    return {
+      success: true,
+      message: "Email verified successfully!"
+    };
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }

@@ -330,38 +330,4 @@ export const getAdminUsersOverview : ()=> Promise< ActionResponse<{
   }
 }, [ROUTES.admin.users, "getAdminUsersOverview"], {revalidate: 60 * 60 * 24})
 
-interface VerifyEmailParams {
-  email: string
-}
-const VerifyEmailSchema = z.object({
-  email: z.email("Please Provide a valid email address")
-})
-export async function VerifyEmail(params:VerifyEmailParams): Promise<ActionResponse>{
-  const validatedResult = await action({params,schema:VerifyEmailSchema,authorize:true})
- 
-  if(validatedResult instanceof Error) {
-     return handleError(validatedResult) as ErrorResponse
-  }
-  const session = validatedResult.session;
-  try {
-    if(!session) throw new UnAuthorizedError("UnAuthorized to perform this action")
-      const {email} = validatedResult.params!;
-     await connectDB()
-     const token = crypto.randomBytes(32).toString("hex");
-  const hashedToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
-    await Token.create({
-       userId: session.user.id,
-       token: hashedToken,
-       expiresAt: 'after 10 min'
-    })
-     await sendVerificationEmail(email,token)
-    return {
-       success: true
-    }
-  } catch (error) {
-     return handleError(error) as ErrorResponse
-  }
-}
+

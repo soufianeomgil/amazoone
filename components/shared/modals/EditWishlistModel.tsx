@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { EditWishlistSchema } from "@/lib/zod";
-import { editWishlistAction } from "@/actions/savedList.actions";
+
 
 
 
@@ -59,19 +59,7 @@ const EditWishlistModal: React.FC<CreateListModalProps> = ({ open, name,id, setO
   const isSubmitting = form.formState.isSubmitting
 
   async function onSubmit(values: z.infer<typeof EditWishlistSchema>) {
-    try {
-      const { error, success } = await editWishlistAction({name:values.name,id: values.id})
-      if(error) {
-         toast.error(error.message)
-         return
-      }else if(success) {
-         toast.success("wishlist has been updated successfuly")
-         setOpen(false)
-         return
-      }
-    } catch (error) {
-       console.log(error)
-    }
+  
   }
      
 

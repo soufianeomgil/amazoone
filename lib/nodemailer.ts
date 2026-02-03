@@ -11,16 +11,16 @@ const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com"
 })
 
-export async function sendVerificationEmail(email: string, token: string) {
+export async function sendVerificationEmail(email: string, code: string) {
   await transporter.sendMail({
-    from: `"Amazon Clone" <no-reply@yourdomain.com>`,
+    from: 'soufianehmamou92@gmail.com',
     to: email,
     subject: "Confirm your new email address",
     html: `
       <div style="font-family:Arial">
         <h2>Confirm your email</h2>
         <p>Use the code below to confirm your new email address:</p>
-        <h1 style="letter-spacing:3px">${token}</h1>
+        <h1 style="letter-spacing:3px">${code}</h1>
         <p>This code expires in <strong>10 minutes</strong>.</p>
         <p>If you did not request this change, ignore this email.</p>
       </div>

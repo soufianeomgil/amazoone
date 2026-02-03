@@ -13,7 +13,7 @@ import Variant from '@/components/shared/Variant';
 import { IProduct } from '@/models/product.model';
 import { getSignleProduct } from '@/actions/product.actions';
 import BuyPanel from '@/components/shared/BuyPanel';
-import { getSavedListsAction } from '@/actions/savedList.actions';
+
 import Rating from '@/components/shared/Rating';
 import ProductSpecs from './_components/ProductSpec';
 import RelatedProducts from './_components/RelatedProducts';
@@ -66,7 +66,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
     }
   };
 
-  const {data} = await getSavedListsAction({page: 1,limit: 10, includeArchived:true})
+ 
    await trackProductView({userId:session?.user.id!,productId: productId,productTags: result.data?.product.tags!})
  
   // If the API shape differs, ensure a safe product object
@@ -253,7 +253,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
   </div>
 </div>
 
-<BuyPanel userId={session?.user.id as string} product={product} data={data?.lists || []} />
+<BuyPanel userId={session?.user.id as string} product={product} data={ []} />
       
         </div>
 

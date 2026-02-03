@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { CreateListSchema } from "@/lib/zod";
-import { createSavedListAction } from "@/actions/savedList.actions";
+
 
 
 type WishlistItemInput = {
@@ -59,19 +59,7 @@ const CreateListModal: React.FC<CreateListModalProps> = ({ open, setOpen, defaul
   const isSubmitting = form.formState.isSubmitting
 
   async function onSubmit(values: z.infer<typeof CreateListSchema>) {
-      try {
-        const  {error,success} = await createSavedListAction(values)
-        if(error) {
-          toast.error(error.message)
-          return
-        }else{
-           setOpen(false)
-           toast.success(`List has been created`)
-           return
-        }
-      } catch (error) {
-         console.log(error)
-      }
+     
   }
 
 

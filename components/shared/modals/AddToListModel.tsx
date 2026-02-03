@@ -6,7 +6,7 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import Rating from "../Rating";
 
-import { ISavedItem } from "@/models/savedList.model";
+
 
 
 
@@ -14,7 +14,7 @@ interface AddToListModalProps {
   open: boolean;
    setOpen: (v:boolean)=> void;
    listName: string
-  item: ISavedItem | undefined
+  item: any | undefined
   // optional callbacks to integrate with backend
  
  

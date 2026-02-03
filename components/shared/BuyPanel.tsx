@@ -13,7 +13,6 @@ import CartSidebar from "./CartSidebar";
 import FixedQTY from "./FixedQTY";
 import AddToListButton from "./clientBtns/ListBtn";
 import { IProduct, IVariant } from "@/models/product.model";
-import { ISavedList } from "@/models/savedList.model";
 import { LocationIcon } from "./icons";
 import AmazonPrice from "./AmazonPrice";
 import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
@@ -32,7 +31,7 @@ type LocalCartItem = {
   sku?: string;
 };
 
-const BuyPanel = ({ product, data,userId }: { product: IProduct; userId: string; data: ISavedList[] }) => {
+const BuyPanel = ({ product, data,userId }: { product: IProduct; userId: string; data: [] }) => {
   const variants = product?.variants ?? [];
   const selectedVariantIndex = useSelector(
     (state: RootState) => state.product.selectedVariant[product?._id as string]

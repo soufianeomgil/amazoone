@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { RootState } from "@/lib/store";
 import { IProduct } from "@/models/product.model";
-import { ISavedItem, ISavedList } from "@/models/savedList.model";
+
 import { Plus } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import AddToListModal from "../modals/AddToListModel";
 import CreateListModal from "../modals/CreateListModal";
 
-export default function AddToListButton({ data,product }: {data: ISavedList[], product: IProduct}) {
+export default function AddToListButton({ data,product }: {data: [], product: IProduct}) {
   const [open, setOpen] = useState(false);
 
   console.log(data, "your shit")
@@ -21,7 +21,7 @@ export default function AddToListButton({ data,product }: {data: ISavedList[], p
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const [openModel,setOpenModel] = useState(false)
   const [openCreateListModel,setOpenCreateListModel] = useState(false)
-  const [item,setItem] = useState<ISavedItem>()
+  const [item,setItem] = useState()
   const [listName,setListName] = useState("")
   // optional selected state for accessibility / keyboard navigation
   const [highlightIndex, setHighlightIndex] = useState<number>(-1);
@@ -137,10 +137,10 @@ export default function AddToListButton({ data,product }: {data: ISavedList[], p
                      </div>
                      <div className="flex text-left! flex-col">
                        <p className="text-xs font-medium text-black">
-                         {list.name}
+                         Bags
                        </p>
                        <p className="text-xs text-gray-400 font-normal  ">
-                         {list.isPrivate ? "Private" : "Public"}
+                         {false ? "Private" : "Public"}
                        </p>
                      </div>
                 </button>

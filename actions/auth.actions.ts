@@ -34,10 +34,7 @@ function maskDestination(type: "email" | "phone", value: string) {
 
 
 
-export async function signUpWithCredentials(params: AuthCredentials): Promise<ActionResponse<{ step: string,
-        destination: string,
-        phone: string,
-        email: string}>> {
+export async function signUpWithCredentials(params: AuthCredentials): Promise<ActionResponse> {
   const validationResult = await action({ params, schema: SignUpValidationSchema });
   if (validationResult instanceof Error) return handleError(validationResult) as ErrorResponse
 
@@ -48,7 +45,7 @@ export async function signUpWithCredentials(params: AuthCredentials): Promise<Ac
   try {
     phoneE164  = normalizeMoroccanPhone(phoneNumber) as string;
   } catch (e) {
-    return handleError(e) as any;
+    return handleError(e) as ErrorResponse;
   }
 
   await connectDB();
@@ -89,29 +86,12 @@ export async function signUpWithCredentials(params: AuthCredentials): Promise<Ac
       ],
       { session }
     );
-  const rawCode = generateOTP();
-   // const hashedCode = await bcrypt.hash(rawCode, 10);
-    await session.commitTransaction();
-    session.endSession();
-    const hashedToken  = await bcrypt.hash(rawCode,12)
-     await Token.create({
-       userId: newUser._id,
-       token: hashedToken
-    })
-    // ✅ Send WhatsApp OTP after DB commit
-    await sendVerificationEmail(normalizedEmail, `your verification code is ${rawCode}`);
-
+  
+    await signIn("credentials", { email, password, redirect: false })
     revalidatePath("/admin/usersList");
 
     return {
       success: true,
-      data: {
-        step: "VERIFY_PHONE",
-        destination: maskPhoneE164(phoneE164),
-        phone: phoneE164,
-        email: normalizedEmail,
-      },
-      message: "We sent a verification code via Email.",
     };
   } catch (error) {
     session.endSession();
@@ -168,7 +148,7 @@ export async function signInWithCredentials(
    
 if (!account || !account.password) {
   throw new ForbiddenError(
-    "This account was created using Google. Please sign in with Google or set a password."
+    "Your account is connected to Google - use the Google button to log in"
   );
 }
     const passwordMatches = await bcrypt.compare(
@@ -503,7 +483,33 @@ interface VerifyEmailParams {
   code: string
 
 }
-
+export async function SendVerifyEmail(): Promise<ActionResponse> {
+  try {
+     await connectDB()
+     const session = await auth()
+     if(!session) return {
+       success: false
+     }
+     const user = await User.findById(session.user.id) as IUser
+     if(!user) throw new Error('User not found')
+     const rawCode = generateOTP();
+   // const hashedCode = await bcrypt.hash(rawCode, 10);
+     
+    const hashedToken  = await bcrypt.hash(rawCode,12)
+     await Token.create({
+       userId: user._id,
+       token: hashedToken
+    })
+    // ✅ Send WhatsApp OTP after DB commit
+    await sendVerificationEmail(user.email, `your verification code is ${rawCode}`);
+     return {
+       success: true,
+       message: "we sent a verification code to your inbox"
+     }
+  } catch (error) {
+     return handleError(error) as ErrorResponse;
+  }
+}
 
 export async function VerifyEmail(params: VerifyEmailParams): Promise<ActionResponse> {
   try {

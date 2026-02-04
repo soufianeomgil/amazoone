@@ -23,6 +23,7 @@ import { signUpWithCredentials } from "@/actions/auth.actions";
 import AuthFormBtns from "./AuthFormBtns";
 import Image from "next/image";
 import OptModal from "../shared/modals/OptModal";
+import { toast } from "sonner";
 
 type SignUpValues = z.infer<typeof SignUpValidationSchema>;
 
@@ -54,15 +55,15 @@ export default function SignUpForm() {
     setError(undefined);
     setLoading(true);
     try {
-      const { success, message, error, data } = await signUpWithCredentials(values);
+      const { success, message, error } = await signUpWithCredentials(values);
       setLoading(false);
 
       if (success) {
         form.reset();
         // mimic Amazon: after signup they often redirect to home or to verify step
         //router.push(redirect);
-        setDestination(data?.email as string)
-        setOpenOpt(true)
+         toast.success('success')
+         router.replace("/")
         return;
       }
 
@@ -301,7 +302,7 @@ export default function SignUpForm() {
           <p>© 2015–2026, Omgil, Inc. or its affiliates</p>
         </div>
       </div>
-      <OptModal email={destination}  open={openOpt} setOpen={setOpenOpt} />
+      {/* <OptModal email={destination}  open={openOpt} setOpen={setOpenOpt} /> */}
     </div>
   );
 }

@@ -44,7 +44,7 @@ const OptModal = ({ open, setOpen, email }: OptInputProps) => {
       if (response.success) {
         setOpen(false)
         toast.success("Your account has been verified successfuly")
-        router.replace("/")
+        router.replace("/login")
         return
         // Handle success (e.g., redirect or toast)
       }else if(response.error) {

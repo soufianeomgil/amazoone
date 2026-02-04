@@ -543,22 +543,11 @@ export async function VerifyEmail(params: VerifyEmailParams): Promise<ActionResp
 
     // 6. Delete the token so it cannot be reused
     await Token.deleteOne({ _id: tokenDoc._id });
-     const account = await Account.findOne({
-  userId: user._id,
-  provider: "credentials",
-}) as IAccount
+    
 
    
-if (!account || !account.password) {
-  throw new ForbiddenError(
-    "Account not found"
-  );
-}
-     await signIn("credentials", {
-      email: user.email,
-      password: account.password,
-      redirect: false,
-    });
+
+  
     return {
       success: true,
       message: "Email verified successfully!"

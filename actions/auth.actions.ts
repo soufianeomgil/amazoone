@@ -34,43 +34,103 @@ function maskDestination(type: "email" | "phone", value: string) {
 
 
 
+// export async function signUpWithCredentials(params: AuthCredentials): Promise<ActionResponse> {
+//   const validationResult = await action({ params, schema: SignUpValidationSchema });
+//   if (validationResult instanceof Error) return handleError(validationResult) as ErrorResponse
+
+//   const { fullName, email, password, gender, phoneNumber } = validationResult.params!;
+//   const normalizedEmail = email.toLowerCase().trim();
+
+//   let phoneE164: string
+//   try {
+//     phoneE164  = normalizeMoroccanPhone(phoneNumber) as string;
+//   } catch (e) {
+//     return handleError(e) as ErrorResponse;
+//   }
+
+//   await connectDB();
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+
+//   try {
+//     const existingUser = await User.findOne({ email: normalizedEmail });
+//     if (existingUser) {
+//       throw new ForbiddenError(`An account already exists with the email address ${normalizedEmail}.`);
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 12);
+
+//     const [newUser] = await User.create(
+//       [
+//         {
+//           fullName,
+//           email: normalizedEmail,
+//           gender,
+//           phoneNumber: phoneE164,          // store normalized
+//           phoneVerified: false,            // ✅ add this boolean in your user schema
+//           profileCompleted: true,
+//         },
+//       ],
+//       { session }
+//     );
+
+//     await Account.create(
+//       [
+//         {
+//           userId: newUser._id,
+//           name: newUser.fullName,
+//           provider: "credentials",
+//           providerAccountId: normalizedEmail,
+//           password: hashedPassword, // (or remove this later if you refactor to 1 source)
+//         },
+//       ],
+//       { session }
+//     );
+  
+//     await signIn("credentials", { email, password, redirect: false })
+//     revalidatePath("/admin/usersList");
+
+//     return {
+//       success: true,
+//     };
+//   } catch (error) {
+//     session.endSession();
+//     return handleError(error) as ErrorResponse;
+//   }
+// }
 export async function signUpWithCredentials(params: AuthCredentials): Promise<ActionResponse> {
   const validationResult = await action({ params, schema: SignUpValidationSchema });
-  if (validationResult instanceof Error) return handleError(validationResult) as ErrorResponse
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse;
+  }
 
   const { fullName, email, password, gender, phoneNumber } = validationResult.params!;
   const normalizedEmail = email.toLowerCase().trim();
-
-  let phoneE164: string
-  try {
-    phoneE164  = normalizeMoroccanPhone(phoneNumber) as string;
-  } catch (e) {
-    return handleError(e) as ErrorResponse;
-  }
 
   await connectDB();
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
+    // Pre-generate expensive values
+    const [hashedPassword, verificationCode] = await Promise.all([
+      bcrypt.hash(password, 12),
+      Promise.resolve(Math.floor(100000 + Math.random() * 900000).toString()),
+    ]);
+
+    // Parallel user lookup
     const existingUser = await User.findOne({ email: normalizedEmail });
+
     if (existingUser) {
-      throw new ForbiddenError(`An account already exists with the email address ${normalizedEmail}.`);
+      throw new ForbiddenError(
+        `An account already exists with the email address ${normalizedEmail}.`
+      );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-
+    // Create user and account in transaction
     const [newUser] = await User.create(
-      [
-        {
-          fullName,
-          email: normalizedEmail,
-          gender,
-          phoneNumber: phoneE164,          // store normalized
-          phoneVerified: false,            // ✅ add this boolean in your user schema
-          profileCompleted: true,
-        },
-      ],
+      [{ fullName, email: normalizedEmail, gender, profileCompleted: true, phoneNumber }],
       { session }
     );
 
@@ -81,19 +141,42 @@ export async function signUpWithCredentials(params: AuthCredentials): Promise<Ac
           name: newUser.fullName,
           provider: "credentials",
           providerAccountId: normalizedEmail,
-          password: hashedPassword, // (or remove this later if you refactor to 1 source)
+          password: hashedPassword,
         },
       ],
       { session }
     );
-  
-    await signIn("credentials", { email, password, redirect: false })
+
+    // Clean previous tokens and create new one
+    await Token.deleteMany({ userId: newUser._id }, { session });
+    await Token.create(
+      [
+        {
+          token: verificationCode,
+          userId: newUser._id,
+          expiresAt: new Date(Date.now() + 1000 * 60 * 10), // 10 minutes
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // Send email after transaction (non-blocking)
+    // sendVerificationEmail(normalizedEmail, verificationCode).catch(console.error);
+
+    await signIn("credentials", { email: normalizedEmail, password, redirect: false });
+
+    // Optional: revalidate admin user list page
     revalidatePath("/admin/usersList");
 
     return {
       success: true,
+      message: "Please check your email to verify your account.",
     };
   } catch (error) {
+    await session.abortTransaction();
     session.endSession();
     return handleError(error) as ErrorResponse;
   }

@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/actions/user.actions'
 import { IUser } from '@/models/user.model'
 import ProfileItems from '@/components/shared/navbars/ProfileItems'
 import RightSidebar from '@/components/shared/navbars/RightSidebar'
+import EmailVerificationBanner from './_components/EmailVerification'
 
 
 const page = async() => {
@@ -22,9 +23,10 @@ const page = async() => {
     <div className='flex flex-col px-3 flex-1'>
  <div className='flex flex-col space-y-2.5'>
              <h2 className='capitalize font-bold text-black sm:text-3xl text-xl  '>Your profile</h2>
-              <p className='text-sm text-gray-800 font-medium'>Your profile preferences help us personalize recommendations for you.</p>
+              <p className='text-sm text-gray-800 font-medium'>make changes to your personal information or account type</p>
         </div>
-         <div className='mt-5 flex flex-col space-y-4'>
+        <EmailVerificationBanner user={result.data?.user as IUser} />
+                 <div className='mt-5 flex flex-col space-y-4'>
            <ProfileStatementCard title='Login & security' desc='Edit login, name and mobile number' />
            <div>
              <EditProfileForm user={result.data?.user as IUser} />

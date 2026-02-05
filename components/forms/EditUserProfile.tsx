@@ -24,6 +24,7 @@ import { IUser } from "@/models/user.model"
 import { CldUploadWidget } from "next-cloudinary"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { Badge } from "../ui/badge"
 
 
 
@@ -158,7 +159,11 @@ export function EditProfileForm({user}: {user:IUser}) {
               <FormControl>
                 <Input disabled={true} className={cn("cursor-none",className)} placeholder="John@gmail.com" {...field} />
               </FormControl>
-              
+               {user.isVerified && (
+                 <Badge className="text-green-700 bg-green-100 rounded-lg ">
+                    Confirmed
+                 </Badge>
+               )}
               <FormMessage className="font-medium text-xs text-red-500" />
             </FormItem>
           )}

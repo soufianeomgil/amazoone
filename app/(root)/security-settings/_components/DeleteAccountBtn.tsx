@@ -37,6 +37,7 @@ export default function DeleteAccountBtn() {
         </p>
         <div className="flex gap-3">
           <Button 
+          className="w-fit text-red-500 font-medium text-sm cursor-pointer hover:underline"
             variant="destructive" 
             size="sm" 
             onClick={handleDelete}

@@ -16,6 +16,7 @@ import Token from "@/models/token.model";
 import { sendGoodbyeEmail, sendVerificationEmail } from "@/lib/nodemailer";
 import { cache } from "@/lib/cache";
 import { ROUTES } from "@/constants/routes";
+import Account from "@/models/account.model";
 export async function getCurrentUser(): Promise<ActionResponse<{user: IUser | null}>>{
   const currentUser = await auth()
  if(!currentUser?.user)  return {
@@ -349,6 +350,7 @@ export async function deleteAccountAction(): Promise<ActionResponse> {
     
     // 2. Delete from DB
     await User.findByIdAndDelete(user._id);
+    await Account.deleteMany({userId:session.user.id})
 
     // 3. Send the goodbye email
     try {

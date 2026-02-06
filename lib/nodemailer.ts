@@ -153,3 +153,32 @@ export async function sendPasswordChangedEmail({
     `,
   });
 }
+
+
+
+export const sendGoodbyeEmail = async (to: string, userName: string) => {
+  const htmlTemplate = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+      <h2 style="color: #333;">We're sad to see you go, ${userName}</h2>
+      <p style="color: #666; line-height: 1.6;">
+        This email confirms that your account at <strong>Omgil Store</strong> has been successfully deleted. 
+        All your personal data, saved items, and order history have been removed from our systems.
+      </p>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+      <p style="font-size: 14px; color: #999;">
+        If this wasn't you, or if you change your mind, you can always create a new account 
+        on our website. We'd love to have you back!
+      </p>
+      <p style="margin-top: 30px; font-weight: bold; color: #333;">— The Omgil's Team</p>
+    </div>
+  `;
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to,
+    subject: "Account Deleted - Omgil",
+    html: htmlTemplate,
+  };
+
+  return await transporter.sendMail(mailOptions);
+};

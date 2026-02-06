@@ -13,7 +13,7 @@ import { ToggleWishlistParams } from "@/types/actionTypes";
 import z from "zod";
 import { IAddress } from "@/models/address.model";
 import Token from "@/models/token.model";
-import { sendVerificationEmail } from "@/lib/nodemailer";
+import { sendGoodbyeEmail, sendVerificationEmail } from "@/lib/nodemailer";
 import { cache } from "@/lib/cache";
 import { ROUTES } from "@/constants/routes";
 export async function getCurrentUser(): Promise<ActionResponse<{user: IUser | null}>>{
@@ -330,4 +330,36 @@ export const getAdminUsersOverview : ()=> Promise< ActionResponse<{
   }
 }, [ROUTES.admin.users, "getAdminUsersOverview"], {revalidate: 60 * 60 * 24})
 
+// actions/auth.actions.ts
 
+
+export async function deleteAccountAction(): Promise<ActionResponse> {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) return { success: false, message: "Unauthorized" };
+
+    await connectDB();
+    const user = await User.findOne({ email: session.user.email }) as IUser
+
+    if (!user) return { success: false, message: "User not found" };
+
+    // 1. Send the email BEFORE deleting from DB if you need user data 
+    // or store the name/email in variables first
+    const { email, fullName } = user;
+    
+    // 2. Delete from DB
+    await User.findByIdAndDelete(user._id);
+
+    // 3. Send the goodbye email
+    try {
+      await sendGoodbyeEmail(email, fullName);
+    } catch (mailError) {
+      console.error("Mail failed but account was deleted", mailError);
+      // We don't throw here because the account is already gone
+    }
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: "Deletion failed" };
+  }
+}

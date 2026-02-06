@@ -65,5 +65,17 @@ const trackSearch = useCallback((term: string) => {
       })),
     });
   }, []);
-  return { trackViewItem, trackAddToCart, trackBeginCheckout, trackSearch, trackWhatsAppClick };
+  const trackAddToWishlist = useCallback((product: IProduct) => {
+  sendGAEvent("add_to_wishlist", {
+    currency: "MAD",
+    value: product.basePrice,
+    items: [{
+      item_id: product._id,
+      item_name: product.name,
+      price: product.basePrice,
+      item_category: product.category,
+    }]
+  });
+}, []);
+  return { trackViewItem, trackAddToWishlist, trackAddToCart, trackBeginCheckout, trackSearch, trackWhatsAppClick };
 };

@@ -142,7 +142,7 @@ const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
                                 {session ? (
                                     <div className='flex p-4 border-b border-gray-100 bg-gray-50 items-center justify-between'>
                                         <div className="flex items-center gap-2">
-                                            <Image width={40} height={40} className='rounded-full' src={session?.user.image ?? "https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-5.png"} alt="avatar" />
+                                            <Image width={40} height={40} className='rounded-full object-contain' src={session?.user.image ?? "https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-5.png"} alt="avatar" />
                                             <div>
                                                 <p className='font-medium text-sm'>{session?.user.name}</p>
                                                 <p className='text-gray-400 text-xs'>{session?.user.email}</p>
@@ -158,12 +158,27 @@ const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
                                 )}
                                 <div className="flex p-4">
                                     <div className="w-1/2 pr-4 border-r border-gray-200">
-                                        <h3 className="font-bold mb-2">Your Lists</h3>
-                                        <Link href="#" className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Create a List</Link>
+                                       <div className='  '>
+                                           <h3 className="font-bold mb-2">Your Lists</h3>
+                                           <div className='border-b pb-2.5 border-gray-100'>
+<Link href={ROUTES.myorders} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">My bags</Link>
+                                           <Link href={ROUTES.myorders} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Lovely Footwear</Link>
+                                           <Link href={ROUTES.myorders} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">My make-up</Link>
+                                           </div>
+                                           
+
+                                       </div>
+                                       
+                                        <Link href="#" className="block my-2 text-xs text-gray-700 hover:text-orange-600 hover:underline">Create a List</Link>
                                     </div>
                                     <div className="w-1/2 pl-4">
                                         <h3 className="font-bold mb-2">Your Account</h3>
-                                        <Link href={ROUTES.myorders} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Orders</Link>
+                                        <Link href={ROUTES.myorders} className="block text-xs  text-gray-700 hover:text-orange-600 hover:underline">Orders</Link>
+                                        <Link href={ROUTES.myBrowsingHistory} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Browsing History</Link>
+                                        <Link href={ROUTES.mywishlist} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Wishlist</Link>
+                                        <Link href={ROUTES.profile(session?.user.id as string)} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Profile</Link>
+                                        <Link href={ROUTES.addresses} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Addresses</Link>
+                                       
                                     </div>
                                 </div>
                             </div>

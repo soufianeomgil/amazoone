@@ -148,17 +148,17 @@ export async function signUpWithCredentials(params: AuthCredentials): Promise<Ac
     );
 
     // Clean previous tokens and create new one
-    await Token.deleteMany({ userId: newUser._id }, { session });
-    await Token.create(
-      [
-        {
-          token: verificationCode,
-          userId: newUser._id,
-          expiresAt: new Date(Date.now() + 1000 * 60 * 10), // 10 minutes
-        },
-      ],
-      { session }
-    );
+    // await Token.deleteMany({ userId: newUser._id }, { session });
+    // await Token.create(
+    //   [
+    //     {
+    //       token: verificationCode,
+    //       userId: newUser._id,
+    //       expiresAt: new Date(Date.now() + 1000 * 60 * 10), // 10 minutes
+    //     },
+    //   ],
+    //   { session }
+    // );
 
     await session.commitTransaction();
     session.endSession();
@@ -579,6 +579,7 @@ export async function SendVerifyEmail(): Promise<ActionResponse> {
    // const hashedCode = await bcrypt.hash(rawCode, 10);
      
     const hashedToken  = await bcrypt.hash(rawCode,12)
+     await Token.deleteMany({ userId: user._id });
      await Token.create({
        userId: user._id,
        token: hashedToken

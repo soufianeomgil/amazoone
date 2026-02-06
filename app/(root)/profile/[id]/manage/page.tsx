@@ -11,39 +11,60 @@ import RightSidebar from '@/components/shared/navbars/RightSidebar'
 import EmailVerificationBanner from './_components/EmailVerification'
 
 
-const page = async() => {
-  const result = await getCurrentUser()
-  return (
-    <div className='w-full bg-white'>
-      
- <div className=' max-w-7xl gap-7 flex max-lg:flex-col mx-auto sm:py-6'>
- 
-  <ProfileItems />
-        <RightSidebar />
-    <div className='flex flex-col px-3 flex-1'>
- <div className='flex flex-col space-y-2.5'>
-             <h2 className='capitalize font-bold text-black sm:text-3xl text-xl  '>Your profile</h2>
-              <p className='text-sm text-gray-800 font-medium'>make changes to your personal information or account type</p>
-        </div>
-        <EmailVerificationBanner user={result.data?.user as IUser} />
-                 <div className='mt-5 flex flex-col space-y-4'>
-           <ProfileStatementCard title='Login & security' desc='Edit login, name and mobile number' />
-           <div>
-             <EditProfileForm user={result.data?.user as IUser} />
-           </div>
-        </div>
-        <div className='mt-5'>
-           <ProfileStatementCard title='Interests' desc='Activities and hobbies' />
-           <InterestsSection userSavedInterests={result.data?.user?.interests || []}  />
-        </div>
-        
-    </div>
-       
-    </div>
-   
-    </div>
-   
-  )
-}
+const page = async () => {
+  const result = await getCurrentUser();
+  const user = result.data?.user as IUser;
 
+  return (
+    <div className="min-h-screen bg-[#F9FAFB] dark:bg-zinc-950">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 sm:px-4 sm:py-8">
+        {/* Navbars - Assuming these have fixed widths or flex-basis */}
+        <ProfileItems />
+        
+        <main className="flex-1 max-sm:px-4 max-sm:py-5 sm:order-2 space-y-8">
+          {/* Header Section */}
+          <div className="flex flex-col space-y-2 mb-2">
+            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
+              Account Settings
+            </h1>
+            <p className="text-gray-500 font-medium">
+              Manage your personal information, security preferences, and interests.
+            </p>
+          </div>
+
+          {/* Verification Banner - Only show if not verified */}
+          {!user.isVerified && (
+            <div className="transition-all duration-300 hover:scale-[1.01]">
+               <EmailVerificationBanner user={user} />
+            </div>
+          )}
+
+          {/* Security Section Card */}
+          <section className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+            <ProfileStatementCard 
+               title="Login & Security" 
+               desc="Update your name, email, and password." 
+            />
+            <div className="p-6 border-t border-gray-100 bg-white">
+              <EditProfileForm user={user} />
+            </div>
+          </section>
+
+          {/* Interests Section Card */}
+          <section className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+            <ProfileStatementCard 
+               title="Interests" 
+               desc="Personalize your feed based on your hobbies." 
+            />
+            <div className="p-6 border-t border-gray-100">
+              <InterestsSection userSavedInterests={user.interests || []} />
+            </div>
+          </section>
+        </main>
+
+        <RightSidebar />
+      </div>
+    </div>
+  );
+};
 export default page

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils"
 import { Plus, Check } from "lucide-react"
 
 interface InterestCardProps {
@@ -7,35 +8,25 @@ interface InterestCardProps {
   onToggle: () => void
 }
 
-export const InterestCard = ({
-  label,
-  icon,
-  selected,
-  onToggle,
-}: InterestCardProps) => {
+export const InterestCard = ({ label, icon, selected, onToggle }: InterestCardProps) => {
   return (
     <button
       type="button"
       onClick={onToggle}
-      className={`
-        px-3 py-1.5 rounded-full border flex items-center gap-2
-        text-sm transition
-        ${
-          selected
-            ? "border-orange-400 bg-orange-50 text-orange-700"
-            : "border-gray-300 bg-white text-gray-800 hover:border-gray-400"
-        }
-      `}
+      className={cn(
+        "group flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200",
+        selected 
+          ? "bg-yellow-100 border-yellow-400 text-yellow-800 shadow-sm" 
+          : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+      )}
     >
-      <span>{icon}</span>
-
-      <span className="font-normal">{label}</span>
-
+      <span className="text-base">{icon}</span>
+      <span>{label}</span>
       {selected ? (
-        <Check size={14} />
+        <Check size={14} className="text-yellow-700" />
       ) : (
-        <Plus size={14} />
+        <Plus size={14} className="text-gray-400 group-hover:text-gray-600" />
       )}
     </button>
-  )
-}
+  );
+};

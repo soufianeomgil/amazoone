@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Camera, MessageCircleWarning } from "lucide-react"
+import { Camera, Check, MessageCircleWarning } from "lucide-react"
 
 import { EditProfileSchema } from "@/lib/zod"
 import { editUserProfile } from "@/actions/user.actions"
@@ -38,6 +38,7 @@ export function EditProfileForm({user}: {user:IUser}) {
     showUploadMoreButton: false,
     maxFileSize: 10 * 1024 * 1024, // 10MB
   };
+  const inputStyles = "bg-white border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all py-6";
   // 1. Define your form.
   const form = useForm<z.infer<typeof EditProfileSchema>>({
     resolver: zodResolver(EditProfileSchema),
@@ -105,8 +106,8 @@ export function EditProfileForm({user}: {user:IUser}) {
               <Image
                 src={field.value || user.profilePictureUrl || "/avatar-placeholder.png"}
                 alt="Profile picture"
-                width={70}
-                height={70}
+                width={100}
+                height={100}
                 className="sm:w-[100px] w-[70px] h-[70px] sm:h-[100px]
                 rounded-full object-cover border border-gray-200"
               />
@@ -150,24 +151,24 @@ export function EditProfileForm({user}: {user:IUser}) {
             </FormItem>
           )}
         />
-         <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-sm font-medium text-gray-800">Email</FormLabel>
-              <FormControl>
-                <Input disabled={true} className={cn("cursor-none",className)} placeholder="John@gmail.com" {...field} />
-              </FormControl>
-               {user.isVerified && (
-                 <Badge className="text-green-700 bg-green-100 rounded-lg ">
-                    Confirmed
-                 </Badge>
-               )}
-              <FormMessage className="font-medium text-xs text-red-500" />
-            </FormItem>
-          )}
-        />
+       <FormField
+  name="email"
+  render={({ field }) => (
+    <FormItem>
+      <div className="flex items-center justify-between">
+        <FormLabel className="text-sm font-semibold text-gray-700">Email Address</FormLabel>
+        {user.isVerified && (
+          <Badge className="bg-green-50 text-green-700 border-green-100 hover:bg-green-50 px-2 py-0.5 rounded-full flex gap-1 items-center">
+            <Check size={12} strokeWidth={3} /> Verified
+          </Badge>
+        )}
+      </div>
+      <FormControl>
+        <Input disabled className={cn("opacity-70 bg-gray-50", inputStyles)} {...field} />
+      </FormControl>
+    </FormItem>
+  )}
+/>
          <FormField
           control={form.control}
           name="phone"

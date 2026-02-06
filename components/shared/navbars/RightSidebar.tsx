@@ -46,7 +46,7 @@ const RightSidebar = () => {
         {/* TITLE */}
         <div className="px-5 flex items-center space-x-2 py-4 border-b border-gray-200">
                   <Image
-                          src={session.data?.user.image || "/profile.png"}
+                          src={session.data?.user.image ?? "/profile.png"}
                           alt="Profile picture"
                           width={55}
                           height={55}

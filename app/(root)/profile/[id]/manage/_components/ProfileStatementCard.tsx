@@ -1,22 +1,19 @@
 import { ChevronDown } from 'lucide-react';
 import React from 'react'
 
-const ProfileStatementCard = ({title,desc}: {title:string;desc:string}) => {
+const ProfileStatementCard = ({ title, desc }: { title: string; desc: string }) => {
   return (
-    <div className='flex items-center px-4 py-3 rounded-lg justify-between bg-[#f7fafa] border border-[#d5d9d9] '>
- <div className='  flex sm:flex-row flex-col  sm:items-center gap-1 sm:gap-2.5  '>
-        <h3 className="text-black sm:text-2xl text-lg font-medium">
-             {title}
+    <div className="flex items-center px-6 py-5 justify-between bg-gradient-to-r from-white to-gray-50">
+      <div className="flex flex-col gap-1">
+        <h3 className="text-xl font-bold text-gray-900 tracking-tight">
+          {title}
         </h3>
-        <span className='font-medium max-sm:hidden text-lg text-black '>|</span>
-        <p className='text-gray-700 text-sm sm:text-base font-normal'>
-            {desc}
+        <p className="text-gray-500 text-sm font-normal">
+          {desc}
         </p>
+      </div>
+      <ChevronDown size={20} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
     </div>
-    <ChevronDown size={22} className='text-gray-700 sm:hidden font-bold' />
-    </div>
-   
-  )
-}
-
+  );
+};
 export default ProfileStatementCard

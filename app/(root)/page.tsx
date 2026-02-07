@@ -16,6 +16,7 @@ import SoldWith from './cart/_component/SoldWith';
 import { auth } from '@/auth';
 import Image from 'next/image';
 import RecommendationCard from '@/components/cards/RecommendedCard';
+import { DarDarekDealCard } from '@/components/cards/MarjaneCard';
 // best sellers in school and work bags
 // bags under 50
 // best sellers in sport bags
@@ -211,13 +212,48 @@ const Home = async () => {
 <section className="bg-white mt-6 py-2">
   <ProductGrid title="Best Sellers in women's Bags" products={result.data?.products ?? []} />
 </section>
-
+  
   
                <section className="bg-gray-100 py-6">
   <SoldWith title="Items under $50" />
 </section>
 <RecommendationCard title='Inspired by your cart' products={response.data?.products.slice(0,3) ?? []} />
 <RecommendationCard title='More Top Picks for you' products={response.data?.products.slice(3,6) ?? []} />
+<section className="bg-[#F4F7F9] py-10 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-2xl font-bold text-[#003B65] mb-6">Deals Dar Darek</h2>
+        
+        {/* Horizontal scroll on mobile, grid on desktop */}
+        <div className="flex overflow-x-auto lg:grid lg:grid-cols-5 gap-4 pb-4 no-scrollbar">
+          {/* Example Data Mapping */}
+          {result.data?.products.map((item) => (
+            <DarDarekDealCard
+              key={item._id} 
+              product={{
+                name: item.name,
+                vendor: item.brand,
+                price: item.basePrice,
+                oldPrice: item.listPrice || item.basePrice + 24,
+                discount: "61",
+                fastDelivery: true,
+                image: item.thumbnail.url,
+                _id: item._id
+              }} 
+            />
+          ))}
+        </div>
+
+        {/* View All Button */}
+        <div className="flex justify-center mt-8">
+          <Link 
+            href="/deals/dar-darek" 
+            className="bg-[#00A89E] text-white px-10 py-2.5 rounded-lg font-bold text-sm hover:bg-[#008c84] transition-all"
+          >
+            voir toutes les offres
+          </Link>
+        </div>
+      </div>
+    </section>
  {response.data?.products && (
  <section className="bg-white py-2.5">
   <ProductGrid title='Recommended for you' products={response.data?.products ?? []} />

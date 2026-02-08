@@ -25,7 +25,7 @@ interface Props {
   onDelete?: () => void;
 }
 
-export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }> = ({ item , userId}) => {
+export const CartItemComponent: React.FC<{ item: Props, userId:string | undefined }> = ({ item , userId}) => {
   const product = item.productId;
   const variant = item.variant ?? null;
   const dispatch = useDispatch();
@@ -111,8 +111,10 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | null  }>
     }
     return null;
   };
-
+const [pendingSaveForLater,setPendingSaveForLater] = useState(false)
 const handleAddToSaveForLater = async () => {
+  if(!userId) return router.push("/login")
+  setPendingSaveForLater(true)
   try {
     const payload = {
       productId: String(product._id),
@@ -157,12 +159,19 @@ const handleAddToSaveForLater = async () => {
     }
   } catch (err) {
     console.error("handleAddToSaveForLater unexpected error:", err);
+  }finally {
+     setPendingSaveForLater(false)
   }
 };
 
   return (
    <article className={`relative border-b border-gray-100 py-4 ${pending ? "opacity-70 pointer-events-none" : ""}`}>
 {pending && (
+    <div className="absolute inset-0 z-10 flex items-center justify-center ">
+        <SpinnerIcon />
+    </div>
+  )}
+  {pendingSaveForLater && (
     <div className="absolute inset-0 z-10 flex items-center justify-center ">
         <SpinnerIcon />
     </div>

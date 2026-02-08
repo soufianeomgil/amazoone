@@ -69,7 +69,7 @@ gaEvent("view_cart", {
                     {result?.data?.userCart.items.map((item: any,index) => (
                       <CartItemComponent
                         key={index}
-                        userId={res.data?.user?._id ?? null}
+                        userId={session?.user.id}
                         item={item}
                       />
                     ))}

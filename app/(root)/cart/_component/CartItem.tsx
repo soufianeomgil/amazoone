@@ -60,7 +60,7 @@ export const CartItemComponent: React.FC<{ item: cartItemsProps, userId:string |
       );
       setPending(false);
       router.refresh();
-      item.onQuantityChange?.(newQty);
+    //  item.onQuantityChange?.(newQty);
     } catch (err) {
       console.error(err);
       setPending(false);

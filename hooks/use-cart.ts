@@ -34,6 +34,10 @@ export const useCartItems = ({isAuthenticated,data}:props)=> {
             imageUrl: item.productId.thumbnail,
             basePrice: item.productId.basePrice,
             quantity: item.quantity,
+            stock: item.productId.totalStock || item.productId.stock,
+            variant: item.variant,
+            variantId: item.variantId,
+            status: item.productId.status
           })) ?? items
         : items;
     return cartItems

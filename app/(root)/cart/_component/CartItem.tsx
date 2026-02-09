@@ -14,6 +14,7 @@ import { SpinnerIcon } from "@/components/shared/icons";
 import Image from "next/image";
 import { gaEvent } from "@/lib/analytics/ga";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { cartItemsProps } from "./CartClient";
 
 
 interface Props {
@@ -25,8 +26,8 @@ interface Props {
   onDelete?: () => void;
 }
 
-export const CartItemComponent: React.FC<{ item: Props, userId:string | undefined }> = ({ item , userId}) => {
-  const product = item.productId;
+export const CartItemComponent: React.FC<{ item: cartItemsProps, userId:string | undefined }> = ({ item , userId}) => {
+  const product = item;
   const variant = item.variant ?? null;
   const dispatch = useDispatch();
   const router = useRouter();
@@ -35,8 +36,8 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | undefine
 
   const imageUrl =
     (variant && (variant as any).images?.[0]?.url) ||
-    product?.thumbnail?.url ||
-    product?.images?.[0]?.url ||
+    product?.imageUrl.url ||
+   
     "";
 
   const basePrice = Number(product?.basePrice ?? 0);
@@ -73,13 +74,13 @@ export const CartItemComponent: React.FC<{ item: Props, userId:string | undefine
          setPending(false)
          gaEvent("remove_from_cart", {
     currency: "MAD",
-    value: Number(item.productId.basePrice) * item.quantity,
+    value: Number(item.basePrice) * item.quantity,
     items: [
       {
         item_id: String(product._id),
-        item_name: item.productId.name,
-        item_brand: item.productId.brand,
-        price: Number(item.productId.basePrice),
+        item_name: item.name,
+        item_brand: item.brand,
+        price: Number(item.basePrice),
         quantity: item.quantity,
       },
     ],
@@ -123,8 +124,10 @@ const handleAddToSaveForLater = async () => {
       quantity: item.quantity,
       snapshot: {
         price: unitPrice,
-        thumbnail: item.productId.thumbnail,
-        title: item.productId.name,
+        thumbnail: {
+          url: item.imageUrl.url,
+        },
+        title: item.name,
       },
     };
 
@@ -193,7 +196,7 @@ const handleAddToSaveForLater = async () => {
         {/* MAIN INFO NEXT TO IMAGE */}
         <div className="flex-1 flex flex-col justify-between">
           <div>
-            <Link href={`/product/${product._id as string}`}>
+            <Link href={`/product/${product?._id as string}`}>
               <h3 className="text-base font-semibold text-gray-700 line-clamp-2">
                 {product?.name}
               </h3>
@@ -231,7 +234,7 @@ const handleAddToSaveForLater = async () => {
 
         {/* MAIN INFO */}
         <div>
-          <Link href={`/product/${product._id as string}`}>
+          <Link href={`/product/${product?._id as string}`}>
             <h3 className="text-base font-medium text-gray-700">{product?.name}</h3>
           </Link>
 
@@ -254,7 +257,7 @@ const handleAddToSaveForLater = async () => {
 
   <QuantitySelector
     value={item.quantity}
-    max={variant?.stock ?? product.stock ?? 10}
+    max={variant?.stock ?? product?.stock ?? 10}
     onChange={handleUpdateQuantity}
     size="sm"
     disabled={pending}
@@ -277,7 +280,7 @@ const handleAddToSaveForLater = async () => {
         <div className="sm:hidden">
             <QuantitySelector
               value={item.quantity}
-              max={variant?.stock ?? product.stock ?? 10}
+              max={variant?.stock ?? product?.stock ?? 10}
               onChange={handleUpdateQuantity}
               size="sm"
             />

@@ -9,13 +9,12 @@ import AmazonPrice from "@/components/shared/AmazonPrice";
 import { IUser } from "@/models/user.model";
 import { gaEvent } from "@/lib/analytics/ga";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { cartItemsProps } from "./CartClient";
 
 type Props = {
   isMobile?: boolean;
   user: IUser | null
-  data: {
-    items: ItemProps[] | undefined;
-  };
+  data: cartItemsProps[]
 };
 
 export interface ItemProps {
@@ -34,14 +33,14 @@ interface IVariant {
   priceModifier?: number;
 }
 
-export const CheckoutBox: React.FC<Props> = ({ isMobile = false, data, user }) => {
-  const items = data?.items ?? [];
+export const CheckoutBox = ({ isMobile = false, data, user }:Props) => {
+  const items = data ?? [];
   const qty = items.reduce((acc, it) => acc + (it.quantity ?? 0), 0);
   const { trackBeginCheckout } = useAnalytics();
    const [openAuthModel,setOpenAuthModel] = useState(false)
    const router = useRouter()
   const totalPriceNumber = items.reduce((acc, it) => {
-    const base = Number(it.productId?.basePrice ?? 0);
+    const base = Number(it?.basePrice ?? 0);
     const modifier = Number(it.variant?.priceModifier ?? 0);
     return acc + (base + modifier) * (it.quantity ?? 0);
   }, 0);
@@ -62,10 +61,10 @@ export const CheckoutBox: React.FC<Props> = ({ isMobile = false, data, user }) =
         setOpenAuthModel(true)
         return
      }
-     trackBeginCheckout({ 
-  total: Number(formattedSubtotal) ,
-  items: items 
-});
+//      trackBeginCheckout({ 
+//   total: Number(formattedSubtotal) ,
+//   items: items 
+// });
      router.push("/checkout")
      return
   };

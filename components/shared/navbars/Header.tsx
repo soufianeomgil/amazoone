@@ -6,14 +6,14 @@ import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { Session } from 'next-auth';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ChevronDown, User, ChevronRight, Heart, Menu, X } from 'lucide-react';
 
 // Local imports
-import { LocationIcon, CartIcon, FlagIcon, CaretDownIcon, UserIcon, CloseIcon } from '../icons';
+import { LocationIcon, CartIcon, FlagIcon, CaretDownIcon, UserIcon, CloseIcon, SpinnerIcon } from '../icons';
 import { Button } from '../../ui/button';
 import { ROUTES } from '@/constants/routes';
-import { getTotalItems } from '@/lib/store/cartSlice';
+import { clearCart, getTotalItems } from '@/lib/store/cartSlice';
 import SearchInput from '../SearchInput';
 
 interface HeaderProps {
@@ -24,6 +24,8 @@ interface HeaderProps {
 }
 
 const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
+    const dispatch = useDispatch()
+    const [loading,setLoading] = useState(false)
     const cutName = session ? session.user?.name?.split(' ').map((word) => word[0]?.toUpperCase())?.join("") : ""
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isRightMenuOpen, setIsRightMenuOpen] = useState(false);
@@ -45,9 +47,29 @@ const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
         "Programs & Features": ["Gift Cards", "Shop By Interest", "Amazon Live", "International Shopping"],
         "Help & Settings": ["Your Account", "Customer Service", "Sign In"],
     };
+  const handleLogOut = async () => {
+    setLoading(true);
+    try {
+      if (session) {
+        await fetch("/api/logout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: session.user.id }),
+        });
+      }
 
+      dispatch(clearCart());
+      localStorage.removeItem("guest_cart");
+      await signOut({ callbackUrl: process.env.NEXT_PUBLIC_API_ENDPOINT || "/" });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
     return (
         <>
+
             <header className={`bg-[#131921] w-full text-white ${pathname === "/" ? "sticky top-0 z-[140]" : ""}`}>
                 
                 {/* 1. TOP ANNOUNCEMENT BAR (Desktop) */}
@@ -148,7 +170,9 @@ const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
                                                 <p className='text-gray-400 text-xs'>{session?.user.email}</p>
                                             </div>
                                         </div>
-                                        <button className='text-blue-700 text-sm hover:underline' onClick={() => signOut()}>Sign Out</button>
+                                        <button className='text-blue-700 cursor-pointer text-sm hover:underline' onClick={handleLogOut}>
+                                             {loading ? <SpinnerIcon /> : "Sign Out"}
+                                        </button>
                                     </div>
                                 ) : (
                                     <div className="w-full py-4 flex flex-col items-center border-b">
@@ -197,7 +221,7 @@ const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
                                 <CartIcon />
                               
 <span className="absolute -top-1 left-3 bg-[#FEBD69] text-black text-[11px] font-bold rounded-full h-4 w-5 flex items-center justify-center">
-                                    {qty || totalCartItems}
+                                    {session ? qty : totalCartItems}
                                 </span>
                              
                             </div>

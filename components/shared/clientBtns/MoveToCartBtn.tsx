@@ -5,13 +5,12 @@ import { Button } from '@/components/ui/button'
 import { ISaveForLaterDoc } from '@/models/saveForLater.model'
 import Image from 'next/image'
 import Link from 'next/link'
-
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 interface props {  
     items: ISaveForLaterDoc[];
 }
-export const MoveToCartBtn = ({data}: {data: props}) => {
+export const MoveToCartBtn = ({data}: {data:ISaveForLaterDoc[]}) => {
    const [pendingMove,setPendingMove] = useState<boolean>(false)
    const [loadingRemove,setLoadingRemove] = useState<boolean>(false)
 
@@ -50,7 +49,7 @@ export const MoveToCartBtn = ({data}: {data: props}) => {
     }
   return (
     <>
-         {data?.items?.map((item,index) => (
+         {data?.map((item,index) => (
                          <React.Fragment key={index}>
 <div className='sm:flex  hidden flex-col border border-gray-300 p-2.5 gap-2.5' >
 

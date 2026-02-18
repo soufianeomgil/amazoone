@@ -540,7 +540,7 @@ const RelatedProducts = ({title}: {title:string}) => {
         //     <h3 className="text-sm font-medium line-clamp-2">{product.title}</h3>
         //     <p className="text-gray-900 font-bold mt-1">${product.price.toFixed(2)}</p>
         //   </div>
-        <MainCard userId="" key={index} product={product as IProduct}  />
+        <MainCard   priority={index < 4} userId="" key={index} product={product as IProduct}  />
         ))}
       </div>
     </section>

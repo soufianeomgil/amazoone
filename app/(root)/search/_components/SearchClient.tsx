@@ -296,7 +296,7 @@ export default function SearchClient({
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-10">
               {products.map((p,index) => (
-                <MainCard key={index} userId={userId} listId="" product={p} />
+                <MainCard priority={index < 4} key={index} userId={userId} listId="" product={p} />
               ))}
             </div>
           )}

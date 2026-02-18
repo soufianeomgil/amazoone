@@ -20,6 +20,7 @@ const ProductGrid = async ({ products, title }: { products: (IProduct)[], title:
           <MainCard 
             userId={session?.user.id as string} 
             key={product._id?.toString() || index} 
+            priority={index < 4}
             product={product} 
           />
         ))}

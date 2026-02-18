@@ -17,8 +17,6 @@ interface UserCartElement {
         },
       ],
      }
-    
-   
 }
 
 const page = async () => {

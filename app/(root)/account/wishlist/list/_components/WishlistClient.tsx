@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useTransition, useEffect, useMemo } from "react"
 import Image from "next/image"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Session } from "next-auth"
 
 // Components
@@ -12,8 +12,6 @@ import EmptyWishlist from "./EmptyWishlist"
 import Btns from "./Btns"
 import WishlistSkeleton from "@/components/skeletons/WishlistSkeleton"
 import { SpinnerIcon } from "@/components/shared/icons"
-
-// Types
 import { IProduct } from "@/models/product.model"
 
 type Props = {
@@ -23,41 +21,59 @@ type Props = {
   initialProducts: any[]
 }
 
-const WishlistClient = ({
-  session,
-  lists,
-  initialList,
-  initialProducts,
-}: Props) => {
+const WishlistClient = ({ session, lists, initialList, initialProducts }: Props) => {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const listId = searchParams.get("list")
-
-  // UI State
-  const [activeList, setActiveList] = useState(initialList)
+  
+  // Use React Transition for smooth navigation without manual loading states
+  const [isPending, startTransition] = useTransition()
+  const [loading,setLoading] = useState(false)
+  // Sync state with props when initialProducts change (Server -> Client handoff)
+  // This avoids the "stale data" bug when navigating via router.refresh()
   const [products, setProducts] = useState(initialProducts)
-  const [loading, setLoading] = useState(false)
-  const [pending, setPending] = useState(false)
+  const [activeList, setActiveList] = useState(initialList)
 
-  // UI Placeholder for the click handler
+  useEffect(() => {
+    setProducts(initialProducts)
+    setActiveList(initialList)
+  }, [initialProducts, initialList])
+
   const selectList = (list: any) => {
-    setActiveList(list)
-    // Logic for fetching/router.push goes here
+    startTransition(() => {
+      // router.push is handled within the transition
+      router.push(`/account/wishlist/list?list=${list._id}`, { scroll: false })
+    })
   }
 
+  // Memoize the grid to prevent re-renders of the entire list when only pending changes
+  const productGrid = useMemo(() => (
+    <div className="grid mt-4 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+      {products.map((item: any,index) => (
+        <MainCard 
+          key={index}
+          listId={listId!}
+          priority={index < 4}
+          product={item.productId as unknown as IProduct}
+          userId={session?.user.id!}
+          isWishlist={true}
+          isWished={true}
+        />
+      ))}
+    </div>
+  ), [products, listId, session?.user.id])
+
   return (
-    <div className="bg-white w-full">
+    <div className="bg-white w-full min-h-screen">
       <div className="flex flex-col gap-5 max-w-[1400px] px-3 mx-auto py-5">
-        
-        {/* HEADER */}
         <div className="flex w-full items-center justify-between">
           <h2 className="font-bold text-2xl text-black">Wishlist</h2>
           <OpenListModelBtn />
         </div>
 
         {lists.length > 0 ? (
-          <>
-            {/* MOBILE LIST SCROLLER */}
-            <div className="flex w-full sm:hidden gap-3 overflow-x-auto no-scrollbar py-3 px-2">
+          <div className="sm:flex sm:gap-5 sm:p-3 rounded-xl w-full">
+                 <div className="flex w-full sm:hidden gap-3 overflow-x-auto no-scrollbar py-3 ">
               {lists.map((list, index) => (
                 <div
                   key={index}
@@ -87,89 +103,65 @@ const WishlistClient = ({
                 </div>
               ))}
             </div>
-
-            <div className="sm:border sm:flex gap-5 p-3 sm:border-gray-100 rounded-xl w-full">
-              
-              {/* DESKTOP SIDEBAR LISTS */}
-              <div className="sm:flex hidden space-y-2.5 flex-col">
-                {lists.map((list, index) => (
-                  <div
-                    key={index}
-                    onClick={() => selectList(list)}
-                    className={`
-                      ${list.id === activeList?.id ? "bg-[#f3f3f3] border-l-4 border-l-orange-500" : "border-transparent"}
-                      cursor-pointer group w-[250px] border flex flex-col space-y-1.5 p-3 transition-colors
-                    `}
-                  >
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-bold group-hover:text-orange-500">
-                        {list.name}
-                      </h4>
-                      <p className="text-xs text-gray-400 uppercase tracking-tighter">
-                        {list.isPrivate ? "Private" : "Public"}
-                      </p>
-                    </div>
-                    {list.isDefault && (
-                      <p className="text-xs text-gray-500 italic">Default List</p>
-                    )}
-                    <p className="text-xs font-medium text-gray-700">
-                      {list?.items?.length} Items
-                    </p>
+            {/* DESKTOP SIDEBAR - Optimized with better CSS logic */}
+            <aside className="sm:flex hidden space-y-2.5 flex-col shrink-0">
+              {lists.map((list) => (
+                <button
+                  key={list._id}
+                  disabled={isPending}
+                  onClick={() => selectList(list)}
+                  className={`
+                    ${list._id === activeList?._id ? "bg-gray-100 border-l-4 border-l-orange-500" : "border-transparent bg-white"}
+                    text-left w-[250px] border p-3 transition-all hover:bg-gray-50
+                    ${isPending ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}
+                  `}
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className={`text-sm font-bold ${list._id === activeList?._id ? "text-orange-500" : "text-black"}`}>
+                      {list.name}
+                    </h4>
+                    <span className="text-[10px] text-gray-400 uppercase">{list.isPrivate ? "Private" : "Public"}</span>
                   </div>
-                ))}
-              </div>
+                  <p className="text-xs text-gray-500">{list?.items?.length || 0} Items</p>
+                </button>
+              ))}
+            </aside>
 
-              {/* PRODUCTS DISPLAY AREA */}
-              <div className="flex-1 flex relative flex-col w-full border-b border-gray-200 pb-1.5">
-                
-                {/* OVERLAY LOADER */}
-                {pending && (
-                  <div className="absolute bg-white/60 inset-0 z-10 flex items-center justify-center backdrop-blur-[1px]">
-                    <SpinnerIcon />
-                  </div>
-                )}
-
-                {/* ACTIVE LIST INFO & ACTIONS */}
-                <div className="w-full border-b border-gray-200 pb-3 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <h2 className="text-md font-bold">{activeList?.name}</h2>
-                    <p className="text-sm text-gray-500">
-                      • {activeList?.isPrivate ? "Private" : "Public"}
-                    </p>
-                  </div>
-                  <Btns 
-                    isDefault={activeList?.isDefault} 
-                    setPending={setPending} 
-                    hasItems={activeList?.items?.length > 0} 
-                    id={activeList?.id} 
-                    name={activeList?.name} 
-                  />
+            {/* MAIN CONTENT AREA */}
+            <main className="flex-1 relative flex flex-col w-full min-h-[400px]">
+              {/* Transition Overlay */}
+              {isPending && (
+                <div className="absolute inset-0 z-20 bg-white/40 backdrop-blur-[2px] flex items-center justify-center rounded-xl">
+                  <SpinnerIcon  />
                 </div>
+              )}
+             {loading && (
+                <div className="absolute inset-0 z-20 bg-white/40 backdrop-blur-[2px] flex items-center justify-center rounded-xl">
+                  <SpinnerIcon  />
+                </div>
+              )}
 
-                {/* PRODUCTS GRID */}
-                {loading ? (
-                  <WishlistSkeleton />
-                ) : products.length === 0 ? (
-                  <div className="flex w-full justify-center mt-10">
-                    <EmptyWishlist />
-                  </div>
-                ) : (
-                  <div className="grid mt-4 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                    {products.map((item: any, index: number) => (
-                      <MainCard 
-                        key={index}
-                        listId={listId!}
-                        product={item.productId as unknown as IProduct}
-                        userId={session?.user.id!}
-                        isWishlist={true}
-                        isWished={true} // UI state shows as wished in this view
-                      />
-                    ))}
-                  </div>
-                )}
+              <div className="w-full border-b border-gray-200 pb-3 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <h2 className="text-md font-bold">{activeList?.name}</h2>
+                  <p className="text-sm text-gray-500">• {activeList?.isPrivate ? "Private" : "Public"}</p>
+                </div>
+                <Btns  
+                  setPending={setLoading}
+                  isDefault={activeList?.isDefault} 
+                  hasItems={products.length > 0} 
+                  id={activeList?._id} 
+                  name={activeList?.name} 
+                />
               </div>
-            </div>
-          </>
+
+              {products.length === 0 && !isPending ? (
+                <div className="flex w-full justify-center mt-20">
+                  <EmptyWishlist />
+                </div>
+              ) : productGrid}
+            </main>
+          </div>
         ) : (
           <EmptyWishlist />
         )}

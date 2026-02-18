@@ -1,7 +1,7 @@
 "use client";
 
 import React, {  useRef } from "react";
-import { X, Plus, Trash2, Link as LinkIcon } from "lucide-react";
+import { X, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner"; // optional, remove if not in your project
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { EditWishlistSchema } from "@/lib/zod";
+import { editSavedListNameAction } from "@/actions/savedList.actions";
 
 
 
@@ -59,7 +60,19 @@ const EditWishlistModal: React.FC<CreateListModalProps> = ({ open, name,id, setO
   const isSubmitting = form.formState.isSubmitting
 
   async function onSubmit(values: z.infer<typeof EditWishlistSchema>) {
-  
+     try {
+      const { error , success } =  await editSavedListNameAction({listId:values.id, name: values.name})
+      if(error) {
+         toast.error(error.message)
+         return
+      }else if(success) {
+         toast.success("success")
+         setOpen(false)
+         return
+      }
+     } catch (error) {
+        console.log(error)
+     } 
   }
      
 

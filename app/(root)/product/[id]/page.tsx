@@ -1,12 +1,10 @@
-import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
   Award,
   CheckCircle,
-  AlertCircle,
-  TrainTrack,
-  TrainTrackIcon,
+  AlertCircle
 } from 'lucide-react';
 import ProductImage from '@/components/shared/ProductImage';
 import Variant from '@/components/shared/Variant';
@@ -28,6 +26,8 @@ import { auth } from '@/auth';
 import { Metadata } from 'next';
 import { gaEvent } from '@/lib/analytics/ga';
 import ViewItemTracker from './_components/TrackItemView';
+
+
   export async function generateMetadata({ params }: { params:  Promise<{id: string}>  }): Promise<Metadata> {
   const { id } = await params;
   const { data } = await getSignleProduct({ productId: id });
@@ -85,7 +85,7 @@ const ProductDetails = async ({params}: {params: Promise<{id:string}>}) => {
     thumbnail: "https://picsum.photos/seed/video3/300/300",
   },
 ];
-
+ 
 
   if (!product) {
     return (

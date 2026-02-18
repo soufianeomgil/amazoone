@@ -26,11 +26,13 @@ import { toast } from "sonner";
 import Image from "next/image";
 import CartSidebar from "../shared/CartSidebar";
 import BottomSheet from "../shared/Sheet";
+import { toggleDefaultSavedItemAction } from "@/actions/savedList.actions";
 
 
 
 type Props = {
   product: IProduct;
+  priority:boolean;
   listId?: string;
   userId: string;
   isWishlist?: boolean;
@@ -53,6 +55,7 @@ type LocalCartItem = {
   price: number;
   listPrice?: number | null;
   variant: IVariant;
+ 
   quantity: number;
   thumbnail?: { url?: string };
   sku?: string;
@@ -61,6 +64,7 @@ type LocalCartItem = {
 const MainCard: React.FC<Props> = ({
   product,
   userId,
+  priority = false,
   listId,
   isWished,
   isWishlist,
@@ -75,6 +79,48 @@ const MainCard: React.FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [openCart, setOpenCart] = useState(false);
   const [addedItems, setAddedItems] = useState<LocalCartItem[]>([]);
+const handleToggleWishlist = async () => {
+  if (wishLoading) return;
+
+  const prev = !!localWished;
+  setLocalWished(!prev); // optimistic
+  setWishLoading(true);
+
+  try {
+    const variantId = chosenVariant?._id ? String(chosenVariant._id) : null;
+
+    const thumbnail =
+      chosenVariant?.images?.[0]?.url ??
+      product?.thumbnail?.url ??
+      product?.images?.[0]?.url ??
+      undefined;
+
+    const res = await toggleDefaultSavedItemAction({
+      productId: String(product._id),
+      variantId,
+      priceSnapshot: Number(product.basePrice ?? 0),
+       variantSnapshot: product.variants[0],
+      thumbnail,
+    });
+
+    if (res?.error || !res?.success) {
+      setLocalWished(prev); // rollback
+      toast.error(res?.error?.message || "Wishlist update failed");
+      return;
+    }
+
+    // single source of truth
+    setLocalWished(Boolean(res.data?.added));
+
+    // refresh header badge counts etc.
+    router.refresh();
+  } catch (e) {
+    setLocalWished(prev);
+    toast.error("Something went wrong");
+  } finally {
+    setWishLoading(false);
+  }
+};
 
   // ✅ mobile sheet state for the "More" menu (wishlist card)
   const [moreOpen, setMoreOpen] = useState(false);
@@ -100,8 +146,8 @@ const MainCard: React.FC<Props> = ({
     const vImgs = (chosenVariant?.images ?? [])
       .map((x: any) => x?.url)
       .filter(Boolean);
-    const pThumb = product?.thumbnail?.url ? [product.thumbnail.url] : [];
-    const pImgs = (product?.images ?? []).map((x: any) => x?.url).filter(Boolean);
+    const pThumb =  product?.thumbnail?.url ? [product.thumbnail.url] : [];
+    const pImgs =  (product?.images ?? []).map((x: any) => x?.url).filter(Boolean);
 
     const base = vImgs.length ? vImgs : [...pThumb, ...pImgs];
 
@@ -380,7 +426,7 @@ const MainCard: React.FC<Props> = ({
                         alt={product?.name ?? "product"}
                         className="object-contain"
                         sizes="(max-width: 768px) 50vw, 20vw"
-                        priority={false}
+                        priority={priority}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300 bg-white rounded">
@@ -580,16 +626,24 @@ const MainCard: React.FC<Props> = ({
             </span>
           </div> */}
 
+
           <div className="flex  flex-col ml-1.5 items-end ">
-            {!isWishlist && (
-              <button
-                onClick={handleAddToCart}
-                disabled={loading || (chosenVariant && chosenVariant.stock === 0)}
-                className="flex bg-[hsl(178,100%,34%)] cursor-pointer rounded-full w-[30px] h-[30px] items-center justify-center disabled:opacity-60"
-              >
-                <ShoppingCart size={14} color="white" />
-              </button>
-            )}
+           {!isWishlist && (
+  <button
+    type="button"
+    onClick={handleToggleWishlist}
+    disabled={wishLoading}
+    className="absolute top-3 right-3 z-30 w-[35px] h-[35px] flex items-center justify-center rounded-full bg-white shadow disabled:opacity-60"
+    aria-label={localWished ? "Remove from wishlist" : "Add to wishlist"}
+  >
+    {localWished ? (
+      <Heart size={22} className="text-red-500 fill-red-500" />
+    ) : (
+      <Heart size={22} className="text-gray-700 hover:text-red-500" />
+    )}
+  </button>
+)}
+
           </div>
         </div>
       </article>

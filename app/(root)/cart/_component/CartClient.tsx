@@ -189,7 +189,7 @@ const CartClient = ({userId,isAuthenticated,data,savedItems,userData}:Props) => 
         </div>
        
       )}
-      {/* <SoldWith title="Frequently bought with items in your cart" /> */}
+    
     </div>
     </div>
   )

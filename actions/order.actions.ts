@@ -9,7 +9,7 @@ import { Cart } from "@/models/cart.model";
 import Order, { IOrder, IOrderDoc, IOrderItem, OrderStatus, PaymentMethod } from "@/models/order.model";
 import { IVariant, Product } from "@/models/product.model";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { ROUTES } from "@/constants/routes";
 import { clearUserCart } from "./cart.actions";
 import { CancelOrderSchema, GetOrderDetailsSchema } from "@/lib/zod";
@@ -259,6 +259,7 @@ await Product.updateMany(
     mongoSession.endSession();
 
     if (!createdOrder) throw new Error("Failed to create order")
+      revalidateTag("getUserOrdersAction")
       revalidatePath(ROUTES.myorders)
       revalidatePath(ROUTES.admin.orders)
          

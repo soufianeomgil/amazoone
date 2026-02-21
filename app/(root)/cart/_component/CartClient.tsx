@@ -61,7 +61,7 @@ const CartClient = ({userId,isAuthenticated,data,savedItems,userData}:Props) => 
  <div className="max-w-7xl overflow-hidden mx-auto sm:p-4">
       {hasCartItems ? (
         <>
-          <h1 className="text-2xl max-sm:p-5 mb-7 font-semibold">Shopping Cart</h1>
+          <h1 className="text-2xl max-sm:p-5 mb-1.5 font-semibold">Shopping Cart</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-x-6">
             {/* Left/main column */}

@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Rating from "../shared/Rating";
 import AmazonPrice from "../shared/AmazonPrice";
 import { updateUserInterestsEngine } from "@/actions/recommendations.actions";
-import { calculateDiscount } from "@/lib/utils";
+import { calculateDiscount, cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -590,10 +590,10 @@ const handleToggleWishlist = async () => {
 
         {/* Footer */}
         <div
-          className="py-2 px-2 border-t border-gray-100 bg-white flex items-center justify-between"
+          className="py-2 px-2 border-t w-full border-gray-100 bg-white flex items-center justify-between"
           style={{ minHeight: 68 }}
         > 
-         <div className="flex flex-col">
+         <div className="flex flex-col flex-1">
                <div className="flex items-center gap-2">
                  <span className="sm:text-xl text-[12px] font-black text-gray-900">${priceForDisplay}</span>
                  <span className="text-[10px] font-bold bg-red-100 text-red-600 px-1 rounded">
@@ -608,6 +608,33 @@ const handleToggleWishlist = async () => {
              
               
              </div>
+             {!isWishlist && (
+  <Button
+  type="button"
+  onClick={handleAddToCart}
+  disabled={loading}
+  className={cn(
+    "relative  items-center p-0! justify-center gap-3 rounded-full w-[40px]  h-[40px]",
+    "bg-[#08ada8] hover:bg-[#079691] active:scale-[0.98]", // Brand color & interaction
+    "text-white font-semibold uppercase tracking-wide transition-all duration-200 shadow-md hover:shadow-lg",
+    "disabled:bg-gray-300 disabled:cursor-not-allowed",
+    "" // Replaced fixed width with padding for flexible content
+  )}
+>
+  {loading ? (
+   
+      <SpinnerIcon  />
+     
+    
+  ) : (
+    <>
+      <ShoppingCart size={20} className="sm:w-6 sm:h-6" />
+      {/* <span className="text-[12px] sm:text-[15px]">Add to Cart</span> */}
+    </>
+  )}
+</Button>
+             )}
+          
           {/* <div className="flex flex-col">
             <div className="flex gap-1.5 items-center">
               <span className="text-base font-normal text-red-700">

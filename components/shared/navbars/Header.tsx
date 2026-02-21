@@ -67,6 +67,28 @@ const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
       setLoading(false);
     }
   };
+  const subMenuLinks = [
+     {
+        name: "Orders",
+        href: ROUTES.myorders
+     },
+      {
+        name: "Browsing History",
+        href: ROUTES.myBrowsingHistory
+     },
+     {
+        name: "Wishlist",
+        href: ROUTES.mywishlist
+     },
+      {
+        name: "Profile",
+        href: ROUTES.profile(session?.user.id ?? "")
+     },
+      {
+        name: "Addresses",
+        href: ROUTES.addresses
+     }
+  ]
     return (
         <>
 
@@ -197,11 +219,15 @@ const Header = ({ qty, session, totalWishQty }: HeaderProps) => {
                                     </div>
                                     <div className="w-1/2 pl-4">
                                         <h3 className="font-bold mb-2">Your Account</h3>
-                                        <Link href={ROUTES.myorders} className="block text-xs  text-gray-700 hover:text-orange-600 hover:underline">Orders</Link>
-                                        <Link href={ROUTES.myBrowsingHistory} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Browsing History</Link>
-                                        <Link href={ROUTES.mywishlist} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Wishlist</Link>
-                                        <Link href={ROUTES.profile(session?.user.id as string)} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Profile</Link>
-                                        <Link href={ROUTES.addresses} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">Addresses</Link>
+                                        <div className="flex flex-col gap-2">
+                                      {subMenuLinks.map((link,index) => (
+                                             <Link key={index} href={link.href} className="block text-xs text-gray-700 hover:text-orange-600 hover:underline">
+                                                 {link.name}
+                                             </Link>
+                                        ))}
+                                        </div>
+                                       
+                                       
                                        
                                     </div>
                                 </div>

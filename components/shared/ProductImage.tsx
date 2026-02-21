@@ -118,6 +118,9 @@ const handleToggleWishlist = async () => {
 
           {/* 🟧 Main image */}
           <div className="relative flex-1 border border-gray-200 rounded-md bg-gray-100">
+             <div onClick={handleToggleWishlist} className="sm:flex hidden right-0 absolute rounded-full bg-gray-100 w-[45px] h-[45px] items-center justify-center">
+              <Heart color="black" />
+            </div>
             {gallery[active]?.url ? (
               <Image
                 height={420}

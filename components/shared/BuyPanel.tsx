@@ -103,7 +103,7 @@ const BuyPanel = ({ product, data,userId }: { product: IProduct; userId: string;
         <div className=" rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden">
           
           {/* PRICE */}
-          <div className="p-5 border-b flex items-center gap-x-4 border-gray-100 bg-gradient-to-br from-gray-50 to-white">
+          <div className="p-5 border-b flex items-center gap-x-4 border-gray-100 bg-linear-to-br from-gray-50 to-white">
            
             <div>
   <span className={`inline-flex items-start font-bold text-gray-900`}>
@@ -185,7 +185,7 @@ const BuyPanel = ({ product, data,userId }: { product: IProduct; userId: string;
               {loading ? <Spinner /> : <><ShoppingCart className="mr-2" /> Add to cart</>}
             </Button>
 
-            <AddToListButton product={product} data={data} />
+            {/* <AddToListButton product={product} data={data} /> */}
           </div>
 
           {/* TRUST */}

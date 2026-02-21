@@ -10,6 +10,7 @@ import { IUser } from "@/models/user.model";
 import { gaEvent } from "@/lib/analytics/ga";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { cartItemsProps } from "./CartClient";
+import { ChevronDown, ChevronUp, Gift } from "lucide-react";
 
 type Props = {
   isMobile?: boolean;
@@ -120,7 +121,7 @@ export const CheckoutBox = ({ isMobile = false, data, user }:Props) => {
       <div className="sm:hidden">
         {/* The full card shown above is hidden on mobile; show a compact card instead */}
          <Features />
-        <div className="bg-white p-3 rounded-md shadow-sm my-4">
+     {/*}   <div className="bg-white p-3 rounded-md shadow-sm my-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total articles ({qty})</p>
@@ -153,8 +154,8 @@ export const CheckoutBox = ({ isMobile = false, data, user }:Props) => {
         
         </div>
  
-        {/* Fixed CTA bar at bottom */}
-        <div className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-gray-200 shadow-lg">
+      
+        {/* <div className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-gray-200 shadow-lg">
           <div className="max-w-3xl mx-auto px-3 py-3 flex items-center justify-between gap-3">
             {/* <div className="flex items-center gap-3">
               <div>
@@ -162,7 +163,7 @@ export const CheckoutBox = ({ isMobile = false, data, user }:Props) => {
                 <p className="font-semibold text-lg">{formattedSubtotal}</p>
                 <p className="text-xs text-gray-500">{qty} item{qty > 1 ? "s" : ""}</p>
               </div>
-            </div> */}
+            </div> 
 
             <div className="flex-1 ml-3">
               <Button
@@ -180,8 +181,48 @@ export const CheckoutBox = ({ isMobile = false, data, user }:Props) => {
           </div>
 
        
+        </div> */}
+<div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] px-4 py-3 sm:hidden">
+      <div className="flex flex-col gap-3">
+        
+        {/* Top Row: Subtotal and Details Toggle */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-baseline gap-1">
+            <span className="text-gray-600 text-sm">Subtotal</span>
+            <span className="text-xl font-bold text-gray-900">{formattedSubtotal}</span>
+          </div>
+
+          <button
+            onClick={() => setMobileSummaryOpen((s) => !s)}
+            className="flex items-center gap-1 text-sm text-cyan-700 hover:text-orange-600 font-medium transition-colors"
+          >
+            {qty} items {mobileSummaryOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+          </button>
         </div>
 
+        {/* Middle Row: The Amazon "Gift" checkbox style */}
+        <div className="flex items-center bg-gray-50 p-2 rounded-lg border border-gray-100">
+          <div className="flex items-center h-5">
+            <input
+              id="checkout-gift-mobile"
+              type="checkbox"
+              checked={containsGift}
+              onChange={(e) => setContainsGift(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 cursor-pointer"
+            />
+          </div>
+          <label htmlFor="checkout-gift-mobile" className="ml-3 flex items-center gap-1.5 cursor-pointer">
+            <Gift size={14} className="text-gray-500" />
+            <span className="text-sm text-gray-700">This order contains a gift</span>
+          </label>
+        </div>
+
+        {/* Bottom Row: The Primary Action Button (The "Gold" Button) */}
+        <button className="w-full bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] font-medium py-3 rounded-lg shadow-[0_2px_5px_0_rgba(213,217,217,0.5)] border border-[#FCD200] transition-all text-base">
+          Proceed to Checkout
+        </button>
+      </div>
+    </div>
         {/* spacer to ensure page content isn't hidden by fixed CTA */}
         <div aria-hidden className="h-28" />
       </div>

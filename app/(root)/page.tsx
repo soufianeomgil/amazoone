@@ -229,16 +229,7 @@ const Home = async () => {
           {result.data?.products.map((item) => (
             <DarDarekDealCard
               key={item._id} 
-              product={{
-                name: item.name,
-                vendor: item.brand,
-                price: item.basePrice,
-                oldPrice: item.listPrice || item.basePrice + 24,
-                discount: "61",
-                fastDelivery: true,
-                image: item.thumbnail.url,
-                _id: item._id
-              }} 
+              product={item} 
             />
           ))}
         </div>

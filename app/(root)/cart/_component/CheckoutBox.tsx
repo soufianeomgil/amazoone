@@ -218,9 +218,17 @@ export const CheckoutBox = ({ isMobile = false, data, user }:Props) => {
         </div>
 
         {/* Bottom Row: The Primary Action Button (The "Gold" Button) */}
-        <button className="w-full bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] font-medium py-3 rounded-lg shadow-[0_2px_5px_0_rgba(213,217,217,0.5)] border border-[#FCD200] transition-all text-base">
-          Proceed to Checkout
-        </button>
+        <Button
+               type='button'
+                onClick={handleProceed}
+                disabled={proceedDisabled}
+                className={`w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-full py-3 px-4 font-semibold transition
+                  ${proceedDisabled ? "bg-gray-200 text-gray-600 cursor-not-allowed" : "bg-[#FFD814] hover:bg-[#F7CA00] text-black"}
+                `}
+                aria-disabled={proceedDisabled}
+              >
+                Proceed to checkout 
+              </Button>
       </div>
     </div>
         {/* spacer to ensure page content isn't hidden by fixed CTA */}

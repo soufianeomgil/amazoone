@@ -30,6 +30,7 @@ import { toggleDefaultSavedItemAction } from "@/actions/savedList.actions";
 
 
 
+
 type Props = {
   product: IProduct;
   priority:boolean;
@@ -48,7 +49,7 @@ const SAMPLE_CONVERSION_BADGES = [
 const clamp = (n: number, min: number, max: number) =>
   Math.max(min, Math.min(max, n));
 
-type LocalCartItem = {
+export interface LocalCartItem  {
   _id: string;
   productId: string;
   title: string;
@@ -312,45 +313,7 @@ const handleToggleWishlist = async () => {
     return base.toFixed(2);
   })();
 
-  // const handleAddItemToWishlist = async () => {
-  //   if (wishLoading) return;
-
-  //   try {
-  //     setWishLoading(true);
-
-  //     const variant = chosenVariant ?? null;
-  //     const variantId = variant?._id ? String(variant._id) : null;
-
-  //     const thumbnail =
-  //       variant?.images?.[0]?.url ??
-  //       product?.thumbnail?.url ??
-  //       product?.images?.[0]?.url;
-
-  //     const res = await toggleSavedItemAction(userId, {
-  //       productId: String(product._id),
-  //       variantId,
-  //       priceSnapshot: Number(product.basePrice ?? 0),
-  //       thumbnail,
-  //     });
-
-  //     if (res?.error) {
-  //       toast.error("Wishlist update failed");
-  //       return;
-  //     }
-
-     
-      
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Something went wrong");
-  //   } finally {
-  //     setWishLoading(false);
-  //   }
-  // };
-
-
-
-  // placeholders for later (your logic)
+ 
   const handleMoveToAnother = async () => {
     toast.message("Move to another wishlist (TODO)");
     setMoreOpen(false);
@@ -796,3 +759,4 @@ const handleToggleWishlist = async () => {
 };
 
 export default MainCard;
+

@@ -86,7 +86,7 @@ const EmailVerificationBanner = ({user}: Props) => {
 
       {/* VERIFICATION MODAL */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-10000 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 relative animate-in zoom-in-95 duration-200">
             <button 
               onClick={() => setShowModal(false)}
@@ -117,7 +117,7 @@ const EmailVerificationBanner = ({user}: Props) => {
                   disabled={verifying || otp.length < 4}
                   className="w-full bg-[#111111] hover:bg-black text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
                 >
-                  {verifying ? <SpinnerIcon className="mx-auto" /> : "Verify Account"}
+                  {verifying ? <SpinnerIcon  /> : "Verify Account"}
                 </button>
               </form>
               

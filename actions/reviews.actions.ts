@@ -77,7 +77,7 @@ if (typeof Order !== "undefined") {
 
   if (order) {
     verifiedPurchase = true;
-    verifiedOrderId = String((order as any)._id);
+    verifiedOrderId = String(order._id);
   }
 }
   

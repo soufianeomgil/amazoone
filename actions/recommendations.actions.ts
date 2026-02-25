@@ -18,43 +18,7 @@ interface UpdateInterestParams {
   source?: InterestSource
 }
 
-// export async function updateUserInterestsEngine({
-//   userId,
-//   tags,
-//   weight,
-//   source = "auto",
-// }: UpdateInterestParams): Promise<ActionResponse> {
-//     try {
-//         await connectDB()
-//         const user = await User.findById(userId)
-//    if (!user) throw new NotFoundError("User")
 
-//   for (const tag of tags) {
-//     const existing = user.interests.find(i => i.tag === tag)
-
-//     if (existing) {
-//       existing.score = Math.min(100, existing.score + weight)
-//       existing.updatedAt = new Date()
-//       if (source === "manual") existing.source = "manual"
-//     } else {
-//       user.interests.push({
-//         tag,
-//         score: source === "manual" ? 50 : weight,
-//         source,
-//         updatedAt: new Date(),
-//       })
-//     }
-//   }
-
-//   await user.save()
-//   return {
-//     success: true
-//   }
-//     } catch (error) {
-//        return handleError(error) as ErrorResponse
-//     }
-  
-// }
 export async function updateUserInterestsEngine({
   userId,
   tags,
